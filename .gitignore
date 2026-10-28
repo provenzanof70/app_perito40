@@ -4,6 +4,7 @@
 /pratiche/
 /rientri/
 *.zip
+!demo/**/*.zip
 *.heic
 *.mov
 
