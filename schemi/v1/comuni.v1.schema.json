@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "comuni.v1.schema.json",
+  "title": "Definizioni comuni ai formati Perizia 4.0 — v1",
+  "description": "Tipi condivisi da pratica_40, scheda_bene, perizia40-andata e perizia40-rientro. I riferimenti a paragrafi (§) rimandano al metodo peritale dello studio, che non è contenuto in questo repository.",
+  "$defs": {
+    "versioneSchema": { "type": "string", "pattern": "^1\\.[0-9]+\\.[0-9]+$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "uuid": { "type": "string", "format": "uuid" },
+    "dataGiorno": { "type": "string", "format": "date" },
+    "dataOra": { "type": "string", "format": "date-time" },
+    "testo": { "type": "string", "minLength": 1 },
+
+    "codicePratica": { "type": "string", "pattern": "^[A-Z0-9][A-Z0-9_-]{2,40}$" },
+    "codiceBene": {
+      "type": "string",
+      "pattern": "^B[0-9]{2}(\\.[0-9]{1,2})?$",
+      "description": "Codice stabile del bene (B01) o del componente (B01.1), §1.6"
+    },
+    "requisito": {
+      "enum": ["ID", "VOCE", "RO1", "RO2", "RO3", "RO4", "RO5", "RU1", "RU2", "RU3", "DOC"],
+      "description": "ID = identificazione del bene; VOCE = riconducibilità e caratteristiche della voce (profilo ridotto); DOC = documentazione di supporto a più requisiti"
+    },
+    "idEvidenza": {
+      "type": "string",
+      "pattern": "^B[0-9]{2}(\\.[0-9]{1,2})?-(ID|VOCE|RO[1-5]|RU[1-3]|DOC)-[0-9]{3}$",
+      "description": "Codice bene + requisito + progressivo, es. B01-RO2-003 (§1.6)"
+    },
+    "idSopralluogo": { "type": "string", "pattern": "^S[0-9]{2}$" },
+    "idRiscontro": { "type": "string", "pattern": "^RD-[0-9]{3}$" },
+    "idDichiarazione": { "type": "string", "pattern": "^DT-[0-9]{3}$" },
+    "idAzione": { "type": "string", "pattern": "^A[0-9]{3}$" },
+    "idTimeline": { "type": "string", "pattern": "^T[0-9]{3}$" },
+    "idPersona": { "type": "string", "pattern": "^P[0-9]{2}$" },
+
+    "campoAgliAtti": {
+      "enum": [
+        "identita.costruttore", "identita.modello", "identita.matricola", "identita.anno",
+        "controllore.marca", "controllore.modello", "controllore.firmware",
+        "hmi.modello",
+        "reteDichiarata.ip", "reteDichiarata.sistemaAziendale", "reteDichiarata.protocollo",
+        "dichiarazioneCE.numero", "dichiarazioneCE.data", "dichiarazioneCE.direttive", "dichiarazioneCE.riferimentoMatricola",
+        "esitoGateC"
+      ],
+      "description": "Percorso di una voce di datiAgliAtti nella scheda del bene"
+    },
+    "statoDato": {
+      "enum": ["documentato", "dichiarato", "da_verificare"],
+      "description": "Stato di un dato agli atti"
+    },
+    "provenienza": { "enum": ["perito", "cliente", "fornitore", "integratore"] },
+    "gruppoEvidenza": {
+      "description": "Gruppi 1-10 della raccolta per profilo (§2.7) più DOC per i documenti",
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 10 },
+        { "const": "DOC" }
+      ]
+    },
+    "attesa": {
+      "enum": ["si", "su_richiesta", "se_dichiarato", "supporto", "non_applicabile"],
+      "description": "Se il gruppo va raccolto per il profilo del bene (§2.7)"
+    },
+
+    "refEv": {
+      "type": "object",
+      "description": "Rimando a un'evidenza nel formato [ev: B01-RO2-003 | nome_file.pdf, p.X] (§1.6). Il fatto letto va indicato per i documenti.",
+      "required": ["idEvidenza"],
+      "additionalProperties": false,
+      "properties": {
+        "idEvidenza": { "$ref": "#/$defs/idEvidenza" },
+        "file": { "$ref": "#/$defs/testo" },
+        "posizione": { "type": "string", "description": "p.34, §4.2, 00:12, riquadro 2…" },
+        "fattoLetto": { "type": "string", "description": "Fatto effettivamente letto in quella posizione" }
+      }
+    },
+
+    "data": {
+      "type": "object",
+      "description": "Data con precisione dichiarata: giorno AAAA-MM-GG, mese AAAA-MM, periodo AAAA-MM-GG/AAAA-MM-GG (§6.1)",
+      "required": ["valore", "precisione"],
+      "additionalProperties": false,
+      "properties": {
+        "valore": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}(-[0-9]{2}(/[0-9]{4}-[0-9]{2}-[0-9]{2})?)?$"
+        },
+        "precisione": { "enum": ["giorno", "mese", "periodo"] }
+      }
+    },
+
+    "persona": {
+      "type": "object",
+      "required": ["id", "nome", "ruolo", "organizzazione"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/idPersona" },
+        "nome": { "$ref": "#/$defs/testo" },
+        "ruolo": { "$ref": "#/$defs/testo" },
+        "organizzazione": { "$ref": "#/$defs/testo" }
+      }
+    },
+
+    "annotazione": {
+      "type": "object",
+      "description": "Segno sovrapposto alla foto, in coordinate normalizzate 0-1 rispetto all'immagine originale; il file originale non viene modificato. Il testo descrive ciò che si vede, non giudizi (§2.7).",
+      "required": ["tipo", "testo"],
+      "additionalProperties": false,
+      "properties": {
+        "tipo": { "enum": ["riquadro", "freccia", "evidenziazione", "nota"] },
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 },
+        "w": { "type": "number", "minimum": 0, "maximum": 1 },
+        "h": { "type": "number", "minimum": 0, "maximum": 1 },
+        "x2": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y2": { "type": "number", "minimum": 0, "maximum": 1 },
+        "testo": { "$ref": "#/$defs/testo" }
+      },
+      "allOf": [
+        { "if": { "properties": { "tipo": { "enum": ["riquadro", "evidenziazione"] } } }, "then": { "required": ["x", "y", "w", "h"] } },
+        { "if": { "properties": { "tipo": { "const": "freccia" } } }, "then": { "required": ["x", "y", "x2", "y2"] } }
+      ]
+    },
+
+    "trascrizione": {
+      "type": "object",
+      "description": "Lettura di testo da foto, vocale o video. Mai da servizi esterni: manuale in campo oppure eseguita da Claude in sessione sul PC. Va sempre confrontata con l'originale (§2.7).",
+      "required": ["testo", "origine", "confrontataConOriginale"],
+      "additionalProperties": false,
+      "properties": {
+        "testo": { "$ref": "#/$defs/testo" },
+        "origine": { "enum": ["manuale_campo", "claude_pc"] },
+        "confrontataConOriginale": { "type": "boolean" },
+        "confrontataIl": { "$ref": "#/$defs/dataOra" },
+        "nota": { "type": "string" }
+      }
+    },
+
+    "evidenza": {
+      "type": "object",
+      "description": "Evidenza documentale acquisita (foto, vocale, video, documento, screenshot, log). Le evidenze annullate restano nel fascicolo con motivo e data.",
+      "required": ["id", "beni", "gruppo", "requisiti", "tipo", "file", "sha256", "provenienza", "acquisitaIl", "descrizione", "stato"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/idEvidenza" },
+        "beni": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/codiceBene" },
+          "description": "Il primo è il bene del codice; gli altri solo per evidenze comuni (comune = true)"
+        },
+        "comune": { "type": "boolean", "description": "true se l'evidenza è comune a più beni, dichiarandolo (§1.6)" },
+        "gruppo": { "$ref": "#/$defs/gruppoEvidenza" },
+        "requisiti": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/requisito" } },
+        "tipo": { "enum": ["foto", "vocale", "video", "screenshot", "documento", "log", "altro"] },
+        "file": { "$ref": "#/$defs/testo", "description": "Percorso relativo nel pacchetto o nel fascicolo; il nome è fissato all'acquisizione e non cambia" },
+        "mime": { "type": "string" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "provenienza": { "$ref": "#/$defs/provenienza" },
+        "idSopralluogo": { "$ref": "#/$defs/idSopralluogo" },
+        "acquisitaIl": { "$ref": "#/$defs/dataOra", "description": "Data di acquisizione nel dispositivo o nel fascicolo" },
+        "dataScatto": { "$ref": "#/$defs/dataOra", "description": "Data dello scatto o della registrazione, se diversa" },
+        "dataMostrataAVideo": {
+          "type": "object",
+          "description": "Data/ora visibile nello schermo fotografato. Se l'orologio del bene è errato si registra, non si corregge (§6.1).",
+          "required": ["valore"],
+          "additionalProperties": false,
+          "properties": {
+            "valore": { "$ref": "#/$defs/testo" },
+            "orologioErrato": { "type": "boolean" },
+            "scartoStimato": { "type": "string" },
+            "nota": { "type": "string" }
+          }
+        },
+        "durataSecondi": { "type": "number", "minimum": 0 },
+        "descrizione": { "$ref": "#/$defs/testo", "description": "Quale fatto mostra, di quale bene, in quale circostanza" },
+        "annotazioni": { "type": "array", "items": { "$ref": "#/$defs/annotazione" } },
+        "trascrizioni": { "type": "array", "items": { "$ref": "#/$defs/trascrizione" } },
+        "contenutoLetto": {
+          "type": "array",
+          "description": "Per i documenti: posizione e fatto effettivamente letto (§1.6)",
+          "items": {
+            "type": "object", "required": ["posizione", "fatto"], "additionalProperties": false,
+            "properties": { "posizione": { "$ref": "#/$defs/testo" }, "fatto": { "$ref": "#/$defs/testo" } }
+          }
+        },
+        "storicoIdentificativi": {
+          "type": "array",
+          "description": "Identificativi precedenti, se l'evidenza è stata ricollegata al bene corretto",
+          "items": {
+            "type": "object", "required": ["id", "cambiatoIl", "motivo"], "additionalProperties": false,
+            "properties": { "id": { "$ref": "#/$defs/idEvidenza" }, "cambiatoIl": { "$ref": "#/$defs/dataOra" }, "motivo": { "$ref": "#/$defs/testo" } }
+          }
+        },
+        "stato": { "enum": ["valida", "annullata"] },
+        "annullamento": {
+          "type": "object", "required": ["motivo", "data"], "additionalProperties": false,
+          "properties": {
+            "motivo": { "$ref": "#/$defs/testo" },
+            "data": { "$ref": "#/$defs/dataOra" },
+            "sostituitaDa": { "$ref": "#/$defs/idEvidenza" }
+          }
+        }
+      },
+      "if": { "properties": { "stato": { "const": "annullata" } } },
+      "then": { "required": ["annullamento"] }
+    },
+
+    "rigaManifesto": {
+      "type": "object",
+      "description": "Riga del manifesto di integrità (§10.10). L'impronta prova solo che il file non è cambiato dopo la registrazione.",
+      "required": ["idEvidenza", "file", "sha256", "dataAcquisizione", "provenienza", "hash", "marcaTemporale"],
+      "additionalProperties": false,
+      "properties": {
+        "idEvidenza": { "$ref": "#/$defs/idEvidenza" },
+        "file": { "$ref": "#/$defs/testo" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "byte": { "type": "integer", "minimum": 0 },
+        "dataAcquisizione": { "$ref": "#/$defs/dataOra" },
+        "provenienza": { "$ref": "#/$defs/provenienza" },
+        "hash": { "enum": ["C", "S"], "description": "C = calcolato all'acquisizione; S = calcolato successivamente su materiale già esistente" },
+        "marcaTemporale": {
+          "type": "object", "required": ["tipo"], "additionalProperties": false,
+          "properties": {
+            "tipo": { "enum": ["n/a", "opentimestamps", "rfc3161_non_qualificata", "qualificata"] },
+            "riferimento": { "type": "string" }
+          }
+        },
+        "volume": { "type": "integer", "minimum": 1, "description": "Volume del pacchetto che contiene il file (rientro)" },
+        "trasmessaInCheckpoint": { "type": "integer", "minimum": 1, "description": "Il file è già stato consegnato nel checkpoint con questo numero e non è ripetuto qui" }
+      }
+    },
+
+    "rigaTimeline": {
+      "type": "object",
+      "description": "Riga della timeline di coerenza (§6.1, §10.5)",
+      "required": ["id", "evento", "beni", "data", "tipoData", "origine", "stato", "prove", "coerenza"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/idTimeline" },
+        "evento": {
+          "enum": [
+            "ordine", "acconto_20", "fabbricazione_fat", "immissione_mercato", "dichiarazione_conformita",
+            "fattura", "ddt_consegna", "installazione", "collaudo_sat", "entrata_in_funzione",
+            "interconnessione_dichiarata", "prima_prova_scambio", "verifica_perito",
+            "comunicazione_preventiva", "comunicazione_conferma", "comunicazione_completamento",
+            "perizia", "asseverazione", "altro"
+          ]
+        },
+        "descrizione": { "type": "string" },
+        "beni": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/codiceBene" } },
+        "data": { "$ref": "#/$defs/data" },
+        "tipoData": {
+          "enum": ["documento", "mostrata_a_video", "scatto", "acquisizione", "verifica_perito"],
+          "description": "Di quale data si tratta: del documento, mostrata a schermo, dello scatto, di acquisizione nel fascicolo, della verifica professionale"
+        },
+        "origine": {
+          "enum": ["documento_fiscale", "verbale", "log_sistema", "documento_terzo", "dichiarazione_impresa", "riscontro_perito"]
+        },
+        "stato": { "enum": ["documentata", "dichiarata", "da_verificare"] },
+        "prove": {
+          "type": "array", "items": { "$ref": "#/$defs/refEv" },
+          "description": "Documento di prova [ev:]; obbligatorio almeno uno se lo stato è documentata"
+        },
+        "coerenza": { "enum": ["S", "N"] },
+        "nota": { "type": "string", "description": "Obbligatoria se coerenza = N" }
+      },
+      "if": { "properties": { "coerenza": { "const": "N" } } },
+      "then": { "required": ["nota"], "properties": { "nota": { "minLength": 1 } } }
+    },
+
+    "azione": {
+      "type": "object",
+      "description": "Ogni lacuna diventa un'azione (§10.4). Si chiude solo con motivo documentato.",
+      "required": ["id", "priorita", "beni", "cosaServe", "percheServe", "requisito", "esempioAccettabile", "destinatario", "stato", "apertaIl"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/idAzione" },
+        "priorita": { "enum": ["indispensabile", "raccomandata", "utile"] },
+        "beni": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/codiceBene" } },
+        "cosaServe": { "$ref": "#/$defs/testo" },
+        "percheServe": { "$ref": "#/$defs/testo" },
+        "requisito": { "$ref": "#/$defs/requisito" },
+        "esempioAccettabile": { "$ref": "#/$defs/testo" },
+        "destinatario": { "enum": ["cliente", "fornitore", "integratore", "perito"] },
+        "stato": { "enum": ["aperta", "chiusa"] },
+        "apertaIl": { "$ref": "#/$defs/dataGiorno" },
+        "chiusura": {
+          "type": "object",
+          "required": ["data", "motivo", "motivazione"],
+          "additionalProperties": false,
+          "properties": {
+            "data": { "$ref": "#/$defs/dataGiorno" },
+            "motivo": { "enum": ["evidenza_acquisita", "riscontro_diretto", "decisione_motivata"] },
+            "evidenze": { "type": "array", "items": { "$ref": "#/$defs/refEv" } },
+            "riscontro": { "$ref": "#/$defs/idRiscontro" },
+            "motivazione": { "$ref": "#/$defs/testo" }
+          }
+        }
+      },
+      "if": { "properties": { "stato": { "const": "chiusa" } } },
+      "then": { "required": ["chiusura"] }
+    },
+
+    "riscontroDiretto": {
+      "type": "object",
+      "description": "Osservazione eseguita personalmente dal perito in sopralluogo (§1.3, §10.9). Vale per la data della visita e non retrodata l'evento.",
+      "required": ["id", "bene", "requisito", "idSopralluogo", "dataVisita", "fatto", "oggetto", "circostanza", "frase", "evidenze"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/idRiscontro" },
+        "bene": { "$ref": "#/$defs/codiceBene" },
+        "requisito": { "$ref": "#/$defs/requisito" },
+        "idSopralluogo": { "$ref": "#/$defs/idSopralluogo" },
+        "dataVisita": { "$ref": "#/$defs/dataGiorno" },
+        "ora": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+        "fatto": { "$ref": "#/$defs/testo", "description": "Che cosa è stato osservato" },
+        "oggetto": { "$ref": "#/$defs/testo", "description": "Su quale elemento del bene" },
+        "circostanza": { "$ref": "#/$defs/testo", "description": "In quale momento e condizione" },
+        "frase": { "$ref": "#/$defs/testo", "description": "Frase verbalizzata che unisce fatto + oggetto + circostanza" },
+        "evidenze": { "type": "array", "items": { "$ref": "#/$defs/idEvidenza" } },
+        "limiti": { "type": "string" }
+      }
+    },
+
+    "dichiarazioneTerzi": {
+      "type": "object",
+      "description": "Dichiarazione di cliente, fornitore o integratore (§10.9). Da sola non dimostra un requisito.",
+      "required": ["id", "beni", "persona", "ruolo", "organizzazione", "forma", "data", "contenuto", "requisito", "riscontroOggettivo"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/idDichiarazione" },
+        "beni": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/codiceBene" } },
+        "persona": { "$ref": "#/$defs/testo" },
+        "ruolo": { "$ref": "#/$defs/testo" },
+        "organizzazione": { "$ref": "#/$defs/testo" },
+        "forma": { "enum": ["scritta", "verbale"] },
+        "data": { "$ref": "#/$defs/dataGiorno" },
+        "contenuto": { "$ref": "#/$defs/testo", "description": "Contenuto effettivo, non riassunto valutativo" },
+        "requisito": { "$ref": "#/$defs/requisito" },
+        "evidenzaDichiarazione": { "$ref": "#/$defs/idEvidenza", "description": "Documento o vocale che contiene la dichiarazione, se esiste" },
+        "riscontroOggettivo": {
+          "type": "object",
+          "required": ["esito", "evidenze"],
+          "additionalProperties": false,
+          "properties": {
+            "esito": { "enum": ["S", "N"] },
+            "evidenze": { "type": "array", "items": { "$ref": "#/$defs/refEv" } },
+            "nota": { "type": "string" }
+          },
+          "if": { "properties": { "esito": { "const": "S" } } },
+          "then": { "properties": { "evidenze": { "minItems": 1 } } }
+        }
+      }
+    }
+  }
+}

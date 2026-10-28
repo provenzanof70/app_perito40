@@ -1,0 +1,519 @@
+{
+  "formato": "perizia40.andata",
+  "versioneSchema": "1.0.0",
+  "demo": true,
+  "idAndata": "5f0c2a1e-1d2b-4c3a-9e00-00000000a001",
+  "revisione": "rev001",
+  "creatoIl": "2026-10-10T18:00:00+02:00",
+  "codicePratica": "DEMO-2026-001",
+  "regime": "CRI_4.0",
+  "cliente": {
+    "ragioneSociale": "Officine Demo Fittizie S.r.l.",
+    "sedeIntervento": "Via dell'Esempio 1, 00000 Citta Fittizia (XX)"
+  },
+  "sopralluogo": {
+    "id": "S01",
+    "dataPrevista": "2026-10-15",
+    "referenti": [
+      {
+        "id": "P01",
+        "nome": "Mario Esempio",
+        "ruolo": "Responsabile di produzione",
+        "organizzazione": "Officine Demo Fittizie S.r.l."
+      },
+      {
+        "id": "P02",
+        "nome": "Laura Fittizia",
+        "ruolo": "Referente IT",
+        "organizzazione": "Officine Demo Fittizie S.r.l."
+      },
+      {
+        "id": "P03",
+        "nome": "Paolo Campione",
+        "ruolo": "Tecnico di automazione",
+        "organizzazione": "Automazioni Demo S.r.l."
+      }
+    ],
+    "avvertenze": [
+      "Prove sulla rete aziendale solo con la referente IT presente",
+      "Nessuna password, token o badge nelle foto: se compaiono, oscurare e segnalare",
+      "Cambiare codice bene appena si passa fisicamente a un altro bene"
+    ]
+  },
+  "beni": [
+    {
+      "codice": "B01",
+      "denominazione": "Centro di lavoro CNC CDX-500",
+      "funzione": "Fresatura e foratura a controllo numerico di componenti metallici",
+      "ubicazione": "Reparto lavorazioni, campata 2",
+      "componenti": [
+        {
+          "codice": "B01.1",
+          "denominazione": "Cambio pallet automatico",
+          "tipo": "ACC"
+        },
+        {
+          "codice": "B01.2",
+          "denominazione": "Sistema di aspirazione nebbie oleose",
+          "tipo": "M"
+        }
+      ],
+      "classificazione": {
+        "allegato": "A",
+        "gruppo": 1,
+        "voce": "Macchine utensili per asportazione (voce abbreviata, DEMO)",
+        "profilo": "completo",
+        "ruDichiarati": [
+          "RU1",
+          "RU2"
+        ]
+      },
+      "gruppiEvidenze": [
+        {
+          "gruppo": 1,
+          "titolo": "Bene",
+          "requisiti": [
+            "ID"
+          ],
+          "attesa": "si",
+          "cosaCercare": "contesto prima del dettaglio"
+        },
+        {
+          "gruppo": 2,
+          "titolo": "Targa",
+          "requisiti": [
+            "ID",
+            "RO5"
+          ],
+          "attesa": "si",
+          "cosaCercare": "targa leggibile, senza riflessi; confrontare con fattura e DdC"
+        },
+        {
+          "gruppo": 3,
+          "titolo": "Controllore",
+          "requisiti": [
+            "RO1"
+          ],
+          "attesa": "si",
+          "cosaCercare": "targa e pagina di sistema del controllore"
+        },
+        {
+          "gruppo": 4,
+          "titolo": "HMI",
+          "requisiti": [
+            "RO1",
+            "RO4"
+          ],
+          "attesa": "si",
+          "cosaCercare": "pagine operative e livelli utente"
+        },
+        {
+          "gruppo": 5,
+          "titolo": "Interconnessione",
+          "requisiti": [
+            "RO2"
+          ],
+          "attesa": "si",
+          "cosaCercare": "entrambi i lati dello scambio: bene e sistema aziendale, stesso ordine o dato"
+        },
+        {
+          "gruppo": 6,
+          "titolo": "Integrazione",
+          "requisiti": [
+            "RO3"
+          ],
+          "attesa": "si",
+          "cosaCercare": "flusso logistico o M2M effettivo"
+        },
+        {
+          "gruppo": 7,
+          "titolo": "Remoto",
+          "requisiti": [
+            "RU1"
+          ],
+          "attesa": "si",
+          "cosaCercare": "configurazione o sessione di telemanutenzione, senza credenziali"
+        },
+        {
+          "gruppo": 8,
+          "titolo": "Monitoraggio",
+          "requisiti": [
+            "RU2"
+          ],
+          "attesa": "si",
+          "cosaCercare": "variabili monitorate e reazione alle derive"
+        },
+        {
+          "gruppo": 9,
+          "titolo": "Modello digitale",
+          "requisiti": [
+            "RU3"
+          ],
+          "attesa": "non_applicabile",
+          "cosaCercare": "modello di comportamento e suo aggiornamento"
+        },
+        {
+          "gruppo": 10,
+          "titolo": "Dati in uscita",
+          "requisiti": [
+            "RO2"
+          ],
+          "attesa": "supporto",
+          "cosaCercare": "percorso, file riferibili al bene, contenuto di almeno un report"
+        },
+        {
+          "gruppo": "DOC",
+          "titolo": "Documenti",
+          "requisiti": [
+            "DOC"
+          ],
+          "attesa": "si",
+          "cosaCercare": "originali in risoluzione nativa"
+        }
+      ],
+      "datiDaVerificare": [
+        {
+          "campo": "identita.costruttore",
+          "etichetta": "Costruttore",
+          "valoreAgliAtti": "Costruttore Demo S.p.A.",
+          "statoAgliAtti": "documentato",
+          "fonte": "[ev: B01-DOC-001 | fattura_FT-DEMO-0042.pdf, p.1] [ev: B01-RO5-001 | DdC_B01_DdC-DEMO-0001.pdf, p.1]"
+        },
+        {
+          "campo": "identita.modello",
+          "etichetta": "Modello",
+          "valoreAgliAtti": "CDX-500",
+          "statoAgliAtti": "documentato",
+          "fonte": "[ev: B01-DOC-001 | fattura_FT-DEMO-0042.pdf, p.1]"
+        },
+        {
+          "campo": "identita.matricola",
+          "etichetta": "Matricola (leggere sulla targa)",
+          "valoreAgliAtti": "DEMO-0001",
+          "statoAgliAtti": "documentato",
+          "fonte": "[ev: B01-DOC-001 | fattura_FT-DEMO-0042.pdf, p.1] [ev: B01-RO5-001 | DdC_B01_DdC-DEMO-0001.pdf, p.1]"
+        },
+        {
+          "campo": "identita.anno",
+          "etichetta": "Anno",
+          "valoreAgliAtti": "2025",
+          "statoAgliAtti": "documentato",
+          "fonte": "[ev: B01-RO5-001 | DdC_B01_DdC-DEMO-0001.pdf, p.1]"
+        },
+        {
+          "campo": "controllore.marca",
+          "etichetta": "PLC/CNC: marca",
+          "valoreAgliAtti": "Controllo Demo",
+          "statoAgliAtti": "dichiarato"
+        },
+        {
+          "campo": "controllore.modello",
+          "etichetta": "PLC/CNC: modello",
+          "valoreAgliAtti": "CN-900",
+          "statoAgliAtti": "dichiarato"
+        },
+        {
+          "campo": "controllore.firmware",
+          "etichetta": "PLC/CNC: firmware",
+          "valoreAgliAtti": "V4.2.1",
+          "statoAgliAtti": "dichiarato"
+        },
+        {
+          "campo": "hmi.modello",
+          "etichetta": "HMI: modello",
+          "valoreAgliAtti": "Pannello CN-900 da 15 pollici",
+          "statoAgliAtti": "dichiarato"
+        },
+        {
+          "campo": "reteDichiarata.ip",
+          "etichetta": "IP dichiarato",
+          "valoreAgliAtti": "192.0.2.21",
+          "statoAgliAtti": "dichiarato",
+          "fonte": "[ev: B01-RO2-001 | dichiarazione_rete_cliente.pdf, p.1]"
+        },
+        {
+          "campo": "reteDichiarata.sistemaAziendale",
+          "etichetta": "Sistema aziendale",
+          "valoreAgliAtti": "MES-DEMO",
+          "statoAgliAtti": "dichiarato",
+          "fonte": "[ev: B01-RO2-001 | dichiarazione_rete_cliente.pdf, p.1]"
+        },
+        {
+          "campo": "reteDichiarata.protocollo",
+          "etichetta": "Protocollo",
+          "valoreAgliAtti": "OPC UA",
+          "statoAgliAtti": "dichiarato",
+          "fonte": "[ev: B01-RO2-001 | dichiarazione_rete_cliente.pdf, p.1]"
+        },
+        {
+          "campo": "dichiarazioneCE.riferimentoMatricola",
+          "etichetta": "DdC: corrispondenza con la matricola in targa",
+          "valoreAgliAtti": "cita la matricola DEMO-0001",
+          "statoAgliAtti": "documentato",
+          "fonte": "[ev: B01-RO5-001 | DdC_B01_DdC-DEMO-0001.pdf, p.1]"
+        },
+        {
+          "campo": "esitoGateC",
+          "etichetta": "GATE C: perimetro e componenti",
+          "valoreAgliAtti": "giallo",
+          "statoAgliAtti": "da_verificare",
+          "fonte": "[ev: B01-RO5-001 | DdC_B01_DdC-DEMO-0001.pdf, p.1]"
+        }
+      ]
+    },
+    {
+      "codice": "B02",
+      "denominazione": "Macchina di misura a coordinate MM-300",
+      "funzione": "Misura dimensionale dei pezzi lavorati e generazione dei report di collaudo",
+      "ubicazione": "Sala metrologica",
+      "componenti": [],
+      "classificazione": {
+        "allegato": "A",
+        "gruppo": 2,
+        "voce": "Sistemi di misura a coordinate per la verifica dei requisiti geometrici di prodotto (voce abbreviata, DEMO)",
+        "profilo": "ridotto"
+      },
+      "gruppiEvidenze": [
+        {
+          "gruppo": 1,
+          "titolo": "Bene",
+          "requisiti": [
+            "ID"
+          ],
+          "attesa": "si",
+          "cosaCercare": "contesto prima del dettaglio"
+        },
+        {
+          "gruppo": 2,
+          "titolo": "Targa",
+          "requisiti": [
+            "ID",
+            "RO5"
+          ],
+          "attesa": "si",
+          "cosaCercare": "targa leggibile, senza riflessi; confrontare con fattura e DdC"
+        },
+        {
+          "gruppo": 3,
+          "titolo": "Controllore",
+          "requisiti": [
+            "RO1"
+          ],
+          "attesa": "su_richiesta",
+          "cosaCercare": "targa e pagina di sistema del controllore"
+        },
+        {
+          "gruppo": 4,
+          "titolo": "HMI",
+          "requisiti": [
+            "RO1",
+            "RO4"
+          ],
+          "attesa": "su_richiesta",
+          "cosaCercare": "pagine operative e livelli utente"
+        },
+        {
+          "gruppo": 5,
+          "titolo": "Interconnessione",
+          "requisiti": [
+            "RO2"
+          ],
+          "attesa": "si",
+          "cosaCercare": "entrambi i lati dello scambio: bene e sistema aziendale, stesso ordine o dato"
+        },
+        {
+          "gruppo": 6,
+          "titolo": "Integrazione",
+          "requisiti": [
+            "RO3"
+          ],
+          "attesa": "su_richiesta",
+          "cosaCercare": "flusso logistico o M2M effettivo"
+        },
+        {
+          "gruppo": 7,
+          "titolo": "Remoto",
+          "requisiti": [
+            "RU1"
+          ],
+          "attesa": "non_applicabile",
+          "cosaCercare": "configurazione o sessione di telemanutenzione, senza credenziali"
+        },
+        {
+          "gruppo": 8,
+          "titolo": "Monitoraggio",
+          "requisiti": [
+            "RU2"
+          ],
+          "attesa": "non_applicabile",
+          "cosaCercare": "variabili monitorate e reazione alle derive"
+        },
+        {
+          "gruppo": 9,
+          "titolo": "Modello digitale",
+          "requisiti": [
+            "RU3"
+          ],
+          "attesa": "non_applicabile",
+          "cosaCercare": "modello di comportamento e suo aggiornamento"
+        },
+        {
+          "gruppo": 10,
+          "titolo": "Dati in uscita",
+          "requisiti": [
+            "RO2"
+          ],
+          "attesa": "si",
+          "cosaCercare": "percorso, file riferibili al bene, contenuto di almeno un report"
+        },
+        {
+          "gruppo": "DOC",
+          "titolo": "Documenti",
+          "requisiti": [
+            "DOC"
+          ],
+          "attesa": "si",
+          "cosaCercare": "originali in risoluzione nativa"
+        }
+      ],
+      "datiDaVerificare": [
+        {
+          "campo": "identita.costruttore",
+          "etichetta": "Costruttore",
+          "valoreAgliAtti": "Metrologia Demo S.r.l.",
+          "statoAgliAtti": "documentato",
+          "fonte": "[ev: B01-DOC-001 | fattura_FT-DEMO-0042.pdf, p.1] [ev: B02-RO5-001 | DdC_B02_DdC-DEMO-0002.pdf, p.1]"
+        },
+        {
+          "campo": "identita.modello",
+          "etichetta": "Modello",
+          "valoreAgliAtti": "MM-300",
+          "statoAgliAtti": "documentato",
+          "fonte": "[ev: B01-DOC-001 | fattura_FT-DEMO-0042.pdf, p.1] [ev: B02-RO5-001 | DdC_B02_DdC-DEMO-0002.pdf, p.1]"
+        },
+        {
+          "campo": "identita.matricola",
+          "etichetta": "Matricola (leggere sulla targa)",
+          "valoreAgliAtti": "DEMO-0002",
+          "statoAgliAtti": "documentato",
+          "fonte": "[ev: B01-DOC-001 | fattura_FT-DEMO-0042.pdf, p.1]"
+        },
+        {
+          "campo": "identita.anno",
+          "etichetta": "Anno",
+          "valoreAgliAtti": "2025",
+          "statoAgliAtti": "dichiarato"
+        },
+        {
+          "campo": "controllore.marca",
+          "etichetta": "PLC/CNC: marca",
+          "valoreAgliAtti": null,
+          "statoAgliAtti": "da_verificare"
+        },
+        {
+          "campo": "controllore.modello",
+          "etichetta": "PLC/CNC: modello",
+          "valoreAgliAtti": null,
+          "statoAgliAtti": "da_verificare"
+        },
+        {
+          "campo": "controllore.firmware",
+          "etichetta": "PLC/CNC: firmware",
+          "valoreAgliAtti": null,
+          "statoAgliAtti": "da_verificare"
+        },
+        {
+          "campo": "hmi.modello",
+          "etichetta": "HMI: modello",
+          "valoreAgliAtti": "Software DEMO-Measure 3 su PC",
+          "statoAgliAtti": "dichiarato"
+        },
+        {
+          "campo": "reteDichiarata.ip",
+          "etichetta": "IP dichiarato",
+          "valoreAgliAtti": "192.0.2.35",
+          "statoAgliAtti": "dichiarato",
+          "fonte": "[ev: B01-RO2-001 | dichiarazione_rete_cliente.pdf, p.1]"
+        },
+        {
+          "campo": "reteDichiarata.sistemaAziendale",
+          "etichetta": "Sistema aziendale",
+          "valoreAgliAtti": "Cartella condivisa qualita su SRV-DEMO",
+          "statoAgliAtti": "dichiarato",
+          "fonte": "[ev: B01-RO2-001 | dichiarazione_rete_cliente.pdf, p.1]"
+        },
+        {
+          "campo": "reteDichiarata.protocollo",
+          "etichetta": "Protocollo",
+          "valoreAgliAtti": "Condivisione file SMB",
+          "statoAgliAtti": "dichiarato",
+          "fonte": "[ev: B01-RO2-001 | dichiarazione_rete_cliente.pdf, p.1]"
+        },
+        {
+          "campo": "dichiarazioneCE.riferimentoMatricola",
+          "etichetta": "DdC: corrispondenza con la matricola in targa",
+          "valoreAgliAtti": "riferita al modello MM-300, senza matricola",
+          "statoAgliAtti": "documentato",
+          "fonte": "[ev: B02-RO5-001 | DdC_B02_DdC-DEMO-0002.pdf, p.1]"
+        },
+        {
+          "campo": "esitoGateC",
+          "etichetta": "GATE C: perimetro e componenti",
+          "valoreAgliAtti": "verde",
+          "statoAgliAtti": "documentato",
+          "fonte": "[ev: B02-RO5-001 | DdC_B02_DdC-DEMO-0002.pdf, p.1]"
+        }
+      ]
+    }
+  ],
+  "azioniAperte": [
+    {
+      "id": "A001",
+      "priorita": "indispensabile",
+      "beni": [
+        "B01"
+      ],
+      "cosaServe": "Esportazione dello storico ordini di MES-DEMO verso B01 dal 20/05/2025",
+      "percheServe": "Datare l'inizio dello scambio dichiarato al 20/05/2025",
+      "requisito": "RO2",
+      "esempioAccettabile": "Export CSV del MES con numero ordine, data, ora e identificativo macchina B01",
+      "destinatario": "cliente",
+      "stato": "aperta",
+      "apertaIl": "2026-10-01"
+    },
+    {
+      "id": "A002",
+      "priorita": "raccomandata",
+      "beni": [
+        "B02"
+      ],
+      "cosaServe": "DdC di B02 riferita all'esemplare (matricola)",
+      "percheServe": "La DdC ricevuta e riferita al solo modello MM-300",
+      "requisito": "RO5",
+      "esempioAccettabile": "DdC o attestazione del costruttore con modello e matricola di B02",
+      "destinatario": "fornitore",
+      "stato": "aperta",
+      "apertaIl": "2026-10-01"
+    },
+    {
+      "id": "A003",
+      "priorita": "indispensabile",
+      "beni": [
+        "B01"
+      ],
+      "cosaServe": "Riscontro in campo dello scambio MES-DEMO verso B01",
+      "percheServe": "La dichiarazione del cliente da sola non dimostra lo scambio",
+      "requisito": "RO2",
+      "esempioAccettabile": "Stesso ordine visibile sul MES e sull'HMI di B01, con foto di entrambi i lati",
+      "destinatario": "perito",
+      "stato": "aperta",
+      "apertaIl": "2026-10-01"
+    }
+  ],
+  "evidenzeEsistenti": [
+    "B01-DOC-001",
+    "B01-RO5-001",
+    "B01-RO2-001",
+    "B02-RO5-001"
+  ]
+}

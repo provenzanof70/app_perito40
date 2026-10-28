@@ -1,0 +1,13 @@
+# Il repository è pubblico: solo codice e dati DEMO.
+# Le pratiche reali non devono mai essere copiate qui; queste regole sono una rete di sicurezza.
+/PRATICA_*/
+/pratiche/
+/rientri/
+*.zip
+*.heic
+*.mov
+
+# Strumenti
+node_modules/
+.DS_Store
+Thumbs.db

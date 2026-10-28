@@ -1,0 +1,438 @@
+{
+  "formato": "perizia40.scheda_bene",
+  "versioneSchema": "1.0.0",
+  "demo": true,
+  "codicePratica": "DEMO-2026-001",
+  "codice": "B01",
+  "denominazione": "Centro di lavoro CNC CDX-500",
+  "funzione": "Fresatura e foratura a controllo numerico di componenti metallici",
+  "ubicazione": "Reparto lavorazioni, campata 2",
+  "componenti": [
+    {
+      "codice": "B01.1",
+      "denominazione": "Cambio pallet automatico",
+      "tipo": "ACC",
+      "costruttore": "Costruttore Demo S.p.A.",
+      "funzione": "Scambio automatico dei pallet portapezzo"
+    },
+    {
+      "codice": "B01.2",
+      "denominazione": "Sistema di aspirazione nebbie oleose",
+      "tipo": "M",
+      "costruttore": "Aspirazione Demo S.r.l.",
+      "funzione": "Aspirazione delle nebbie dalla cabina"
+    }
+  ],
+  "classificazione": {
+    "regime": "CRI_4.0",
+    "allegato": "A",
+    "gruppo": 1,
+    "voce": "Macchine utensili per asportazione (voce abbreviata, DEMO)",
+    "profilo": "completo",
+    "ruDichiarati": [
+      "RU1",
+      "RU2"
+    ],
+    "sostenibilita": "solida",
+    "motivazione": "Asportazione di truciolo con controllo numerico su pezzi metallici, come da fattura",
+    "fonti": [
+      {
+        "idEvidenza": "B01-DOC-001",
+        "file": "fattura_FT-DEMO-0042.pdf",
+        "posizione": "p.1",
+        "fattoLetto": "riga 1: centro di lavoro CDX-500"
+      }
+    ]
+  },
+  "datiAgliAtti": {
+    "identita": {
+      "costruttore": {
+        "valore": "Costruttore Demo S.p.A.",
+        "fonti": [
+          {
+            "idEvidenza": "B01-DOC-001",
+            "file": "fattura_FT-DEMO-0042.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "fornitore Costruttore Demo S.p.A."
+          },
+          {
+            "idEvidenza": "B01-RO5-001",
+            "file": "DdC_B01_DdC-DEMO-0001.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "costruttore Costruttore Demo S.p.A."
+          }
+        ],
+        "stato": "documentato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-ID-003"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "modello": {
+        "valore": "CDX-500",
+        "fonti": [
+          {
+            "idEvidenza": "B01-DOC-001",
+            "file": "fattura_FT-DEMO-0042.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "riga 1: CDX-500"
+          }
+        ],
+        "stato": "documentato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-ID-003"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "matricola": {
+        "valore": "DEMO-0001",
+        "fonti": [
+          {
+            "idEvidenza": "B01-DOC-001",
+            "file": "fattura_FT-DEMO-0042.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "riga 1: matricola DEMO-0001"
+          },
+          {
+            "idEvidenza": "B01-RO5-001",
+            "file": "DdC_B01_DdC-DEMO-0001.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "matricola DEMO-0001"
+          }
+        ],
+        "stato": "documentato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-ID-003"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "anno": {
+        "valore": "2025",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO5-001",
+            "file": "DdC_B01_DdC-DEMO-0001.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "data 10/03/2025"
+          }
+        ],
+        "stato": "documentato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-ID-003"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      }
+    },
+    "controllore": {
+      "marca": {
+        "valore": "Controllo Demo",
+        "fonti": [],
+        "stato": "dichiarato",
+        "nota": "indicata dal cliente al telefono; manuale non ancora ricevuto",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-RO1-001"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "modello": {
+        "valore": "CN-900",
+        "fonti": [],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-RO1-001"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "firmware": {
+        "valore": "V4.2.1",
+        "fonti": [],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "corretto",
+          "valoreRilevato": "V4.2.3",
+          "evidenze": [
+            "B01-RO1-001"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15",
+          "nota": "aggiornamento firmware riferito dal manutentore; data da documentare"
+        }
+      }
+    },
+    "hmi": {
+      "modello": {
+        "valore": "Pannello CN-900 da 15 pollici",
+        "fonti": [],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-RO1-002"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      }
+    },
+    "reteDichiarata": {
+      "ip": {
+        "valore": "192.0.2.21",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO2-001",
+            "file": "dichiarazione_rete_cliente.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "B01: IP 192.0.2.21"
+          }
+        ],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-RO2-002"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "sistemaAziendale": {
+        "valore": "MES-DEMO",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO2-001",
+            "file": "dichiarazione_rete_cliente.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "collegato a MES-DEMO"
+          }
+        ],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-RO2-003"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "protocollo": {
+        "valore": "OPC UA",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO2-001",
+            "file": "dichiarazione_rete_cliente.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "via OPC UA"
+          }
+        ],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-RO2-002"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      }
+    },
+    "dichiarazioneCE": {
+      "numero": {
+        "valore": "DdC-DEMO-0001",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO5-001",
+            "file": "DdC_B01_DdC-DEMO-0001.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "n. DdC-DEMO-0001"
+          }
+        ],
+        "stato": "documentato"
+      },
+      "data": {
+        "valore": "2025-03-10",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO5-001",
+            "file": "DdC_B01_DdC-DEMO-0001.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "data 10/03/2025"
+          }
+        ],
+        "stato": "documentato"
+      },
+      "direttive": {
+        "valore": "2006/42/CE; 2014/30/UE",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO5-001",
+            "file": "DdC_B01_DdC-DEMO-0001.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "direttive 2006/42/CE, 2014/30/UE"
+          }
+        ],
+        "stato": "documentato"
+      },
+      "riferimentoMatricola": {
+        "valore": "cita la matricola DEMO-0001",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO5-001",
+            "file": "DdC_B01_DdC-DEMO-0001.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "matricola DEMO-0001"
+          }
+        ],
+        "stato": "documentato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B01-ID-003"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15",
+          "nota": "matricola in targa uguale a quella della DdC"
+        }
+      }
+    },
+    "esitoGateC": {
+      "esito": "giallo",
+      "stato": "da_verificare",
+      "fonti": [
+        {
+          "idEvidenza": "B01-RO5-001",
+          "file": "DdC_B01_DdC-DEMO-0001.pdf",
+          "posizione": "p.1",
+          "fattoLetto": "la DdC copre il solo CDX-500"
+        }
+      ],
+      "motivazione": "L'aspiratore B01.2 di altro costruttore e integrato nella cabina: verificare se la DdC di B01 copre l'insieme o se serve una DdC d'insieme",
+      "verificaCampo": {
+        "esito": "confermato",
+        "evidenze": [
+          "B01.2-RO5-001",
+          "B01.1-ID-001"
+        ],
+        "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+        "data": "2026-10-15",
+        "nota": "aspiratore B01.2 di altro costruttore montato sulla cabina: l'esito resta giallo"
+      }
+    }
+  },
+  "gruppiEvidenze": [
+    {
+      "gruppo": 1,
+      "titolo": "Bene",
+      "requisiti": [
+        "ID"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 2,
+      "titolo": "Targa",
+      "requisiti": [
+        "ID",
+        "RO5"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 3,
+      "titolo": "Controllore",
+      "requisiti": [
+        "RO1"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 4,
+      "titolo": "HMI",
+      "requisiti": [
+        "RO1",
+        "RO4"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 5,
+      "titolo": "Interconnessione",
+      "requisiti": [
+        "RO2"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 6,
+      "titolo": "Integrazione",
+      "requisiti": [
+        "RO3"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 7,
+      "titolo": "Remoto",
+      "requisiti": [
+        "RU1"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 8,
+      "titolo": "Monitoraggio",
+      "requisiti": [
+        "RU2"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 9,
+      "titolo": "Modello digitale",
+      "requisiti": [
+        "RU3"
+      ],
+      "attesa": "non_applicabile"
+    },
+    {
+      "gruppo": 10,
+      "titolo": "Dati in uscita",
+      "requisiti": [
+        "RO2"
+      ],
+      "attesa": "supporto"
+    },
+    {
+      "gruppo": "DOC",
+      "titolo": "Documenti",
+      "requisiti": [
+        "DOC"
+      ],
+      "attesa": "si"
+    }
+  ]
+}

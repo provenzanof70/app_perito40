@@ -1,0 +1,182 @@
+{
+  "descrizione": "Casi errati costruiti sulla pratica DEMO. Ogni caso applica in memoria le modifiche indicate (puntatori JSON, file alterati o rimossi) e richiede che il validatore segnali almeno gli errori attesi. {vol1} e {vol2} indicano le cartelle dei due volumi del rientro. Eseguire con: node strumenti/prova.mjs",
+  "pratica": "../PRATICA_DEMO_2026_001",
+  "casi": [
+    {
+      "nome": "azione chiusa senza prova",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/azioni/2/chiusura", "valore": { "data": "2026-10-16", "motivo": "evidenza_acquisita", "motivazione": "chiusa" } }],
+      "atteso": ["AZIONE_CHIUSA_SENZA_MOTIVO"]
+    },
+    {
+      "nome": "azione chiusa senza dati di chiusura",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/azioni/2/chiusura", "elimina": true }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "interconnessione anteriore all'installazione",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/timeline/7/data/valore", "valore": "2025-03-01" }],
+      "atteso": ["TIMELINE_ANACRONISMO"]
+    },
+    {
+      "nome": "data dichiarata dall'impresa marcata come documentata, senza prova",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/timeline/4/stato", "valore": "documentata" }],
+      "atteso": ["TIMELINE_SENZA_PROVA", "TIMELINE_STATO_ORIGINE"]
+    },
+    {
+      "nome": "coerenza N senza nota",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/timeline/7/nota", "elimina": true }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "precisione mese con data al giorno",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/timeline/0/data/valore", "valore": "2025-01-15" }],
+      "atteso": ["TIMELINE_PRECISIONE"]
+    },
+    {
+      "nome": "timeline senza codice del bene",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/timeline/2/beni", "valore": [] }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "evidenza riferita al bene sbagliato",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/evidenze/4/beni", "valore": ["B02"] }],
+      "atteso": ["EVIDENZA_BENE_ERRATO"]
+    },
+    {
+      "nome": "codice evidenza malformato",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/evidenze/4/id", "valore": "B1-ID-001" }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "evidenza annullata senza motivo",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/evidenze/5/annullamento", "elimina": true }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "evidenza annullata cancellata dal rientro",
+      "modifiche": [{ "file": "{vol1}/perizia40-rientro.json", "puntatore": "/evidenze/1", "elimina": true }],
+      "atteso": ["MANIFESTO_ORFANO", "VOLUMI_INCOERENTI"]
+    },
+    {
+      "nome": "file del rientro modificato dopo l'acquisizione",
+      "fileAlterati": ["{vol1}/evidenze/DEMO-2026-001_20261015_B01-ID-003.png"],
+      "atteso": ["HASH_DIVERSO"]
+    },
+    {
+      "nome": "file del rientro mancante",
+      "fileRimossi": ["{vol2}/evidenze/DEMO-2026-001_20261015_B01-RO2-004.wav"],
+      "atteso": ["FILE_MANCANTE"]
+    },
+    {
+      "nome": "volume mancante",
+      "cartelleRimosse": ["{vol2}/"],
+      "atteso": ["VOLUME_MANCANTE"]
+    },
+    {
+      "nome": "pacchetto finale che rimanda a un checkpoint",
+      "modifiche": [{ "file": "{vol1}/perizia40-rientro.json", "puntatore": "/manifesto/0/trasmessaInCheckpoint", "valore": 1 }],
+      "atteso": ["FINALE_INCOMPLETO"]
+    },
+    {
+      "nome": "andata modificata dopo il caricamento",
+      "fileAlterati": ["andata/perizia40-andata.json"],
+      "atteso": ["RIENTRO_ANDATA_HASH", "PACCHETTO_HASH"]
+    },
+    {
+      "nome": "evidenza del rientro con un identificativo già usato nel fascicolo",
+      "modifiche": [
+        { "file": "{vol1}/perizia40-rientro.json", "puntatore": "/evidenze/0/id", "valore": "B01-RO2-001" },
+        { "file": "{vol1}/perizia40-rientro.json", "puntatore": "/manifesto/0/idEvidenza", "valore": "B01-RO2-001" }
+      ],
+      "atteso": ["EVIDENZA_ID_COLLISIONE"]
+    },
+    {
+      "nome": "riscontro diretto con data diversa dalla visita",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/riscontriDiretti/0/dataVisita", "valore": "2026-10-14" }],
+      "atteso": ["RISCONTRO_DATA_VISITA"]
+    },
+    {
+      "nome": "riscontro diretto senza requisito",
+      "modifiche": [{ "file": "{vol1}/perizia40-rientro.json", "puntatore": "/riscontriDiretti/0/requisito", "elimina": true }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "riscontro diretto senza circostanza",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/riscontriDiretti/1/circostanza", "elimina": true }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "dichiarazione di terzi con riscontro S senza evidenza",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/dichiarazioniTerzi/0/riscontroOggettivo/evidenze", "valore": [] }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "trascrizione da servizio esterno",
+      "modifiche": [{ "file": "{vol1}/perizia40-rientro.json", "puntatore": "/evidenze/2/trascrizioni/0/origine", "valore": "ocr_servizio_esterno" }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "dato corretto senza valore rilevato",
+      "modifiche": [{ "file": "{vol1}/perizia40-rientro.json", "puntatore": "/verificheDati/6/valoreRilevato", "elimina": true }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "dato confermato senza evidenza",
+      "modifiche": [{ "file": "{vol1}/perizia40-rientro.json", "puntatore": "/verificheDati/0/evidenze", "valore": [] }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "valore agli atti diverso dall'andata",
+      "modifiche": [{ "file": "{vol1}/perizia40-rientro.json", "puntatore": "/verificheDati/2/valoreAgliAtti", "valore": "DEMO-9999" }],
+      "atteso": ["VERIFICA_VALORE_ATTI"]
+    },
+    {
+      "nome": "nuova azione chiusa in campo",
+      "modifiche": [
+        { "file": "{vol1}/perizia40-rientro.json", "puntatore": "/nuoveAzioni/0/stato", "valore": "chiusa" },
+        { "file": "{vol1}/perizia40-rientro.json", "puntatore": "/nuoveAzioni/0/chiusura", "valore": { "data": "2026-10-15", "motivo": "decisione_motivata", "motivazione": "chiusa in campo" } }
+      ],
+      "atteso": ["AZIONE_CHIUSA_IN_CAMPO"]
+    },
+    {
+      "nome": "dato documentato senza fonte",
+      "modifiche": [{ "file": "beni/B01.json", "puntatore": "/datiAgliAtti/identita/modello/fonti", "valore": [] }],
+      "atteso": ["DATO_SENZA_FONTE"]
+    },
+    {
+      "nome": "profilo incoerente con il gruppo",
+      "modifiche": [{ "file": "beni/B02.json", "puntatore": "/classificazione/profilo", "valore": "completo" }],
+      "atteso": ["PROFILO_INCOERENTE"]
+    },
+    {
+      "nome": "componente con codice di un altro bene",
+      "modifiche": [{ "file": "beni/B01.json", "puntatore": "/componenti/0/codice", "valore": "B02.1" }],
+      "atteso": ["COMPONENTE_CODICE"]
+    },
+    {
+      "nome": "gruppo di evidenze mancante",
+      "modifiche": [{ "file": "beni/B01.json", "puntatore": "/gruppiEvidenze/5", "elimina": true }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "esito GATE C fuori elenco",
+      "modifiche": [{ "file": "beni/B01.json", "puntatore": "/datiAgliAtti/esitoGateC/esito", "valore": "arancione" }],
+      "atteso": ["SCHEMA"]
+    },
+    {
+      "nome": "IP reale nei dati DEMO",
+      "modifiche": [{ "file": "beni/B01.json", "puntatore": "/datiAgliAtti/reteDichiarata/ip/valore", "valore": "192.168.1.21" }],
+      "atteso": ["DEMO_IP_REALE"]
+    },
+    {
+      "nome": "credenziale in una descrizione",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/evidenze/13/descrizione", "valore": "Pagina servizio remoto, password: Fittizia123" }],
+      "atteso": ["CREDENZIALI"]
+    },
+    {
+      "nome": "pratica non marcata come DEMO nel repository pubblico",
+      "modifiche": [{ "file": "pratica_40.json", "puntatore": "/demo", "valore": false }],
+      "atteso": ["DEMO_FLAG"]
+    }
+  ]
+}

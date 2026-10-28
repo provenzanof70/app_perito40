@@ -1,0 +1,411 @@
+{
+  "formato": "perizia40.scheda_bene",
+  "versioneSchema": "1.0.0",
+  "demo": true,
+  "codicePratica": "DEMO-2026-001",
+  "codice": "B02",
+  "denominazione": "Macchina di misura a coordinate MM-300",
+  "funzione": "Misura dimensionale dei pezzi lavorati e generazione dei report di collaudo",
+  "ubicazione": "Sala metrologica",
+  "componenti": [],
+  "classificazione": {
+    "regime": "CRI_4.0",
+    "allegato": "A",
+    "gruppo": 2,
+    "voce": "Sistemi di misura a coordinate per la verifica dei requisiti geometrici di prodotto (voce abbreviata, DEMO)",
+    "profilo": "ridotto",
+    "sostenibilita": "solida",
+    "motivazione": "Misura a coordinate dei pezzi con report di collaudo per pezzo",
+    "fonti": [
+      {
+        "idEvidenza": "B01-DOC-001",
+        "file": "fattura_FT-DEMO-0042.pdf",
+        "posizione": "p.1",
+        "fattoLetto": "riga 2: macchina di misura MM-300"
+      }
+    ]
+  },
+  "datiAgliAtti": {
+    "identita": {
+      "costruttore": {
+        "valore": "Metrologia Demo S.r.l.",
+        "fonti": [
+          {
+            "idEvidenza": "B01-DOC-001",
+            "file": "fattura_FT-DEMO-0042.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "riga 2: Metrologia Demo S.r.l."
+          },
+          {
+            "idEvidenza": "B02-RO5-001",
+            "file": "DdC_B02_DdC-DEMO-0002.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "costruttore Metrologia Demo S.r.l."
+          }
+        ],
+        "stato": "documentato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B02-ID-002"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "modello": {
+        "valore": "MM-300",
+        "fonti": [
+          {
+            "idEvidenza": "B01-DOC-001",
+            "file": "fattura_FT-DEMO-0042.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "riga 2: MM-300"
+          },
+          {
+            "idEvidenza": "B02-RO5-001",
+            "file": "DdC_B02_DdC-DEMO-0002.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "modello MM-300"
+          }
+        ],
+        "stato": "documentato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B02-ID-002"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "matricola": {
+        "valore": "DEMO-0002",
+        "fonti": [
+          {
+            "idEvidenza": "B01-DOC-001",
+            "file": "fattura_FT-DEMO-0042.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "riga 2: matricola DEMO-0002"
+          }
+        ],
+        "stato": "documentato",
+        "verificaCampo": {
+          "esito": "difforme",
+          "valoreRilevato": "DEMO-0020",
+          "evidenze": [
+            "B02-ID-002",
+            "B02-RO2-002"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15",
+          "nota": "targa e report di misura riportano DEMO-0020; la fattura riporta DEMO-0002"
+        }
+      },
+      "anno": {
+        "valore": "2025",
+        "fonti": [],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B02-ID-002"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      }
+    },
+    "controllore": {
+      "marca": {
+        "valore": null,
+        "fonti": [],
+        "stato": "da_verificare",
+        "verificaCampo": {
+          "esito": "corretto",
+          "valoreRilevato": "Controllo Demo Metrologia",
+          "evidenze": [
+            "B02-RO1-001"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "modello": {
+        "valore": null,
+        "fonti": [],
+        "stato": "da_verificare",
+        "verificaCampo": {
+          "esito": "corretto",
+          "valoreRilevato": "UC-30",
+          "evidenze": [
+            "B02-RO1-001"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "firmware": {
+        "valore": null,
+        "fonti": [],
+        "stato": "da_verificare",
+        "verificaCampo": {
+          "esito": "non_verificabile",
+          "evidenze": [],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15",
+          "nota": "pagina di sistema accessibile solo al tecnico del fornitore: non richiesta"
+        }
+      }
+    },
+    "hmi": {
+      "modello": {
+        "valore": "Software DEMO-Measure 3 su PC",
+        "fonti": [],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B02-ID-001"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      }
+    },
+    "reteDichiarata": {
+      "ip": {
+        "valore": "192.0.2.35",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO2-001",
+            "file": "dichiarazione_rete_cliente.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "B02: IP 192.0.2.35"
+          }
+        ],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B02-RO2-003"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "sistemaAziendale": {
+        "valore": "Cartella condivisa qualita su SRV-DEMO",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO2-001",
+            "file": "dichiarazione_rete_cliente.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "report su cartella condivisa qualita"
+          }
+        ],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B02-RO2-001"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      },
+      "protocollo": {
+        "valore": "Condivisione file SMB",
+        "fonti": [
+          {
+            "idEvidenza": "B01-RO2-001",
+            "file": "dichiarazione_rete_cliente.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "SMB"
+          }
+        ],
+        "stato": "dichiarato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B02-RO2-003"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15"
+        }
+      }
+    },
+    "dichiarazioneCE": {
+      "numero": {
+        "valore": "DdC-DEMO-0002",
+        "fonti": [
+          {
+            "idEvidenza": "B02-RO5-001",
+            "file": "DdC_B02_DdC-DEMO-0002.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "n. DdC-DEMO-0002"
+          }
+        ],
+        "stato": "documentato"
+      },
+      "data": {
+        "valore": "2025-02-28",
+        "fonti": [
+          {
+            "idEvidenza": "B02-RO5-001",
+            "file": "DdC_B02_DdC-DEMO-0002.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "data 28/02/2025"
+          }
+        ],
+        "stato": "documentato"
+      },
+      "direttive": {
+        "valore": "2006/42/CE; 2014/30/UE",
+        "fonti": [
+          {
+            "idEvidenza": "B02-RO5-001",
+            "file": "DdC_B02_DdC-DEMO-0002.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "direttive 2006/42/CE, 2014/30/UE"
+          }
+        ],
+        "stato": "documentato"
+      },
+      "riferimentoMatricola": {
+        "valore": "riferita al modello MM-300, senza matricola",
+        "fonti": [
+          {
+            "idEvidenza": "B02-RO5-001",
+            "file": "DdC_B02_DdC-DEMO-0002.pdf",
+            "posizione": "p.1",
+            "fattoLetto": "nessuna matricola indicata"
+          }
+        ],
+        "stato": "documentato",
+        "verificaCampo": {
+          "esito": "confermato",
+          "evidenze": [
+            "B02-ID-002"
+          ],
+          "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+          "data": "2026-10-15",
+          "nota": "la DdC resta riferita al solo modello"
+        }
+      }
+    },
+    "esitoGateC": {
+      "esito": "verde",
+      "stato": "documentato",
+      "fonti": [
+        {
+          "idEvidenza": "B02-RO5-001",
+          "file": "DdC_B02_DdC-DEMO-0002.pdf",
+          "posizione": "p.1",
+          "fattoLetto": "macchina singola, DdC del costruttore"
+        }
+      ],
+      "motivazione": "Macchina singola con DdC del costruttore; nessun componente di terzi dichiarato",
+      "verificaCampo": {
+        "esito": "confermato",
+        "evidenze": [
+          "B02-ID-001"
+        ],
+        "idRientro": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
+        "data": "2026-10-15"
+      }
+    }
+  },
+  "gruppiEvidenze": [
+    {
+      "gruppo": 1,
+      "titolo": "Bene",
+      "requisiti": [
+        "ID"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 2,
+      "titolo": "Targa",
+      "requisiti": [
+        "ID",
+        "RO5"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 3,
+      "titolo": "Controllore",
+      "requisiti": [
+        "RO1"
+      ],
+      "attesa": "su_richiesta"
+    },
+    {
+      "gruppo": 4,
+      "titolo": "HMI",
+      "requisiti": [
+        "RO1",
+        "RO4"
+      ],
+      "attesa": "su_richiesta"
+    },
+    {
+      "gruppo": 5,
+      "titolo": "Interconnessione",
+      "requisiti": [
+        "RO2"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": 6,
+      "titolo": "Integrazione",
+      "requisiti": [
+        "RO3"
+      ],
+      "attesa": "su_richiesta"
+    },
+    {
+      "gruppo": 7,
+      "titolo": "Remoto",
+      "requisiti": [
+        "RU1"
+      ],
+      "attesa": "non_applicabile"
+    },
+    {
+      "gruppo": 8,
+      "titolo": "Monitoraggio",
+      "requisiti": [
+        "RU2"
+      ],
+      "attesa": "non_applicabile"
+    },
+    {
+      "gruppo": 9,
+      "titolo": "Modello digitale",
+      "requisiti": [
+        "RU3"
+      ],
+      "attesa": "non_applicabile"
+    },
+    {
+      "gruppo": 10,
+      "titolo": "Dati in uscita",
+      "requisiti": [
+        "RO2"
+      ],
+      "attesa": "si"
+    },
+    {
+      "gruppo": "DOC",
+      "titolo": "Documenti",
+      "requisiti": [
+        "DOC"
+      ],
+      "attesa": "si"
+    }
+  ]
+}

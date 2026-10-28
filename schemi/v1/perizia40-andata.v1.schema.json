@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "perizia40-andata.v1.schema.json",
+  "title": "Pacchetto di andata Perizia 4.0 — v1",
+  "description": "File perizia40-andata.json generato sul PC dalla pratica e caricato nell'app sul telefono. Porta il censimento dei beni, i gruppi di evidenze attesi, i dati agli atti da verificare e le azioni aperte da chiudere in campo. Contiene solo ciò che serve al sopralluogo (§12.5).",
+  "type": "object",
+  "required": ["formato", "versioneSchema", "demo", "idAndata", "revisione", "creatoIl", "codicePratica", "regime", "cliente", "sopralluogo", "beni", "azioniAperte", "evidenzeEsistenti"],
+  "additionalProperties": false,
+  "properties": {
+    "formato": { "const": "perizia40.andata" },
+    "versioneSchema": { "$ref": "comuni.v1.schema.json#/$defs/versioneSchema" },
+    "demo": { "type": "boolean" },
+    "idAndata": { "$ref": "comuni.v1.schema.json#/$defs/uuid" },
+    "revisione": { "type": "string", "pattern": "^rev[0-9]{3}$" },
+    "creatoIl": { "$ref": "comuni.v1.schema.json#/$defs/dataOra" },
+    "codicePratica": { "$ref": "comuni.v1.schema.json#/$defs/codicePratica" },
+    "regime": { "const": "CRI_4.0" },
+    "cliente": {
+      "type": "object", "required": ["ragioneSociale", "sedeIntervento"], "additionalProperties": false,
+      "properties": {
+        "ragioneSociale": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+        "sedeIntervento": { "$ref": "comuni.v1.schema.json#/$defs/testo" }
+      }
+    },
+    "sopralluogo": {
+      "type": "object", "required": ["id", "dataPrevista", "referenti"], "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "comuni.v1.schema.json#/$defs/idSopralluogo" },
+        "dataPrevista": { "$ref": "comuni.v1.schema.json#/$defs/dataGiorno" },
+        "referenti": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/persona" } },
+        "avvertenze": {
+          "type": "array", "items": { "type": "string" },
+          "description": "Promemoria di campo (sicurezza del sito, prove di rete solo con l'IT autorizzato, niente credenziali in foto…)"
+        }
+      }
+    },
+    "beni": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["codice", "denominazione", "funzione", "componenti", "classificazione", "gruppiEvidenze", "datiDaVerificare"],
+        "additionalProperties": false,
+        "properties": {
+          "codice": { "type": "string", "pattern": "^B[0-9]{2}$" },
+          "denominazione": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+          "funzione": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+          "ubicazione": { "type": "string" },
+          "componenti": {
+            "type": "array",
+            "items": {
+              "type": "object", "required": ["codice", "denominazione", "tipo"], "additionalProperties": false,
+              "properties": {
+                "codice": { "type": "string", "pattern": "^B[0-9]{2}\\.[0-9]{1,2}$" },
+                "denominazione": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+                "tipo": { "enum": ["M", "QM", "ITS", "ACC"] }
+              }
+            }
+          },
+          "classificazione": {
+            "type": "object", "required": ["allegato", "voce", "profilo"], "additionalProperties": false,
+            "properties": {
+              "allegato": { "enum": ["A", "B"] },
+              "gruppo": { "enum": [1, 2, 3] },
+              "voce": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+              "profilo": { "enum": ["completo", "ridotto"] },
+              "ruDichiarati": { "type": "array", "uniqueItems": true, "items": { "enum": ["RU1", "RU2", "RU3"] } }
+            }
+          },
+          "gruppiEvidenze": {
+            "type": "array", "minItems": 11, "maxItems": 11,
+            "items": {
+              "type": "object", "required": ["gruppo", "titolo", "requisiti", "attesa"], "additionalProperties": false,
+              "properties": {
+                "gruppo": { "$ref": "comuni.v1.schema.json#/$defs/gruppoEvidenza" },
+                "titolo": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+                "requisiti": { "type": "array", "minItems": 1, "items": { "$ref": "comuni.v1.schema.json#/$defs/requisito" } },
+                "attesa": { "$ref": "comuni.v1.schema.json#/$defs/attesa" },
+                "cosaCercare": { "type": "string", "description": "Indicazione pratica per il campo" }
+              }
+            }
+          },
+          "datiDaVerificare": {
+            "type": "array",
+            "description": "Dati agli atti da confermare in campo. Il valore è quello dei documenti, non quello vero: va verificato.",
+            "items": {
+              "type": "object", "required": ["campo", "etichetta", "valoreAgliAtti", "statoAgliAtti"], "additionalProperties": false,
+              "properties": {
+                "campo": { "$ref": "comuni.v1.schema.json#/$defs/campoAgliAtti" },
+                "etichetta": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+                "valoreAgliAtti": { "type": ["string", "null"] },
+                "statoAgliAtti": { "$ref": "comuni.v1.schema.json#/$defs/statoDato" },
+                "fonte": { "type": "string", "description": "Rimando leggibile [ev: …] della fonte agli atti" },
+                "comeVerificare": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "azioniAperte": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/azione" } },
+    "evidenzeEsistenti": {
+      "type": "array", "uniqueItems": true,
+      "items": { "$ref": "comuni.v1.schema.json#/$defs/idEvidenza" },
+      "description": "Identificativi già usati nel fascicolo, perché l'app continui la numerazione senza collisioni"
+    }
+  }
+}
