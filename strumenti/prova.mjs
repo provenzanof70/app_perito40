@@ -5,7 +5,9 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { inflateRawSync } from 'node:zlib';
 import { caricaSchemi, caricaCartella, validaCaricata } from './lib/disco.mjs';
+import { scriviZip, leggiZip } from './lib/zip.mjs';
 
 const RADICE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fileCasi = join(RADICE, 'demo', 'casi_errati', 'casi.json');
@@ -32,6 +34,25 @@ function applica(doc, puntatore, m) {
 }
 
 let falliti = 0;
+let prove = 0;
+const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok ? 'ok      ' : 'FALLITO '} ${nome}`); };
+
+// Libreria ZIP: andata e ritorno, nomi UTF-8, archivio danneggiato
+{
+  const enc = new TextEncoder();
+  const voci = [{ nome: 'perizia40-rientro.json', dati: enc.encode('{"demo":true}') }, { nome: 'evidenze/però.png', dati: new Uint8Array(5000).fill(9) }];
+  const zip = scriviZip(voci, '2026-10-15T17:30:00');
+  const letto = leggiZip(zip, inflateRawSync);
+  verifica('ZIP: lettura di ciò che si è scritto', letto.size === 2 && letto.get('evidenze/però.png').length === 5000);
+  const rotto = zip.slice(); rotto[60] ^= 0xff;
+  let errore = '';
+  try { leggiZip(rotto, inflateRawSync); } catch (e) { errore = e.message; }
+  verifica('ZIP: contenuto alterato rilevato dal CRC', /CRC/.test(errore));
+  errore = '';
+  try { leggiZip(zip.slice(0, zip.length - 30), inflateRawSync); } catch (e) { errore = e.message; }
+  verifica('ZIP: archivio troncato rifiutato', errore !== '');
+}
+
 const esitoDemo = validaCaricata(base, registro, { repoPubblico: true });
 if (esitoDemo.errori.length) {
   falliti++;
@@ -73,5 +94,5 @@ for (const caso of casi) {
   } else console.log(`ok       ${caso.nome} → ${caso.atteso.join(', ')}`);
 }
 
-console.log(`\n${casi.length + 1 - falliti} superate, ${falliti} fallite`);
+console.log(`\n${casi.length + 1 + prove - falliti} superate, ${falliti} fallite`);
 process.exit(falliti ? 1 : 0);

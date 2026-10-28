@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Rigenera la pratica DEMO in demo/PRATICA_DEMO_2026_001: media sintetici, pacchetto di andata,
-// pacchetto di rientro finale in due volumi, fascicolo sul PC dopo l'importazione.
+// pacchetto di rientro finale in due volumi ZIP, fascicolo sul PC dopo l'importazione.
 // Tutti i dati sono inventati; IP negli intervalli di documentazione (RFC 5737).
 // Uso: node strumenti/genera_demo.mjs
 
@@ -10,14 +10,15 @@ import { fileURLToPath } from 'node:url';
 import { deflateSync, crc32 } from 'node:zlib';
 import { sha256 } from './lib/disco.mjs';
 import { GRUPPI } from './lib/validatore.mjs';
+import { scriviZip } from './lib/zip.mjs';
 
 const RADICE = join(dirname(fileURLToPath(import.meta.url)), '..', 'demo', 'PRATICA_DEMO_2026_001');
 const PRATICA = 'DEMO-2026-001';
 const VISITA = '2026-10-15';
 const ID_ANDATA = '5f0c2a1e-1d2b-4c3a-9e00-00000000a001';
 const ID_RIENTRO = '7b1e9c40-2f3a-4d5b-8c00-00000000b001';
-const VERSIONE = '1.0.0';
-const ora = (data, hhmm) => `${data}T${hhmm}:00+02:00`;
+const VERSIONE = '1.1.0';
+const ora = (data, hhmm, ss = '00') => `${data}T${hhmm}:${ss}+02:00`;
 
 // ---------------------------------------------------------------------------
 // Media sintetici
@@ -160,7 +161,7 @@ const CAMPO = [
     stato: 'annullata', annullamento: { motivo: 'riflesso sulla targa: matricola illeggibile', data: ora(VISITA, '10:09'), sostituitaDa: 'B01-ID-003' } },
   { id: 'B01-ID-003', gruppo: 2, requisiti: ['ID', 'RO5'], t: '10:09', et: 'TARGA CE',
     descrizione: 'Targa CE di B01 ripresa senza riflessi',
-    annotazioni: [{ tipo: 'riquadro', x: 0.2, y: 0.2, w: 0.6, h: 0.5, testo: 'targa: costruttore, modello, matricola, anno, marcatura CE' }],
+    annotazioni: [{ tipo: 'riquadro', colore: '#FF453A', x: 0.2, y: 0.2, w: 0.6, h: 0.5, testo: 'targa: costruttore, modello, matricola, anno, marcatura CE' }],
     trascrizioni: [{ testo: 'COSTRUTTORE DEMO SPA - CDX-500 - MATR. DEMO-0001 - ANNO 2025 - CE', origine: 'manuale_campo', confrontataConOriginale: true, confrontataIl: ora(VISITA, '10:10') }] },
   { id: 'B01-RO1-001', gruppo: 3, requisiti: ['RO1'], t: '10:20', et: 'CN - PAGINA SISTEMA',
     descrizione: 'Pagina di sistema del controllo numerico di B01: marca, modello, versione firmware',
@@ -172,7 +173,8 @@ const CAMPO = [
     annotazioni: [
       { tipo: 'riquadro', x: 0.05, y: 0.1, w: 0.4, h: 0.12, testo: 'programma P-17' },
       { tipo: 'riquadro', x: 0.55, y: 0.1, w: 0.4, h: 0.12, testo: 'stato: in esecuzione' },
-      { tipo: 'freccia', x: 0.5, y: 0.6, x2: 0.3, y2: 0.25, testo: 'ordine ODP-DEMO-0042' }] },
+      { tipo: 'freccia', colore: '#FFD60A', x: 0.5, y: 0.6, x2: 0.3, y2: 0.25 },
+      { tipo: 'testo', colore: '#FFD60A', x: 0.52, y: 0.62, testo: 'ordine ODP-DEMO-0042' }] },
   { id: 'B01-RO2-002', gruppo: 5, requisiti: ['RO2'], t: '10:45', et: 'HMI - PAGINA RETE',
     descrizione: "Pagina rete dell'HMI di B01: IP letto 192.0.2.21, client OPC UA connesso a MES-DEMO",
     annotazioni: [{ tipo: 'riquadro', x: 0.1, y: 0.3, w: 0.7, h: 0.2, testo: 'IP 192.0.2.21 - client OPC UA: connesso a MES-DEMO' }],
@@ -184,7 +186,7 @@ const CAMPO = [
       { tipo: 'riquadro', x: 0.05, y: 0.2, w: 0.9, h: 0.15, testo: 'ordine ODP-DEMO-0042, ricetta P-17, destinazione B01, stato inviato' },
       { tipo: 'riquadro', x: 0.05, y: 0.6, w: 0.9, h: 0.15, testo: 'storico: primo ordine a B01 il 03/06/2025' }] },
   { id: 'B01-RO2-004', tipo: 'vocale', gruppo: 5, requisiti: ['RO2'], t: '10:52', durata: 2,
-    descrizione: 'Nota vocale del perito sulla prova di scambio MES-DEMO verso B01' },
+    descrizione: 'Prova di invio ordine da MES-DEMO verso B01', nota: 'operatore al CN, richiamo del programma P-17' },
   { id: 'B01-RO2-005', tipo: 'video', gruppo: 5, requisiti: ['RO2'], t: '10:55', durata: 20,
     descrizione: "Video: invio dell'ordine dal MES e comparsa del programma sull'HMI di B01 (nella DEMO il file e un segnaposto di testo)" },
   { id: 'B01-RU1-001', gruppo: 7, requisiti: ['RU1'], t: '11:05', et: 'HMI - SERVIZIO REMOTO',
@@ -194,14 +196,15 @@ const CAMPO = [
     annotazioni: [{ tipo: 'evidenziazione', x: 0.1, y: 0.35, w: 0.8, h: 0.05, testo: 'soglia di allarme vibrazioni' }] },
   { id: 'B01.1-ID-001', beni: ['B01.1'], gruppo: 1, requisiti: ['ID'], t: '11:12', et: 'CAMBIO PALLET B01.1',
     descrizione: 'Cambio pallet automatico B01.1 collegato al centro di lavoro B01' },
-  { id: 'B01.2-RO5-001', beni: ['B01.2'], gruppo: 2, requisiti: ['RO5', 'ID'], t: '11:15', et: 'TARGA ASPIRATORE B01.2',
+  { id: 'B01.2-RO5-001', beni: ['B01.2'], gruppo: 2, requisiti: ['RO5', 'ID'], t: '11:15', et: 'TARGA ASPIRATORE B01.2', senzaMetadati: true,
+    nota: "file senza metadati di scatto: resta solo l'ora di acquisizione nell'app",
     descrizione: 'Targa del sistema di aspirazione nebbie B01.2: costruttore diverso da quello di B01, marcatura CE propria',
     trascrizioni: [{ testo: 'ASPIRAZIONE DEMO SRL - AN-200 - MATR. DEMO-A-77 - CE', origine: 'manuale_campo', confrontataConOriginale: true, confrontataIl: ora(VISITA, '11:16') }] },
   { id: 'B02-ID-001', gruppo: 1, requisiti: ['ID'], t: '11:25', et: 'VISTA D INSIEME',
     descrizione: "Vista d'insieme della macchina di misura B02 in sala metrologica, con PC e software di misura" },
   { id: 'B02-ID-002', gruppo: 2, requisiti: ['ID', 'RO5'], t: '11:27', et: 'TARGA - MATR. DEMO-0020',
     descrizione: 'Targa di B02: matricola letta DEMO-0020',
-    annotazioni: [{ tipo: 'riquadro', x: 0.3, y: 0.4, w: 0.4, h: 0.1, testo: 'matricola DEMO-0020' }],
+    annotazioni: [{ tipo: 'cerchio', colore: '#FF453A', x: 0.3, y: 0.38, w: 0.4, h: 0.14 }, { tipo: 'testo', colore: '#FF453A', x: 0.3, y: 0.56, testo: 'matricola DEMO-0020' }],
     trascrizioni: [{ testo: 'METROLOGIA DEMO SRL - MM-300 - MATR. DEMO-0020 - ANNO 2025 - CE', origine: 'manuale_campo', confrontataConOriginale: true, confrontataIl: ora(VISITA, '11:28') }] },
   { id: 'B02-RO1-001', gruppo: 3, requisiti: ['RO1'], t: '11:29', et: 'CONTROLLORE UC-30',
     descrizione: 'Targhetta del controllore di B02',
@@ -218,6 +221,12 @@ const CAMPO = [
   { id: 'B02-RO2-003', gruppo: 5, requisiti: ['RO2'], t: '11:36', et: 'PC B02 - RETE',
     descrizione: 'Impostazioni di rete del PC di B02: IP 192.0.2.35, unita di rete mappata su \\\\SRV-DEMO\\qualita',
     trascrizioni: [{ testo: 'IPv4 192.0.2.35 - Q: = \\\\SRV-DEMO\\qualita', origine: 'manuale_campo', confrontataConOriginale: true, confrontataIl: ora(VISITA, '11:37') }] },
+  { id: 'B01-DOC-002', gruppo: 'DOC', requisiti: ['DOC'], t: '11:40', et: 'VERBALE INSTALLAZIONE',
+    descrizione: 'Verbale di installazione di B01 mostrato dal responsabile di produzione: data 14/04/2025, firme di fornitore e cliente',
+    annotazioni: [{ tipo: 'riquadro', colore: '#FF453A', x: 0.55, y: 0.1, w: 0.4, h: 0.1, testo: 'data 14/04/2025' }] },
+  { id: 'B03-ID-001', gruppo: 1, requisiti: ['ID'], t: '11:50', et: 'ROBOT B03',
+    descrizione: 'Robot di carico e scarico accanto al cambio pallet di B01, targa con matricola DEMO-R-15',
+    annotazioni: [{ tipo: 'freccia', colore: '#FF453A', x: 0.7, y: 0.8, x2: 0.55, y2: 0.55, testo: 'targa del robot' }] },
 ];
 
 // ---------------------------------------------------------------------------
@@ -260,12 +269,20 @@ for (const e of CAMPO) {
   media.set(e.id, { nome, dati, mime, volume, tipo });
 }
 
+// Foto e video: data letta dai metadati; vocali: orologio del telefono durante la registrazione nell'app
+function datiScatto(e, tipo) {
+  if (tipo === 'documento') return {};
+  if (e.senzaMetadati) return { origineDataScatto: 'assente' };
+  return { origineDataScatto: tipo === 'vocale' ? 'registrazione_app' : 'metadati', dataScatto: ora(VISITA, e.t) };
+}
+
 const evidenzaCampo = (e, file) => {
   const m = media.get(e.id);
   return pulisci({
     id: e.id, beni: e.beni || [e.id.split('-')[0]], gruppo: e.gruppo, requisiti: e.requisiti, tipo: m.tipo, file, mime: m.mime,
-    sha256: sha256(m.dati), provenienza: 'perito', idSopralluogo: 'S01', acquisitaIl: ora(VISITA, e.t),
-    dataMostrataAVideo: e.dataMostrataAVideo, durataSecondi: e.durata, descrizione: e.descrizione,
+    sha256: sha256(m.dati), provenienza: 'perito', idSopralluogo: 'S01', acquisitaIl: ora(VISITA, e.t, '20'),
+    ...datiScatto(e, m.tipo),
+    dataMostrataAVideo: e.dataMostrataAVideo, durataSecondi: e.durata, descrizione: e.descrizione, nota: e.nota,
     annotazioni: e.annotazioni, trascrizioni: e.trascrizioni, contenutoLetto: e.contenutoLetto,
     stato: e.stato || 'valida', annullamento: e.annullamento,
   });
@@ -385,16 +402,31 @@ const COSA_CERCARE = {
 };
 const valore = (sc, campo) => campo === 'esitoGateC' ? sc.datiAgliAtti.esitoGateC : sc.datiAgliAtti[campo.split('.')[0]][campo.split('.')[1]];
 
+// Timeline agli atti prima del sopralluogo (va nell'andata)
+const riga = (id, evento, beni, valore_, precisione, tipoData, origine, stato, prove, coerenza, descrizione, nota) =>
+  pulisci({ id, evento, descrizione, beni, data: { valore: valore_, precisione }, tipoData, origine, stato, prove, coerenza, nota });
+const TIMELINE_ATTI = [
+  riga('T001', 'ordine', ['B01', 'B02'], '2025-01', 'mese', 'documento', 'dichiarazione_impresa', 'dichiarata', [], 'S', 'Ordine al fornitore', "conferma d'ordine non ancora ricevuta"),
+  riga('T002', 'dichiarazione_conformita', ['B02'], '2025-02-28', 'giorno', 'documento', 'documento_terzo', 'documentata', [DDC2('data 28/02/2025')], 'S', 'DdC di B02'),
+  riga('T003', 'dichiarazione_conformita', ['B01'], '2025-03-10', 'giorno', 'documento', 'documento_terzo', 'documentata', [DDC1('data 10/03/2025')], 'S', 'DdC di B01'),
+  riga('T004', 'fattura', ['B01', 'B02'], '2025-04-02', 'giorno', 'documento', 'documento_fiscale', 'documentata', [FATTURA('data 02/04/2025')], 'S', 'Fattura FT-DEMO-0042'),
+  riga('T005', 'installazione', ['B01'], '2025-04', 'mese', 'documento', 'dichiarazione_impresa', 'dichiarata', [], 'S', 'Installazione di B01', 'verbale di installazione da richiedere'),
+  riga('T006', 'installazione', ['B02'], '2025-04-10/2025-04-20', 'periodo', 'documento', 'dichiarazione_impresa', 'dichiarata', [], 'S', 'Installazione di B02'),
+  riga('T007', 'entrata_in_funzione', ['B01'], '2025-05-05', 'giorno', 'documento', 'dichiarazione_impresa', 'dichiarata', [], 'S', 'Entrata in funzione di B01'),
+  riga('T008', 'interconnessione_dichiarata', ['B01', 'B02'], '2025-05-20', 'giorno', 'documento', 'dichiarazione_impresa', 'dichiarata', [RETE('interconnessione dal 20/05/2025')], 'S',
+    'Interconnessione dichiarata dalla referente IT'),
+];
+
 // Pacchetto di andata
-const azione = (id, priorita, beni, requisito, destinatario, cosaServe, percheServe, esempioAccettabile, apertaIl) =>
-  ({ id, priorita, beni, cosaServe, percheServe, requisito, esempioAccettabile, destinatario, stato: 'aperta', apertaIl });
+const azione = (id, priorita, beni, requisito, destinatario, cosaServe, percheServe, esempioAccettabile, apertaIl, categoria) =>
+  pulisci({ id, priorita, beni, cosaServe, percheServe, requisito, esempioAccettabile, destinatario, categoria, stato: 'aperta', apertaIl });
 const AZIONI_INIZIALI = [
   azione('A001', 'indispensabile', ['B01'], 'RO2', 'cliente', 'Esportazione dello storico ordini di MES-DEMO verso B01 dal 20/05/2025',
-    "Datare l'inizio dello scambio dichiarato al 20/05/2025", 'Export CSV del MES con numero ordine, data, ora e identificativo macchina B01', '2026-10-01'),
+    "Datare l'inizio dello scambio dichiarato al 20/05/2025", 'Export CSV del MES con numero ordine, data, ora e identificativo macchina B01', '2026-10-01', 'documento'),
   azione('A002', 'raccomandata', ['B02'], 'RO5', 'fornitore', "DdC di B02 riferita all'esemplare (matricola)",
-    'La DdC ricevuta e riferita al solo modello MM-300', 'DdC o attestazione del costruttore con modello e matricola di B02', '2026-10-01'),
+    'La DdC ricevuta e riferita al solo modello MM-300', 'DdC o attestazione del costruttore con modello e matricola di B02', '2026-10-01', 'documento'),
   azione('A003', 'indispensabile', ['B01'], 'RO2', 'perito', 'Riscontro in campo dello scambio MES-DEMO verso B01',
-    'La dichiarazione del cliente da sola non dimostra lo scambio', 'Stesso ordine visibile sul MES e sull\'HMI di B01, con foto di entrambi i lati', '2026-10-01'),
+    'La dichiarazione del cliente da sola non dimostra lo scambio', 'Stesso ordine visibile sul MES e sull\'HMI di B01, con foto di entrambi i lati', '2026-10-01', 'evidenza'),
 ];
 const andata = {
   formato: 'perizia40.andata', versioneSchema: VERSIONE, demo: true, idAndata: ID_ANDATA, revisione: 'rev001', creatoIl: '2026-10-10T18:00:00+02:00',
@@ -417,6 +449,7 @@ const andata = {
       });
     }),
   })),
+  timeline: TIMELINE_ATTI,
   azioniAperte: AZIONI_INIZIALI,
   evidenzeEsistenti: DOCUMENTI.map(d => d.id),
 };
@@ -472,7 +505,7 @@ const RISCONTRI = [
 const DICHIARAZIONE_CAMPO = {
   id: 'DT-002', beni: ['B01'], persona: 'Paolo Campione', ruolo: 'Tecnico di automazione', organizzazione: 'Automazioni Demo S.r.l.', forma: 'verbale', data: VISITA,
   contenuto: 'La teleassistenza del costruttore su B01 e attiva dal collaudo e viene usata per gli interventi sul CN.', requisito: 'RU1',
-  riscontroOggettivo: { esito: 'N', evidenze: [], nota: 'nessun registro delle sessioni acquisito; vedi azione A005' },
+  riscontroOggettivo: { esito: 'N', evidenze: [], nota: "riscontro da acquisire: registro delle sessioni richiesto con l'azione A005" },
 };
 const DATE_CAMPO = [
   {
@@ -486,14 +519,38 @@ const DATE_CAMPO = [
     data: { valore: VISITA, precisione: 'giorno' }, tipoData: 'verifica_perito', origine: 'riscontro_perito', stato: 'documentata',
     prove: [ev('B01-RO2-003', media.get('B01-RO2-003').nome, 'riquadro 1'), ev('B02-RO2-001', media.get('B02-RO2-001').nome, 'riquadro 1')], coerenza: 'S',
   },
+  {
+    id: 'T003', evento: 'installazione', descrizione: 'Verbale di installazione di B01 mostrato in visita', beni: ['B01'],
+    data: { valore: '2025-04-14', precisione: 'giorno' }, tipoData: 'documento', origine: 'verbale', stato: 'documentata',
+    prove: [ev('B01-DOC-002', media.get('B01-DOC-002').nome, 'riquadro 1', 'data 14/04/2025')], coerenza: 'S',
+    rifTimeline: 'T005', esitoRif: 'precisata',
+  },
 ];
-const NUOVE_AZIONI = [
-  azione('A004', 'indispensabile', ['B02'], 'ID', 'fornitore', 'Chiarimento sulla matricola di B02: DEMO-0020 in targa, DEMO-0002 in fattura',
-    'Incoerenza tra bene periziato e bene fatturato', 'Attestazione del costruttore sulla matricola e, se necessario, nota di rettifica della fattura', VISITA),
-  azione('A005', 'utile', ['B01'], 'RU1', 'integratore', 'Registro delle sessioni di teleassistenza su B01',
-    "La dichiarazione verbale dell'integratore non e riscontrata", 'Export del registro sessioni con data, ora e identificativo macchina, senza credenziali', VISITA),
-  azione('A006', 'indispensabile', ['B01'], 'RO3', 'cliente', 'Evidenze del flusso automatizzato tra B01, cambio pallet B01.1 e logistica',
-    'Gruppo 6 (integrazione) senza materiale dopo il sopralluogo', 'Log o schermata del sistema che assegna i pallet a B01, con data e identificativo', VISITA),
+// In campo le nuove azioni sono bozze; priorità, destinatario ed esempio si completano sul PC
+const bozza = (id, categoria, beni, requisito, cosaServe, nota, generataDa) => pulisci({ id, categoria, beni, requisito, cosaServe, nota, generataDa, stato: 'aperta', apertaIl: VISITA });
+const BOZZE = [
+  bozza('A004', 'chiarimento', ['B02'], 'ID', 'Chiarimento sulla matricola di B02: DEMO-0020 in targa, DEMO-0002 in fattura', 'targa e report di misura concordano su DEMO-0020'),
+  bozza('A005', 'documento', ['B01'], 'RU1', 'Registro delle sessioni di teleassistenza su B01', 'riscontro oggettivo da acquisire per DT-002', { tipo: 'dichiarazione', id: 'DT-002' }),
+  bozza('A006', 'evidenza', ['B01'], 'RO3', 'Evidenze del flusso automatizzato tra B01, cambio pallet B01.1 e logistica', 'vedi nota di campo NC-001', { tipo: 'nota', id: 'NC-001' }),
+  bozza('A007', 'chiarimento', ['B03'], 'ID', "Chiarire se il robot B03 fa parte dell'investimento", "non presente nell'elenco dei beni del cliente"),
+];
+const COMPLETAMENTO = {
+  A004: ['indispensabile', 'fornitore', 'Incoerenza tra bene periziato e bene fatturato', 'Attestazione del costruttore sulla matricola e, se necessario, nota di rettifica della fattura'],
+  A005: ['utile', 'integratore', "La dichiarazione verbale dell'integratore non e riscontrata", 'Export del registro sessioni con data, ora e identificativo macchina, senza credenziali'],
+  A006: ['indispensabile', 'cliente', 'Gruppo 6 (integrazione) senza materiale dopo il sopralluogo', 'Log o schermata del sistema che assegna i pallet a B01, con data e identificativo'],
+  A007: ['raccomandata', 'cliente', 'Bene trovato in campo e non censito nella pratica', "Fattura o ordine del robot, oppure dichiarazione che non fa parte dell'investimento"],
+};
+const NUOVE_AZIONI = BOZZE.map(b => {
+  const [priorita, destinatario, percheServe, esempioAccettabile] = COMPLETAMENTO[b.id];
+  return pulisci({ ...b, priorita, destinatario, percheServe, esempioAccettabile });
+});
+const BENI_NUOVI = [{
+  codice: 'B03', denominazione: 'Robot di carico e scarico', funzione: 'Carico e scarico dei pezzi sul cambio pallet di B01', ubicazione: 'Reparto lavorazioni, campata 2',
+  matricolaTarga: { valore: 'DEMO-R-15', stato: 'letta', evidenza: 'B03-ID-001' }, componenti: [],
+  nota: "Non presente nell'elenco dei beni del cliente: perimetro da chiarire (azione A007)",
+}];
+const NOTE_CAMPO = [
+  { id: 'NC-001', bene: 'B01', requisito: 'RO3', testo: 'Il referente indica il collegamento al magazzino utensili; ancora da fotografare.', ora: ora(VISITA, '11:42'), base: 'promemoria' },
 ];
 const AGGIORNAMENTI = [
   { idAzione: 'A001', esitoCampo: 'parziale', evidenze: ['B01-RO2-003'], nota: "Storico visto a video con primo ordine al 03/06/2025; manca l'export richiesto" },
@@ -505,30 +562,28 @@ const AGGIORNAMENTI = [
 const evidenzeRientro = CAMPO.map(e => evidenzaCampo(e, `evidenze/${media.get(e.id).nome}`));
 const manifestoRientro = CAMPO.map(e => {
   const m = media.get(e.id);
-  return { idEvidenza: e.id, file: `evidenze/${m.nome}`, sha256: sha256(m.dati), byte: m.dati.length, dataAcquisizione: ora(VISITA, e.t), provenienza: 'perito', hash: 'C', marcaTemporale: { tipo: 'n/a' }, volume: m.volume };
+  return { idEvidenza: e.id, file: `evidenze/${m.nome}`, sha256: sha256(m.dati), byte: m.dati.length, dataAcquisizione: ora(VISITA, e.t, '20'), provenienza: 'perito', hash: 'C', marcaTemporale: { tipo: 'n/a' }, volume: m.volume };
 });
 const pacchettiPratica = [{ tipo: 'andata', id: ID_ANDATA, file: 'andata/perizia40-andata.json', sha256: fAndata.sha256, data: andata.creatoIl }];
 for (const n of [1, 2]) {
-  const cartella = `rientro/${PRATICA}_S01_finale_vol${n}`;
+  const zip = `rientro/${PRATICA}_rientro_FIN_20261015-1730_v${n}di2.zip`;
   const rientro = {
     formato: 'perizia40.rientro', versioneSchema: VERSIONE, demo: true, idRientro: ID_RIENTRO, tipoPacchetto: 'finale', volume: { numero: n, totale: 2 },
     andata: { idAndata: ID_ANDATA, revisione: 'rev001', sha256: fAndata.sha256 }, codicePratica: PRATICA,
     app: { versione: '0.0.0-demo', piattaforma: 'iOS (DEMO)', installata: true }, creatoIl: ora(VISITA, '17:30'), fusoOrario: 'Europe/Rome',
     sopralluogo: { id: 'S01', data: VISITA, inizio: '09:50', fine: '12:10', presenti: PERSONE },
-    evidenze: evidenzeRientro, verificheDati: VERIFICHE, riscontriDiretti: RISCONTRI, dichiarazioniTerzi: [DICHIARAZIONE_CAMPO],
-    dateRilevate: DATE_CAMPO, nuoveAzioni: NUOVE_AZIONI, aggiornamentiAzioni: AGGIORNAMENTI, manifesto: manifestoRientro,
+    beniNuovi: BENI_NUOVI, evidenze: evidenzeRientro, verificheDati: VERIFICHE, riscontriDiretti: RISCONTRI, dichiarazioniTerzi: [DICHIARAZIONE_CAMPO],
+    noteCampo: NOTE_CAMPO, dateRilevate: DATE_CAMPO, nuoveAzioni: BOZZE, aggiornamentiAzioni: AGGIORNAMENTI, manifesto: manifestoRientro,
   };
-  const righeHash = [];
+  const voci = [{ nome: 'perizia40-rientro.json', dati: Buffer.from(json(rientro), 'utf8') }];
   for (const e of CAMPO) {
     const m = media.get(e.id);
-    if (m.volume !== n) continue;
-    const f = scrivi(`${cartella}/evidenze/${m.nome}`, m.dati);
-    righeHash.push(`${f.sha256}  evidenze/${m.nome}`);
+    if (m.volume === n) voci.push({ nome: `evidenze/${m.nome}`, dati: m.dati });
   }
-  const fr = scrivi(`${cartella}/perizia40-rientro.json`, json(rientro));
-  righeHash.unshift(`${fr.sha256}  perizia40-rientro.json`);
-  scrivi(`${cartella}/hash.sha256`, righeHash.join('\n') + '\n');
-  pacchettiPratica.push({ tipo: 'rientro_finale', id: ID_RIENTRO, volume: n, file: `${cartella}/perizia40-rientro.json`, sha256: fr.sha256, data: rientro.creatoIl });
+  const hash = voci.map(v => `${sha256(v.dati)}  ${v.nome}`).join('\n') + '\n';
+  voci.splice(1, 0, { nome: 'hash.sha256', dati: Buffer.from(hash, 'utf8') });
+  const f = scrivi(zip, Buffer.from(scriviZip(voci, '2026-10-15T17:30:00')));
+  pacchettiPratica.push({ tipo: 'rientro_finale', id: ID_RIENTRO, volume: n, file: zip, sha256: f.sha256, data: rientro.creatoIl });
 }
 
 // Importazione nel fascicolo: copia dei media, esiti nelle schede, registri, timeline rinumerata
@@ -540,28 +595,23 @@ for (const e of CAMPO) {
   if (e.id === 'B01-RO2-004') x.trascrizioni = [{ testo: "Prova di invio: ordine ODP-DEMO-0042 partito dal MES alle 10:41, programma P-17 comparso sull'HMI di B01 alle 10:42.", origine: 'claude_pc', confrontataConOriginale: true, confrontataIl: '2026-10-16T09:30:00+02:00' }];
   if (e.id === 'B01-RO2-005') x.trascrizioni = [{ testo: "Audio del video: 'ordine inviato... eccolo sul pannello'.", origine: 'claude_pc', confrontataConOriginale: false, nota: 'da riascoltare: nella DEMO il video e un segnaposto' }];
   evidenzePratica.push(x);
-  manifestoPratica.push({ idEvidenza: e.id, file, sha256: sha256(m.dati), byte: m.dati.length, dataAcquisizione: ora(VISITA, e.t), provenienza: 'perito', hash: 'C', marcaTemporale: { tipo: 'n/a' } });
+  manifestoPratica.push({ idEvidenza: e.id, file, sha256: sha256(m.dati), byte: m.dati.length, dataAcquisizione: ora(VISITA, e.t, '20'), provenienza: 'perito', hash: 'C', marcaTemporale: { tipo: 'n/a' } });
 }
 for (const v of VERIFICHE) {
   valore(schede[v.bene], v.campo).verificaCampo = pulisci({ esito: v.esito, valoreRilevato: v.valoreRilevato, evidenze: v.evidenze, idRientro: ID_RIENTRO, data: v.data, nota: v.nota });
 }
 
-const riga = (id, evento, beni, valore_, precisione, tipoData, origine, stato, prove, coerenza, descrizione, nota) =>
-  pulisci({ id, evento, descrizione, beni, data: { valore: valore_, precisione }, tipoData, origine, stato, prove, coerenza, nota });
+
 const TIMELINE = [
-  riga('T001', 'ordine', ['B01', 'B02'], '2025-01', 'mese', 'documento', 'dichiarazione_impresa', 'dichiarata', [], 'S', 'Ordine al fornitore', 'conferma d\'ordine non ancora ricevuta'),
-  riga('T002', 'dichiarazione_conformita', ['B02'], '2025-02-28', 'giorno', 'documento', 'documento_terzo', 'documentata', [DDC2('data 28/02/2025')], 'S', 'DdC di B02'),
-  riga('T003', 'dichiarazione_conformita', ['B01'], '2025-03-10', 'giorno', 'documento', 'documento_terzo', 'documentata', [DDC1('data 10/03/2025')], 'S', 'DdC di B01'),
-  riga('T004', 'fattura', ['B01', 'B02'], '2025-04-02', 'giorno', 'documento', 'documento_fiscale', 'documentata', [FATTURA('data 02/04/2025')], 'S', 'Fattura FT-DEMO-0042'),
-  riga('T005', 'installazione', ['B01'], '2025-04', 'mese', 'documento', 'dichiarazione_impresa', 'dichiarata', [], 'S', 'Installazione di B01', 'verbale di installazione da richiedere'),
-  riga('T006', 'installazione', ['B02'], '2025-04-10/2025-04-20', 'periodo', 'documento', 'dichiarazione_impresa', 'dichiarata', [], 'S', 'Installazione di B02'),
-  riga('T007', 'entrata_in_funzione', ['B01'], '2025-05-05', 'giorno', 'documento', 'dichiarazione_impresa', 'dichiarata', [], 'S', 'Entrata in funzione di B01'),
-  riga('T008', 'interconnessione_dichiarata', ['B01', 'B02'], '2025-05-20', 'giorno', 'documento', 'dichiarazione_impresa', 'dichiarata', [RETE('interconnessione dal 20/05/2025')], 'N',
-    "Interconnessione dichiarata dalla referente IT", 'per B01 la prima prova datata (T009) e del 03/06/2025: scarto di 14 giorni; per B02 nessuna prova datata anteriore alla visita'),
+  ...TIMELINE_ATTI.map(r => r.id !== 'T005' ? r : {
+    ...r, data: { valore: '2025-04-14', precisione: 'giorno' }, origine: 'verbale', stato: 'documentata',
+    prove: [ev('B01-DOC-002', media.get('B01-DOC-002').nome, 'riquadro 1', 'data 14/04/2025')], nota: 'precisata in campo (S01) con il verbale di installazione',
+  }).map(r => r.id !== 'T008' ? r : {
+    ...r, coerenza: 'N', nota: 'per B01 la prima prova datata (T009) e del 03/06/2025: scarto di 14 giorni; per B02 nessuna prova datata anteriore alla visita',
+  }),
   { ...DATE_CAMPO[0], id: 'T009' },
-  { ...DATE_CAMPO[1], id: 'T010', prove: [ev('B01-RO2-003', media.get('B01-RO2-003').nome, 'riquadro 1'), ev('B02-RO2-001', media.get('B02-RO2-001').nome, 'riquadro 1')] },
+  { ...DATE_CAMPO[1], id: 'T010' },
 ];
-TIMELINE[8].prove = [ev('B01-RO2-003', media.get('B01-RO2-003').nome, 'riquadro 2', 'storico: primo ordine a B01 il 03/06/2025')];
 
 const azioniPratica = [
   ...AZIONI_INIZIALI.filter(a => a.id !== 'A003'),
@@ -574,7 +624,7 @@ const pratica = {
   cliente: CLIENTE, perito: { nome: 'Perito DEMO' }, persone: PERSONE,
   beni: Object.values(schede).map(sc => ({ codice: sc.codice, denominazione: sc.denominazione, scheda: `beni/${sc.codice}.json` })),
   sopralluoghi: [{ id: 'S01', data: VISITA, stato: 'eseguito', presenti: ['P01', 'P02', 'P03'] }],
-  evidenze: evidenzePratica, timeline: TIMELINE, azioni: azioniPratica, riscontriDiretti: RISCONTRI,
+  beniNuovi: BENI_NUOVI, evidenze: evidenzePratica, timeline: TIMELINE, azioni: azioniPratica, riscontriDiretti: RISCONTRI,
   dichiarazioniTerzi: [
     {
       id: 'DT-001', beni: ['B01', 'B02'], persona: 'Laura Fittizia', ruolo: 'Referente IT', organizzazione: CLIENTE.ragioneSociale, forma: 'scritta', data: '2026-09-28',
@@ -586,7 +636,7 @@ const pratica = {
     },
     DICHIARAZIONE_CAMPO,
   ],
-  manifesto: manifestoPratica, pacchetti: pacchettiPratica,
+  noteCampo: NOTE_CAMPO, manifesto: manifestoPratica, pacchetti: pacchettiPratica,
 };
 
 for (const sc of Object.values(schede)) scrivi(`beni/${sc.codice}.json`, json(sc));

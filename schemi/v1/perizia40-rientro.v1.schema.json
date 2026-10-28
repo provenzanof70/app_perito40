@@ -4,7 +4,7 @@
   "title": "Pacchetto di rientro Perizia 4.0 — v1",
   "description": "File perizia40-rientro.json alla radice di ogni volume del pacchetto esportato dall'app. Ogni volume ripete lo stato completo (evidenze, verifiche, registri) e contiene solo i file indicati nel manifesto con il proprio numero di volume. Accanto c'è hash.sha256 con le impronte di tutti i file del volume.",
   "type": "object",
-  "required": ["formato", "versioneSchema", "demo", "idRientro", "tipoPacchetto", "volume", "andata", "codicePratica", "app", "creatoIl", "fusoOrario", "sopralluogo", "evidenze", "verificheDati", "riscontriDiretti", "dichiarazioniTerzi", "dateRilevate", "nuoveAzioni", "aggiornamentiAzioni", "manifesto"],
+  "required": ["formato", "versioneSchema", "demo", "idRientro", "tipoPacchetto", "volume", "andata", "codicePratica", "app", "creatoIl", "fusoOrario", "sopralluogo", "beniNuovi", "evidenze", "verificheDati", "riscontriDiretti", "dichiarazioniTerzi", "noteCampo", "dateRilevate", "nuoveAzioni", "aggiornamentiAzioni", "manifesto"],
   "additionalProperties": false,
   "properties": {
     "formato": { "const": "perizia40.rientro" },
@@ -53,6 +53,11 @@
         "presenti": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/persona" } }
       }
     },
+    "beniNuovi": {
+      "type": "array",
+      "description": "Beni censiti in campo e assenti dall'andata (v1.1)",
+      "items": { "$ref": "comuni.v1.schema.json#/$defs/beneNuovo" }
+    },
     "evidenze": {
       "type": "array",
       "description": "Tutte le evidenze acquisite nel sopralluogo, comprese quelle annullate (mai cancellate)",
@@ -93,15 +98,20 @@
     },
     "riscontriDiretti": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/riscontroDiretto" } },
     "dichiarazioniTerzi": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/dichiarazioneTerzi" } },
+    "noteCampo": {
+      "type": "array",
+      "description": "Note del perito per requisito: promemoria, non base probatoria (v1.1)",
+      "items": { "$ref": "comuni.v1.schema.json#/$defs/notaCampo" }
+    },
     "dateRilevate": {
       "type": "array",
-      "description": "Date lette in campo (targhe, verbali, schermate). Il PC le rinumera all'importazione nella timeline.",
+      "description": "Date lette in campo (targhe, verbali, schermate). Con rifTimeline verificano una data agli atti dell'andata. Il PC le rinumera all'importazione nella timeline.",
       "items": { "$ref": "comuni.v1.schema.json#/$defs/rigaTimeline" }
     },
     "nuoveAzioni": {
       "type": "array",
-      "description": "Lacune emerse in campo, già trasformate in azioni",
-      "items": { "$ref": "comuni.v1.schema.json#/$defs/azione" }
+      "description": "Lacune emerse in campo, già trasformate in bozze di azione da completare sul PC",
+      "items": { "$ref": "comuni.v1.schema.json#/$defs/bozzaAzione" }
     },
     "aggiornamentiAzioni": {
       "type": "array",
@@ -116,8 +126,14 @@
           "riscontro": { "$ref": "comuni.v1.schema.json#/$defs/idRiscontro" },
           "nota": { "type": "string" }
         },
-        "if": { "properties": { "esitoCampo": { "const": "proposta_chiusura" } } },
-        "then": { "required": ["motivoProposto"] }
+        "allOf": [
+          { "if": { "properties": { "esitoCampo": { "const": "proposta_chiusura" } } }, "then": { "required": ["motivoProposto"] } },
+          {
+            "if": { "required": ["motivoProposto"], "properties": { "motivoProposto": { "const": "evidenza_acquisita" } } },
+            "then": { "required": ["evidenze"], "properties": { "evidenze": { "minItems": 1 } } }
+          },
+          { "if": { "required": ["motivoProposto"], "properties": { "motivoProposto": { "const": "riscontro_diretto" } } }, "then": { "required": ["riscontro"] } }
+        ]
       }
     },
     "manifesto": {

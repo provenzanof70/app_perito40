@@ -1,6 +1,6 @@
 {
   "formato": "perizia40.pratica",
-  "versioneSchema": "1.0.0",
+  "versioneSchema": "1.1.0",
   "demo": true,
   "codicePratica": "DEMO-2026-001",
   "regime": "CRI_4.0",
@@ -55,6 +55,21 @@
         "P02",
         "P03"
       ]
+    }
+  ],
+  "beniNuovi": [
+    {
+      "codice": "B03",
+      "denominazione": "Robot di carico e scarico",
+      "funzione": "Carico e scarico dei pezzi sul cambio pallet di B01",
+      "ubicazione": "Reparto lavorazioni, campata 2",
+      "matricolaTarga": {
+        "valore": "DEMO-R-15",
+        "stato": "letta",
+        "evidenza": "B03-ID-001"
+      },
+      "componenti": [],
+      "nota": "Non presente nell'elenco dei beni del cliente: perimetro da chiarire (azione A007)"
     }
   ],
   "evidenze": [
@@ -174,7 +189,9 @@
       "sha256": "5115e729c33806c5160e7b73ea07b1b37fcd79ac1b34170feea8d236673d9656",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T10:05:00+02:00",
+      "acquisitaIl": "2026-10-15T10:05:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T10:05:00+02:00",
       "descrizione": "Vista d'insieme del centro di lavoro B01 nel reparto lavorazioni, lato operatore",
       "annotazioni": [
         {
@@ -204,7 +221,9 @@
       "sha256": "efae07e1bdfd433e56b3a35b98965e92eaaf9aa84644d82e2c001ba579d8565e",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T10:08:00+02:00",
+      "acquisitaIl": "2026-10-15T10:08:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T10:08:00+02:00",
       "descrizione": "Targa CE di B01, primo scatto",
       "stato": "annullata",
       "annullamento": {
@@ -229,11 +248,14 @@
       "sha256": "9bd4b191e9d749f25ad301ce3d374dd2a01da9abb83e781e56dc5a46483ef5f1",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T10:09:00+02:00",
+      "acquisitaIl": "2026-10-15T10:09:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T10:09:00+02:00",
       "descrizione": "Targa CE di B01 ripresa senza riflessi",
       "annotazioni": [
         {
           "tipo": "riquadro",
+          "colore": "#FF453A",
           "x": 0.2,
           "y": 0.2,
           "w": 0.6,
@@ -266,7 +288,9 @@
       "sha256": "51a8fac74bf949794945bcffb245ba2187b3c6d674f35a969f71cfdac5430575",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T10:20:00+02:00",
+      "acquisitaIl": "2026-10-15T10:20:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T10:20:00+02:00",
       "descrizione": "Pagina di sistema del controllo numerico di B01: marca, modello, versione firmware",
       "annotazioni": [
         {
@@ -304,7 +328,9 @@
       "sha256": "872dd2c86f3a788875c9d05d53bfbdc69808a792ed360a2636a734b8684a0965",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T10:42:00+02:00",
+      "acquisitaIl": "2026-10-15T10:42:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T10:42:00+02:00",
       "dataMostrataAVideo": {
         "valore": "15/10/2026 09:42",
         "orologioErrato": true,
@@ -331,10 +357,17 @@
         },
         {
           "tipo": "freccia",
+          "colore": "#FFD60A",
           "x": 0.5,
           "y": 0.6,
           "x2": 0.3,
-          "y2": 0.25,
+          "y2": 0.25
+        },
+        {
+          "tipo": "testo",
+          "colore": "#FFD60A",
+          "x": 0.52,
+          "y": 0.62,
           "testo": "ordine ODP-DEMO-0042"
         }
       ],
@@ -355,7 +388,9 @@
       "sha256": "c16086226e8fc52cacf5d85eaac750b5410f3284a158153b6ebc9a7c71f16ac0",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T10:45:00+02:00",
+      "acquisitaIl": "2026-10-15T10:45:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T10:45:00+02:00",
       "descrizione": "Pagina rete dell'HMI di B01: IP letto 192.0.2.21, client OPC UA connesso a MES-DEMO",
       "annotazioni": [
         {
@@ -392,7 +427,9 @@
       "sha256": "e6f124cf73c5cc9214dabee97c9dd4615b5982a14e31551698af3c064cd693ef",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T10:50:00+02:00",
+      "acquisitaIl": "2026-10-15T10:50:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T10:50:00+02:00",
       "dataMostrataAVideo": {
         "valore": "15/10/2026 10:50",
         "orologioErrato": false
@@ -433,9 +470,12 @@
       "sha256": "79fe866c2e9da535330801d9b16532addba8cc5f3bdebb186d9461f32e0764d7",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T10:52:00+02:00",
+      "acquisitaIl": "2026-10-15T10:52:20+02:00",
+      "origineDataScatto": "registrazione_app",
+      "dataScatto": "2026-10-15T10:52:00+02:00",
       "durataSecondi": 2,
-      "descrizione": "Nota vocale del perito sulla prova di scambio MES-DEMO verso B01",
+      "descrizione": "Prova di invio ordine da MES-DEMO verso B01",
+      "nota": "operatore al CN, richiamo del programma P-17",
       "stato": "valida",
       "trascrizioni": [
         {
@@ -461,7 +501,9 @@
       "sha256": "7fac4fed0a3a4737e6b9869ad5c157b0a1cc4470a3dbcbdd5472e2f75bf58851",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T10:55:00+02:00",
+      "acquisitaIl": "2026-10-15T10:55:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T10:55:00+02:00",
       "durataSecondi": 20,
       "descrizione": "Video: invio dell'ordine dal MES e comparsa del programma sull'HMI di B01 (nella DEMO il file e un segnaposto di testo)",
       "stato": "valida",
@@ -489,7 +531,9 @@
       "sha256": "99cb44bc5839a33a1694e7739f1f006b7e16b5d9d57f089a0c4fd456d822df12",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T11:05:00+02:00",
+      "acquisitaIl": "2026-10-15T11:05:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T11:05:00+02:00",
       "descrizione": "Pagina 'Servizio remoto' dell'HMI di B01: modulo di teleassistenza presente, nessuna sessione in corso; nessun dato di accesso inquadrato",
       "stato": "valida"
     },
@@ -508,7 +552,9 @@
       "sha256": "d72375286702bab9dd5b8c6e9e8fac09d48acf2a397651e1f306c4b408994426",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T11:08:00+02:00",
+      "acquisitaIl": "2026-10-15T11:08:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T11:08:00+02:00",
       "descrizione": "Pagina di monitoraggio del mandrino di B01: trend delle vibrazioni con soglia di allarme",
       "annotazioni": [
         {
@@ -537,7 +583,9 @@
       "sha256": "dcbb3cca3a46ec87dd5afc0f823e87d1260a44af8b69c909577ca46ba788fc02",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T11:12:00+02:00",
+      "acquisitaIl": "2026-10-15T11:12:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T11:12:00+02:00",
       "descrizione": "Cambio pallet automatico B01.1 collegato al centro di lavoro B01",
       "stato": "valida"
     },
@@ -557,8 +605,10 @@
       "sha256": "47f471a6797c89ec6ed93937004bebfe16e810bd04a554842470d5c9d743ca9a",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T11:15:00+02:00",
+      "acquisitaIl": "2026-10-15T11:15:20+02:00",
+      "origineDataScatto": "assente",
       "descrizione": "Targa del sistema di aspirazione nebbie B01.2: costruttore diverso da quello di B01, marcatura CE propria",
+      "nota": "file senza metadati di scatto: resta solo l'ora di acquisizione nell'app",
       "trascrizioni": [
         {
           "testo": "ASPIRAZIONE DEMO SRL - AN-200 - MATR. DEMO-A-77 - CE",
@@ -584,7 +634,9 @@
       "sha256": "a01a7b89896b94cc8c5569e5a80fa5a4ba8632ef50d89e5d2083c33dcd59d391",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T11:25:00+02:00",
+      "acquisitaIl": "2026-10-15T11:25:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T11:25:00+02:00",
       "descrizione": "Vista d'insieme della macchina di misura B02 in sala metrologica, con PC e software di misura",
       "stato": "valida"
     },
@@ -604,15 +656,24 @@
       "sha256": "dcf023e229e4d917f80f14cdd67e2bf64e9295ed6e5c2366b225cee0beded142",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T11:27:00+02:00",
+      "acquisitaIl": "2026-10-15T11:27:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T11:27:00+02:00",
       "descrizione": "Targa di B02: matricola letta DEMO-0020",
       "annotazioni": [
         {
-          "tipo": "riquadro",
+          "tipo": "cerchio",
+          "colore": "#FF453A",
           "x": 0.3,
-          "y": 0.4,
+          "y": 0.38,
           "w": 0.4,
-          "h": 0.1,
+          "h": 0.14
+        },
+        {
+          "tipo": "testo",
+          "colore": "#FF453A",
+          "x": 0.3,
+          "y": 0.56,
           "testo": "matricola DEMO-0020"
         }
       ],
@@ -641,7 +702,9 @@
       "sha256": "d093f8cea965c4020da504bf51313225af459a625b2cec8cb4ee7bc8ddcb38ac",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T11:29:00+02:00",
+      "acquisitaIl": "2026-10-15T11:29:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T11:29:00+02:00",
       "descrizione": "Targhetta del controllore di B02",
       "trascrizioni": [
         {
@@ -668,7 +731,9 @@
       "sha256": "1f295a572cf723c5f23c75bd96c74f03fe156e3a2935d6c287f4142037d8f77a",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T11:30:00+02:00",
+      "acquisitaIl": "2026-10-15T11:30:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T11:30:00+02:00",
       "dataMostrataAVideo": {
         "valore": "15/10/2026 11:30",
         "orologioErrato": false
@@ -701,7 +766,7 @@
       "sha256": "345871b18e05d22302b763ea038adcb813d2cc072f1344c010175eca03893e60",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T11:33:00+02:00",
+      "acquisitaIl": "2026-10-15T11:33:20+02:00",
       "descrizione": "Report di misura DEMO-PZ-118 copiato dalla cartella condivisa in presenza della referente IT",
       "contenutoLetto": [
         {
@@ -726,7 +791,9 @@
       "sha256": "df49527287339f215d35d54715eb7f14069a7a19dc4924ba6e2205eb519a2437",
       "provenienza": "perito",
       "idSopralluogo": "S01",
-      "acquisitaIl": "2026-10-15T11:36:00+02:00",
+      "acquisitaIl": "2026-10-15T11:36:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T11:36:00+02:00",
       "descrizione": "Impostazioni di rete del PC di B02: IP 192.0.2.35, unita di rete mappata su \\\\SRV-DEMO\\qualita",
       "trascrizioni": [
         {
@@ -734,6 +801,70 @@
           "origine": "manuale_campo",
           "confrontataConOriginale": true,
           "confrontataIl": "2026-10-15T11:37:00+02:00"
+        }
+      ],
+      "stato": "valida"
+    },
+    {
+      "id": "B01-DOC-002",
+      "beni": [
+        "B01"
+      ],
+      "gruppo": "DOC",
+      "requisiti": [
+        "DOC"
+      ],
+      "tipo": "foto",
+      "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-DOC-002.png",
+      "mime": "image/png",
+      "sha256": "cb352aa6035450ed2a3d4be5169e69656394c77e4dfa5f5cb81f882d84cda7a9",
+      "provenienza": "perito",
+      "idSopralluogo": "S01",
+      "acquisitaIl": "2026-10-15T11:40:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T11:40:00+02:00",
+      "descrizione": "Verbale di installazione di B01 mostrato dal responsabile di produzione: data 14/04/2025, firme di fornitore e cliente",
+      "annotazioni": [
+        {
+          "tipo": "riquadro",
+          "colore": "#FF453A",
+          "x": 0.55,
+          "y": 0.1,
+          "w": 0.4,
+          "h": 0.1,
+          "testo": "data 14/04/2025"
+        }
+      ],
+      "stato": "valida"
+    },
+    {
+      "id": "B03-ID-001",
+      "beni": [
+        "B03"
+      ],
+      "gruppo": 1,
+      "requisiti": [
+        "ID"
+      ],
+      "tipo": "foto",
+      "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B03-ID-001.png",
+      "mime": "image/png",
+      "sha256": "1963af768ea7bbdb9486c487e899bdc90eb64bb4d22498632b349281f6d2185e",
+      "provenienza": "perito",
+      "idSopralluogo": "S01",
+      "acquisitaIl": "2026-10-15T11:50:20+02:00",
+      "origineDataScatto": "metadati",
+      "dataScatto": "2026-10-15T11:50:00+02:00",
+      "descrizione": "Robot di carico e scarico accanto al cambio pallet di B01, targa con matricola DEMO-R-15",
+      "annotazioni": [
+        {
+          "tipo": "freccia",
+          "colore": "#FF453A",
+          "x": 0.7,
+          "y": 0.8,
+          "x2": 0.55,
+          "y2": 0.55,
+          "testo": "targa del robot"
         }
       ],
       "stato": "valida"
@@ -840,15 +971,22 @@
         "B01"
       ],
       "data": {
-        "valore": "2025-04",
-        "precisione": "mese"
+        "valore": "2025-04-14",
+        "precisione": "giorno"
       },
       "tipoData": "documento",
-      "origine": "dichiarazione_impresa",
-      "stato": "dichiarata",
-      "prove": [],
+      "origine": "verbale",
+      "stato": "documentata",
+      "prove": [
+        {
+          "idEvidenza": "B01-DOC-002",
+          "file": "DEMO-2026-001_20261015_B01-DOC-002.png",
+          "posizione": "riquadro 1",
+          "fattoLetto": "data 14/04/2025"
+        }
+      ],
       "coerenza": "S",
-      "nota": "verbale di installazione da richiedere"
+      "nota": "precisata in campo (S01) con il verbale di installazione"
     },
     {
       "id": "T006",
@@ -977,6 +1115,7 @@
       "requisito": "RO2",
       "esempioAccettabile": "Export CSV del MES con numero ordine, data, ora e identificativo macchina B01",
       "destinatario": "cliente",
+      "categoria": "documento",
       "stato": "aperta",
       "apertaIl": "2026-10-01"
     },
@@ -991,6 +1130,7 @@
       "requisito": "RO5",
       "esempioAccettabile": "DdC o attestazione del costruttore con modello e matricola di B02",
       "destinatario": "fornitore",
+      "categoria": "documento",
       "stato": "aperta",
       "apertaIl": "2026-10-01"
     },
@@ -1005,6 +1145,7 @@
       "requisito": "RO2",
       "esempioAccettabile": "Stesso ordine visibile sul MES e sull'HMI di B01, con foto di entrambi i lati",
       "destinatario": "perito",
+      "categoria": "evidenza",
       "stato": "chiusa",
       "apertaIl": "2026-10-01",
       "chiusura": {
@@ -1023,45 +1164,75 @@
     },
     {
       "id": "A004",
-      "priorita": "indispensabile",
+      "categoria": "chiarimento",
       "beni": [
         "B02"
       ],
-      "cosaServe": "Chiarimento sulla matricola di B02: DEMO-0020 in targa, DEMO-0002 in fattura",
-      "percheServe": "Incoerenza tra bene periziato e bene fatturato",
       "requisito": "ID",
-      "esempioAccettabile": "Attestazione del costruttore sulla matricola e, se necessario, nota di rettifica della fattura",
-      "destinatario": "fornitore",
+      "cosaServe": "Chiarimento sulla matricola di B02: DEMO-0020 in targa, DEMO-0002 in fattura",
+      "nota": "targa e report di misura concordano su DEMO-0020",
       "stato": "aperta",
-      "apertaIl": "2026-10-15"
+      "apertaIl": "2026-10-15",
+      "priorita": "indispensabile",
+      "destinatario": "fornitore",
+      "percheServe": "Incoerenza tra bene periziato e bene fatturato",
+      "esempioAccettabile": "Attestazione del costruttore sulla matricola e, se necessario, nota di rettifica della fattura"
     },
     {
       "id": "A005",
-      "priorita": "utile",
+      "categoria": "documento",
       "beni": [
         "B01"
       ],
-      "cosaServe": "Registro delle sessioni di teleassistenza su B01",
-      "percheServe": "La dichiarazione verbale dell'integratore non e riscontrata",
       "requisito": "RU1",
-      "esempioAccettabile": "Export del registro sessioni con data, ora e identificativo macchina, senza credenziali",
-      "destinatario": "integratore",
+      "cosaServe": "Registro delle sessioni di teleassistenza su B01",
+      "nota": "riscontro oggettivo da acquisire per DT-002",
+      "generataDa": {
+        "tipo": "dichiarazione",
+        "id": "DT-002"
+      },
       "stato": "aperta",
-      "apertaIl": "2026-10-15"
+      "apertaIl": "2026-10-15",
+      "priorita": "utile",
+      "destinatario": "integratore",
+      "percheServe": "La dichiarazione verbale dell'integratore non e riscontrata",
+      "esempioAccettabile": "Export del registro sessioni con data, ora e identificativo macchina, senza credenziali"
     },
     {
       "id": "A006",
-      "priorita": "indispensabile",
+      "categoria": "evidenza",
       "beni": [
         "B01"
       ],
-      "cosaServe": "Evidenze del flusso automatizzato tra B01, cambio pallet B01.1 e logistica",
-      "percheServe": "Gruppo 6 (integrazione) senza materiale dopo il sopralluogo",
       "requisito": "RO3",
-      "esempioAccettabile": "Log o schermata del sistema che assegna i pallet a B01, con data e identificativo",
-      "destinatario": "cliente",
+      "cosaServe": "Evidenze del flusso automatizzato tra B01, cambio pallet B01.1 e logistica",
+      "nota": "vedi nota di campo NC-001",
+      "generataDa": {
+        "tipo": "nota",
+        "id": "NC-001"
+      },
       "stato": "aperta",
-      "apertaIl": "2026-10-15"
+      "apertaIl": "2026-10-15",
+      "priorita": "indispensabile",
+      "destinatario": "cliente",
+      "percheServe": "Gruppo 6 (integrazione) senza materiale dopo il sopralluogo",
+      "esempioAccettabile": "Log o schermata del sistema che assegna i pallet a B01, con data e identificativo"
+    },
+    {
+      "id": "A007",
+      "categoria": "chiarimento",
+      "beni": [
+        "B03"
+      ],
+      "requisito": "ID",
+      "cosaServe": "Chiarire se il robot B03 fa parte dell'investimento",
+      "nota": "non presente nell'elenco dei beni del cliente",
+      "stato": "aperta",
+      "apertaIl": "2026-10-15",
+      "priorita": "raccomandata",
+      "destinatario": "cliente",
+      "percheServe": "Bene trovato in campo e non censito nella pratica",
+      "esempioAccettabile": "Fattura o ordine del robot, oppure dichiarazione che non fa parte dell'investimento"
     }
   ],
   "riscontriDiretti": [
@@ -1150,8 +1321,18 @@
       "riscontroOggettivo": {
         "esito": "N",
         "evidenze": [],
-        "nota": "nessun registro delle sessioni acquisito; vedi azione A005"
+        "nota": "riscontro da acquisire: registro delle sessioni richiesto con l'azione A005"
       }
+    }
+  ],
+  "noteCampo": [
+    {
+      "id": "NC-001",
+      "bene": "B01",
+      "requisito": "RO3",
+      "testo": "Il referente indica il collegamento al magazzino utensili; ancora da fotografare.",
+      "ora": "2026-10-15T11:42:00+02:00",
+      "base": "promemoria"
     }
   ],
   "manifesto": [
@@ -1208,7 +1389,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-ID-001.png",
       "sha256": "5115e729c33806c5160e7b73ea07b1b37fcd79ac1b34170feea8d236673d9656",
       "byte": 1600,
-      "dataAcquisizione": "2026-10-15T10:05:00+02:00",
+      "dataAcquisizione": "2026-10-15T10:05:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1220,7 +1401,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-ID-002.png",
       "sha256": "efae07e1bdfd433e56b3a35b98965e92eaaf9aa84644d82e2c001ba579d8565e",
       "byte": 1612,
-      "dataAcquisizione": "2026-10-15T10:08:00+02:00",
+      "dataAcquisizione": "2026-10-15T10:08:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1232,7 +1413,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-ID-003.png",
       "sha256": "9bd4b191e9d749f25ad301ce3d374dd2a01da9abb83e781e56dc5a46483ef5f1",
       "byte": 1546,
-      "dataAcquisizione": "2026-10-15T10:09:00+02:00",
+      "dataAcquisizione": "2026-10-15T10:09:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1244,7 +1425,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-RO1-001.png",
       "sha256": "51a8fac74bf949794945bcffb245ba2187b3c6d674f35a969f71cfdac5430575",
       "byte": 1680,
-      "dataAcquisizione": "2026-10-15T10:20:00+02:00",
+      "dataAcquisizione": "2026-10-15T10:20:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1256,7 +1437,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-RO1-002.png",
       "sha256": "872dd2c86f3a788875c9d05d53bfbdc69808a792ed360a2636a734b8684a0965",
       "byte": 1669,
-      "dataAcquisizione": "2026-10-15T10:42:00+02:00",
+      "dataAcquisizione": "2026-10-15T10:42:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1268,7 +1449,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-RO2-002.png",
       "sha256": "c16086226e8fc52cacf5d85eaac750b5410f3284a158153b6ebc9a7c71f16ac0",
       "byte": 1662,
-      "dataAcquisizione": "2026-10-15T10:45:00+02:00",
+      "dataAcquisizione": "2026-10-15T10:45:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1280,7 +1461,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-RO2-003.png",
       "sha256": "e6f124cf73c5cc9214dabee97c9dd4615b5982a14e31551698af3c064cd693ef",
       "byte": 1711,
-      "dataAcquisizione": "2026-10-15T10:50:00+02:00",
+      "dataAcquisizione": "2026-10-15T10:50:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1292,7 +1473,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-RO2-004.wav",
       "sha256": "79fe866c2e9da535330801d9b16532addba8cc5f3bdebb186d9461f32e0764d7",
       "byte": 16044,
-      "dataAcquisizione": "2026-10-15T10:52:00+02:00",
+      "dataAcquisizione": "2026-10-15T10:52:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1304,7 +1485,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-RO2-005.segnaposto.txt",
       "sha256": "7fac4fed0a3a4737e6b9869ad5c157b0a1cc4470a3dbcbdd5472e2f75bf58851",
       "byte": 65,
-      "dataAcquisizione": "2026-10-15T10:55:00+02:00",
+      "dataAcquisizione": "2026-10-15T10:55:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1316,7 +1497,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-RU1-001.png",
       "sha256": "99cb44bc5839a33a1694e7739f1f006b7e16b5d9d57f089a0c4fd456d822df12",
       "byte": 1676,
-      "dataAcquisizione": "2026-10-15T11:05:00+02:00",
+      "dataAcquisizione": "2026-10-15T11:05:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1328,7 +1509,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-RU2-001.png",
       "sha256": "d72375286702bab9dd5b8c6e9e8fac09d48acf2a397651e1f306c4b408994426",
       "byte": 1701,
-      "dataAcquisizione": "2026-10-15T11:08:00+02:00",
+      "dataAcquisizione": "2026-10-15T11:08:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1340,7 +1521,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01.1-ID-001.png",
       "sha256": "dcbb3cca3a46ec87dd5afc0f823e87d1260a44af8b69c909577ca46ba788fc02",
       "byte": 1674,
-      "dataAcquisizione": "2026-10-15T11:12:00+02:00",
+      "dataAcquisizione": "2026-10-15T11:12:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1352,7 +1533,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01.2-RO5-001.png",
       "sha256": "47f471a6797c89ec6ed93937004bebfe16e810bd04a554842470d5c9d743ca9a",
       "byte": 1727,
-      "dataAcquisizione": "2026-10-15T11:15:00+02:00",
+      "dataAcquisizione": "2026-10-15T11:15:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1364,7 +1545,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B02-ID-001.png",
       "sha256": "a01a7b89896b94cc8c5569e5a80fa5a4ba8632ef50d89e5d2083c33dcd59d391",
       "byte": 1607,
-      "dataAcquisizione": "2026-10-15T11:25:00+02:00",
+      "dataAcquisizione": "2026-10-15T11:25:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1376,7 +1557,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B02-ID-002.png",
       "sha256": "dcf023e229e4d917f80f14cdd67e2bf64e9295ed6e5c2366b225cee0beded142",
       "byte": 1705,
-      "dataAcquisizione": "2026-10-15T11:27:00+02:00",
+      "dataAcquisizione": "2026-10-15T11:27:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1388,7 +1569,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B02-RO1-001.png",
       "sha256": "d093f8cea965c4020da504bf51313225af459a625b2cec8cb4ee7bc8ddcb38ac",
       "byte": 1676,
-      "dataAcquisizione": "2026-10-15T11:29:00+02:00",
+      "dataAcquisizione": "2026-10-15T11:29:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1400,7 +1581,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B02-RO2-001.png",
       "sha256": "1f295a572cf723c5f23c75bd96c74f03fe156e3a2935d6c287f4142037d8f77a",
       "byte": 1638,
-      "dataAcquisizione": "2026-10-15T11:30:00+02:00",
+      "dataAcquisizione": "2026-10-15T11:30:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1412,7 +1593,7 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B02-RO2-002.pdf",
       "sha256": "345871b18e05d22302b763ea038adcb813d2cc072f1344c010175eca03893e60",
       "byte": 775,
-      "dataAcquisizione": "2026-10-15T11:33:00+02:00",
+      "dataAcquisizione": "2026-10-15T11:33:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1424,7 +1605,31 @@
       "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B02-RO2-003.png",
       "sha256": "df49527287339f215d35d54715eb7f14069a7a19dc4924ba6e2205eb519a2437",
       "byte": 1600,
-      "dataAcquisizione": "2026-10-15T11:36:00+02:00",
+      "dataAcquisizione": "2026-10-15T11:36:20+02:00",
+      "provenienza": "perito",
+      "hash": "C",
+      "marcaTemporale": {
+        "tipo": "n/a"
+      }
+    },
+    {
+      "idEvidenza": "B01-DOC-002",
+      "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B01-DOC-002.png",
+      "sha256": "cb352aa6035450ed2a3d4be5169e69656394c77e4dfa5f5cb81f882d84cda7a9",
+      "byte": 1710,
+      "dataAcquisizione": "2026-10-15T11:40:20+02:00",
+      "provenienza": "perito",
+      "hash": "C",
+      "marcaTemporale": {
+        "tipo": "n/a"
+      }
+    },
+    {
+      "idEvidenza": "B03-ID-001",
+      "file": "evidenze/sopralluogo_S01/DEMO-2026-001_20261015_B03-ID-001.png",
+      "sha256": "1963af768ea7bbdb9486c487e899bdc90eb64bb4d22498632b349281f6d2185e",
+      "byte": 1557,
+      "dataAcquisizione": "2026-10-15T11:50:20+02:00",
       "provenienza": "perito",
       "hash": "C",
       "marcaTemporale": {
@@ -1437,23 +1642,23 @@
       "tipo": "andata",
       "id": "5f0c2a1e-1d2b-4c3a-9e00-00000000a001",
       "file": "andata/perizia40-andata.json",
-      "sha256": "1da028d9a28046652d6445d398d570dae2d68857e747f236a8d26732c2578114",
+      "sha256": "37d90c2e9d8a37328dee435cb10bb056db96393051661e47cdb53a7adb8e2ad9",
       "data": "2026-10-10T18:00:00+02:00"
     },
     {
       "tipo": "rientro_finale",
       "id": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
       "volume": 1,
-      "file": "rientro/DEMO-2026-001_S01_finale_vol1/perizia40-rientro.json",
-      "sha256": "8a9f63bf6d179b830cf61c35dfd87dbdd40f952ad61ffc75855269b31ab5b846",
+      "file": "rientro/DEMO-2026-001_rientro_FIN_20261015-1730_v1di2.zip",
+      "sha256": "c107720e12bd9829ca5156ff70e71a0dee9cabcd722bb985c1a21b452f9ab0f8",
       "data": "2026-10-15T17:30:00+02:00"
     },
     {
       "tipo": "rientro_finale",
       "id": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
       "volume": 2,
-      "file": "rientro/DEMO-2026-001_S01_finale_vol2/perizia40-rientro.json",
-      "sha256": "c26f75277ee58e5515793e11b2e96367fb4c5590aeb35383fdd86d50f2043b7e",
+      "file": "rientro/DEMO-2026-001_rientro_FIN_20261015-1730_v2di2.zip",
+      "sha256": "2c6cbcfbb77dffdf313a546d149d9afb81a78a53fb16fa911c34d45c37390fa7",
       "data": "2026-10-15T17:30:00+02:00"
     }
   ]

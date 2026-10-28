@@ -15,7 +15,8 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | Fase | Contenuto | Stato |
 |---|---|---|
 | F1 | Schemi JSON v1, pratica DEMO, validatore, README | fatta |
-| F2 | Interfaccia PWA (dai mockup di Claude Design) | da fare |
+| F2.0 | Schemi v1.1 allineati ai mockup (`docs/F2_confronto_mockup_schemi.md`), rientro in ZIP, validatore aggiornato | fatta |
+| F2.1–F2.8 | Interfaccia PWA (dai mockup di Claude Design in `design/`) | da fare |
 
 ## Struttura
 
@@ -31,10 +32,13 @@ strumenti/
   prova.mjs                    prova del validatore sulla DEMO e sui casi errati
   genera_demo.mjs              rigenera la pratica DEMO
   lib/validatore.mjs           nucleo dei controlli, senza dipendenze né accesso al disco (riusabile nella PWA)
-  lib/disco.mjs                lettura delle cartelle e calcolo delle impronte (Node)
+  lib/zip.mjs                  lettura e scrittura ZIP senza dipendenze (riusabile nella PWA)
+  lib/disco.mjs                lettura di cartelle e ZIP, calcolo delle impronte (Node)
 demo/
   PRATICA_DEMO_2026_001/       pratica fittizia completa (dopo l'importazione del rientro)
   casi_errati/casi.json        modifiche che il validatore deve rifiutare
+design/                        mockup approvati (Claude Design), solo riferimento grafico
+docs/                          confronto mockup/schemi e decisioni
 ```
 
 ## Flusso
@@ -46,10 +50,10 @@ pratica_40.json + beni/B0x.json
         ▼
 andata/perizia40-andata.json  ───────────────────▶  sopralluogo: foto annotate, vocali, video,
                                                      verifica dei dati agli atti, riscontri diretti,
-                                                     dichiarazioni di terzi, date, nuove azioni
+                                                     dichiarazioni di terzi, date, beni nuovi, bozze di azione
         ┌────────────────────────────────────────── rientro: checkpoint durante la giornata,
-        ▼                                            finale a fine visita, anche in più volumi
-rientro/<pacchetto>_volN/ perizia40-rientro.json + evidenze/ + hash.sha256
+        ▼                                            finale a fine visita, anche in più volumi ZIP
+rientro/<codice>_rientro_FIN_<data-ora>_v1di2.zip = perizia40-rientro.json + hash.sha256 + evidenze/
         │  importa (verifica impronte, copia evidenze, aggiorna schede e registri)
         ▼
 pratica_40.json aggiornata
@@ -62,7 +66,7 @@ PRATICA_xxx/
   pratica_40.json
   beni/B01.json, B02.json …
   andata/perizia40-andata.json
-  rientro/<codice>_S01_finale_vol1/ …
+  rientro/<codice>_rientro_FIN_…_v1di2.zip …
   evidenze/documenti/ …        documenti ricevuti
   evidenze/sopralluogo_S01/ …  evidenze di campo importate
 ```
@@ -84,18 +88,23 @@ PRATICA_xxx/
   Dopo il rientro ogni voce riceve `verificaCampo` con l'esito (`confermato`, `corretto` con il valore rilevato, `difforme`, `non_verificabile`) e l'evidenza collegata.
 - Gruppi di evidenze 1–10 più Documenti, ciascuno legato ai requisiti e con l'attesa per il profilo: `si`, `su_richiesta`, `se_dichiarato`, `supporto`, `non_applicabile` (§2.7).
 
-**Pacchetto di andata.** Riporta i beni con componenti, classificazione, gruppi attesi e cosa cercare. Porta i **dati agli atti come valori da verificare**, le azioni aperte e gli identificativi di evidenza già usati, così l'app continua la numerazione senza collisioni.
+**Pacchetto di andata.** Riporta i beni con componenti, classificazione, gruppi attesi e cosa cercare. Porta i **dati agli atti come valori da verificare**, la **timeline agli atti** (in sola lettura sul telefono), le azioni aperte e gli identificativi di evidenza già usati, così l'app continua la numerazione senza collisioni.
 
 **Pacchetto di rientro**
-- Tipo `checkpoint` o `finale`; può essere diviso in **volumi**. Ogni volume ripete lo stato completo e contiene solo i file assegnati a quel volume nel manifesto.
-- **Evidenze**: foto con annotazioni (riquadri, frecce, note in coordinate 0–1; l'originale non viene toccato), vocali, video, documenti.
+- File ZIP, tipo `checkpoint` o `finale`; può essere diviso in **volumi**. Ogni volume ripete lo stato completo e contiene solo i file assegnati a quel volume nel manifesto. L'impronta dello ZIP non può stare dentro lo ZIP: la registra la pratica in `pacchetti`.
+- **Evidenze**: foto con annotazioni (riquadri, cerchi, frecce, testi e note in coordinate 0–1, con colore; l'originale non viene toccato), vocali e video con titolo e nota facoltativa, documenti.
+- **Data di scatto distinta dall'ora di acquisizione** nell'app (§6.1): `origineDataScatto` dice se viene dai metadati del file, dalla registrazione fatta nell'app o se è assente. Se i metadati mancano lo si dichiara e non si sostituisce con l'ora di importazione.
 - Data mostrata a video, con segnalazione dell'orologio errato: si registra, non si corregge (§6.1).
+- **Beni nuovi** censiti in campo, con matricola letta, illeggibile o mancante: perimetro e classificazione si decidono sul PC.
 - **Trascrizioni** con origine `manuale_campo` o `claude_pc` e flag di confronto con l'originale. Nessun OCR da servizi esterni.
 - Le **evidenze annullate restano** nel pacchetto con motivo, data ed eventuale sostituta: non si cancellano.
 - **Esiti delle verifiche** dei dati agli atti.
 - **Riscontri diretti** del perito (§1.3, §10.9): bene, requisito, data della visita, fatto, oggetto e circostanza in campi separati, la frase verbalizzata, le evidenze collegate e i limiti. Non retrodatano l'evento.
 - **Dichiarazioni di terzi** (§10.9): persona, ruolo, organizzazione, forma, data, contenuto effettivo, requisito e riscontro oggettivo (S/N con `[ev:]`).
-- **Date rilevate**, nuove azioni (sempre aperte) e aggiornamenti delle azioni: l'app propone la chiusura, il perito decide sul PC.
+- **Note di campo** per requisito: promemoria, mai base probatoria.
+- **Date rilevate**: con `rifTimeline` ed `esitoRif` (confermata / precisata / difforme) verificano una data agli atti.
+- **Bozze di azione** (categoria documento / evidenza / chiarimento, bene, requisito, cosa serve, eventuale origine: per esempio una dichiarazione con riscontro «da acquisire»); priorità, destinatario ed esempio si completano sul PC.
+- **Aggiornamenti delle azioni**: l'app propone la chiusura con motivo ed evidenza o riscontro obbligatori; la chiusura la decide il perito sul PC.
 - **Manifesto SHA-256** e file `hash.sha256` in ogni volume.
 
 **Timeline** (§6.1, §10.5). Ogni riga ha:
@@ -114,13 +123,21 @@ PRATICA_xxx/
 - dichiarazioni di terzi → `dichiarazioniTerzi`;
 - deduzioni → restano nel lavoro sul PC e non entrano nei registri.
 
+Le note di campo (`noteCampo`) sono dichiarate `promemoria` e non appartengono a nessuna delle quattro basi.
+
 ## Validatore
 
 ```bash
 node strumenti/valida.mjs demo --repo-pubblico
 ```
 
-Accetta una cartella pratica, una cartella che ne contiene più d'una, oppure un singolo file JSON (solo struttura e controlli interni). Opzioni:
+Accetta una cartella pratica (anche con i rientri in ZIP), una cartella che ne contiene più d'una, un singolo file JSON (solo struttura e controlli interni) oppure i volumi ZIP di un rientro, con l'andata facoltativa per i controlli incrociati:
+
+```bash
+node strumenti/valida.mjs rientro_v1di2.zip rientro_v2di2.zip --andata andata/perizia40-andata.json
+```
+
+Opzioni:
 - `--repo-pubblico`: esige `demo: true` e applica i controlli sui dati fittizi;
 - `--json`: risultato leggibile da una sessione Claude;
 - `--senza-avvisi`.
@@ -140,10 +157,12 @@ Cosa controlla:
 - **Registri**:
   - riscontri nella data della visita e con evidenza collegata;
   - dichiarazioni senza riscontro oggettivo segnalate;
-  - azioni chiuse solo con motivo documentato e mai in campo.
+  - azioni chiuse solo con motivo documentato e mai in campo; proposte di chiusura con evidenza o riscontro;
+  - azioni generate da una dichiarazione, un riscontro o una nota che esistono davvero.
+- **Novità v1.1**: data di scatto mai successiva all'acquisizione e metadati assenti segnalati; beni nuovi senza codici già usati; date rilevate riferite a una riga esistente della timeline, dello stesso evento e degli stessi beni.
 - **Integrità**:
   - ogni evidenza, anche annullata, è nel manifesto con la stessa impronta;
-  - ogni file esiste ed è integro;
+  - ogni file esiste ed è integro, anche dentro gli ZIP (CRC e SHA-256);
   - `hash.sha256` è completo;
   - i volumi sono tutti presenti e coerenti;
   - il rientro corrisponde all'andata da cui nasce (identificativo e impronta);
@@ -162,12 +181,13 @@ node strumenti/prova.mjs
 
 `demo/PRATICA_DEMO_2026_001` è una pratica fittizia di un'azienda inventata con due beni:
 - **B01**, centro di lavoro CNC: Allegato A Gruppo 1, profilo completo, componenti B01.1 e B01.2, GATE C giallo;
-- **B02**, macchina di misura a coordinate: Allegato A Gruppo 2, profilo ridotto, interconnessione tramite report su cartella condivisa.
+- **B02**, macchina di misura a coordinate: Allegato A Gruppo 2, profilo ridotto, interconnessione tramite report su cartella condivisa;
+- più **B03**, robot trovato in campo e non presente nell'elenco del cliente (bene nuovo, perimetro da chiarire).
 
 Contiene:
-- il pacchetto di andata;
-- il rientro finale del sopralluogo S01 in due volumi;
-- il fascicolo già aggiornato dopo l'importazione.
+- il pacchetto di andata, con la timeline agli atti;
+- il rientro finale del sopralluogo S01 in due volumi ZIP;
+- il fascicolo già aggiornato dopo l'importazione: la data di installazione di B01 precisata in campo con il verbale, le bozze di azione completate, la nota di campo e il bene nuovo.
 
 I media sono sintetici:
 - PNG con scritta «DEMO»;
@@ -175,14 +195,15 @@ I media sono sintetici:
 - PDF di una pagina;
 - il video è un segnaposto di testo dichiarato come tale (`text/plain`).
 
-Il validatore riporta sulla DEMO **10 avvisi voluti**, che mostrano i casi da gestire:
+Il validatore riporta sulla DEMO **12 avvisi voluti**, che mostrano i casi da gestire:
 - matricola di B02 difforme da quella in fattura (alert in scheda e nel rientro);
-- orologio del CN indietro di un'ora;
+- orologio del CN indietro di un'ora (in pratica e nel rientro);
+- foto della targa dell'aspiratore B01.2 senza metadati di scatto (in pratica e nel rientro);
 - prima prova dello scambio di B01 successiva di 14 giorni all'interconnessione dichiarata;
-- una dichiarazione verbale senza riscontro oggettivo (in pratica e nel rientro);
+- una dichiarazione verbale con riscontro oggettivo da acquisire (in pratica e nel rientro);
 - trascrizione del video non ancora confrontata;
 - gruppo 6 (integrazione) di B01 ancora vuoto;
-- 5 azioni aperte da riportare nel cruscotto pratiche.
+- 6 azioni aperte da riportare nel cruscotto pratiche.
 
 Per rigenerarla dopo una modifica agli schemi:
 

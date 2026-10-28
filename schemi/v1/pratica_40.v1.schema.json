@@ -53,11 +53,21 @@
         }
       }
     },
+    "beniNuovi": {
+      "type": "array",
+      "description": "Beni censiti in campo in attesa di decisione del perito su perimetro e classificazione (v1.1)",
+      "items": { "$ref": "comuni.v1.schema.json#/$defs/beneNuovo" }
+    },
     "evidenze": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/evidenza" } },
     "timeline": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/rigaTimeline" } },
     "azioni": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/azione" } },
     "riscontriDiretti": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/riscontroDiretto" } },
     "dichiarazioniTerzi": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/dichiarazioneTerzi" } },
+    "noteCampo": {
+      "type": "array",
+      "description": "Note di campo importate: promemoria, non base probatoria (v1.1)",
+      "items": { "$ref": "comuni.v1.schema.json#/$defs/notaCampo" }
+    },
     "manifesto": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/rigaManifesto" } },
     "pacchetti": {
       "type": "array",

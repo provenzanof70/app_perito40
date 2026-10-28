@@ -324,6 +324,8 @@ function controllaEvidenze(evidenze, beniNoti, esito, dove) {
     (e.trascrizioni || []).forEach((t, j) => {
       if (!t.confrontataConOriginale) esito.avviso('TRASCRIZIONE_NON_CONFRONTATA', `${p}/trascrizioni/${j}`, `trascrizione (${t.origine}) non ancora confrontata con l'originale`);
     });
+    if (e.origineDataScatto === 'assente') esito.avviso('DATA_SCATTO_ASSENTE', p, `${e.id}: metadati di scatto assenti, nota solo l'ora di acquisizione nell'app`);
+    if (e.dataScatto && Date.parse(e.dataScatto) > Date.parse(e.acquisitaIl)) esito.errore('DATA_SCATTO_SUCCESSIVA', p, `${e.id}: data di scatto ${e.dataScatto} successiva all'acquisizione ${e.acquisitaIl}`);
     if (e.dataMostrataAVideo && e.dataMostrataAVideo.orologioErrato) esito.avviso('OROLOGIO_ERRATO', p, `orologio del bene errato registrato (${e.dataMostrataAVideo.scartoStimato || 'scarto non stimato'})`);
   });
   evidenze.forEach((e, i) => {
@@ -451,12 +453,16 @@ function controllaDichiarazioni(dichiarazioni, beniNoti, evidenze, esito, dove, 
   });
 }
 
-function controllaAzioni(azioni, beniNoti, evidenze, riscontri, esito, dove, chiave = 'azioni') {
+// origini: { dichiarazione: Set, riscontro: Set, verifica: Set, nota: Set } degli identificativi esistenti
+function controllaAzioni(azioni, beniNoti, evidenze, riscontri, esito, dove, chiave = 'azioni', origini = null) {
   const ids = new Set();
   azioni.forEach((a, i) => {
     const p = `${dove}#/${chiave}/${i}`;
     if (ids.has(a.id)) esito.errore('AZIONE_DUPLICATA', p, `${a.id} ripetuta`);
     ids.add(a.id);
+    if (a.generataDa && origini && origini[a.generataDa.tipo] && !origini[a.generataDa.tipo].has(a.generataDa.id)) {
+      esito.errore('GENERATA_DA_INESISTENTE', p, `${a.id}: generata da ${a.generataDa.tipo} ${a.generataDa.id}, che non esiste`);
+    }
     for (const b of a.beni) if (!beniNoti.has(b)) esito.errore('BENE_INESISTENTE', p, `bene ${b} non censito`);
     if (a.stato === 'aperta' && a.chiusura) esito.errore('AZIONE_APERTA_CON_CHIUSURA', p, `${a.id} aperta ma con dati di chiusura`);
     const c = a.chiusura;
@@ -467,6 +473,32 @@ function controllaAzioni(azioni, beniNoti, evidenze, riscontri, esito, dove, chi
     if (c.data < a.apertaIl) esito.errore('AZIONE_DATE', p, `${a.id} chiusa prima di essere aperta`);
   });
   return ids;
+}
+
+function controllaNoteCampo(note, beniNoti, esito, dove) {
+  const ids = new Set();
+  note.forEach((n, i) => {
+    const p = `${dove}#/noteCampo/${i}`;
+    if (ids.has(n.id)) esito.errore('NOTA_DUPLICATA', p, `${n.id} ripetuta`);
+    ids.add(n.id);
+    if (!beniNoti.has(n.bene)) esito.errore('BENE_INESISTENTE', p, `bene ${n.bene} non censito`);
+  });
+  return ids;
+}
+
+// Aggiunge a beniNoti i beni censiti in campo, segnalando i codici già usati
+function aggiungiBeniNuovi(beniNuovi, beniNoti, esito, dove) {
+  beniNuovi.forEach((b, i) => {
+    const p = `${dove}#/beniNuovi/${i}`;
+    if (beniNoti.has(b.codice)) esito.errore('BENE_NUOVO_DUPLICATO', p, `il codice ${b.codice} è già usato`);
+    beniNoti.add(b.codice);
+    for (const c of b.componenti) {
+      if (beneDi(c.codice) !== b.codice) esito.errore('COMPONENTE_CODICE', p, `il componente ${c.codice} non appartiene a ${b.codice}`);
+      if (beniNoti.has(c.codice)) esito.errore('BENE_NUOVO_DUPLICATO', p, `il codice ${c.codice} è già usato`);
+      beniNoti.add(c.codice);
+    }
+    if (b.matricolaTarga.stato !== 'letta') esito.avviso('MATRICOLA_NON_LETTA', p, `${b.codice}: matricola ${b.matricolaTarga.stato}, riscontro da programmare`);
+  });
 }
 
 function beniDaSchede(schede) {
@@ -493,6 +525,7 @@ export function controllaPratica(ctx, esito, dove = 'pratica_40.json') {
     schedePerCodice.set(b.codice, sc);
   });
   const beniNoti = beniDaSchede(schedePerCodice);
+  aggiungiBeniNuovi(pratica.beniNuovi || [], beniNoti, esito, dove);
   const sopralluoghi = new Map(pratica.sopralluoghi.map(s => [s.id, s.data]));
   const persone = new Set(pratica.persone.map(p => p.id));
   pratica.sopralluoghi.forEach((s, i) => (s.presenti || []).forEach(id => { if (!persone.has(id)) esito.errore('PERSONA_INESISTENTE', `${dove}#/sopralluoghi/${i}`, `${id} non tra le persone`); }));
@@ -504,7 +537,10 @@ export function controllaPratica(ctx, esito, dove = 'pratica_40.json') {
   const riscontri = new Set(pratica.riscontriDiretti.map(r => r.id));
   controllaRiscontri(pratica.riscontriDiretti, beniNoti, evidenze, sopralluoghi, esito, dove);
   controllaDichiarazioni(pratica.dichiarazioniTerzi, beniNoti, evidenze, esito, dove);
-  controllaAzioni(pratica.azioni, beniNoti, evidenze, riscontri, esito, dove);
+  const note = controllaNoteCampo(pratica.noteCampo || [], beniNoti, esito, dove);
+  controllaAzioni(pratica.azioni, beniNoti, evidenze, riscontri, esito, dove, 'azioni', {
+    dichiarazione: new Set(pratica.dichiarazioniTerzi.map(d => d.id)), riscontro: riscontri, nota: note,
+  });
   controllaRiferimenti({ timeline: pratica.timeline, azioni: pratica.azioni, dichiarazioniTerzi: pratica.dichiarazioniTerzi }, evidenze, esito, dove);
   for (const r of pratica.riscontriDiretti) controllaIdEvidenze(r.evidenze, evidenze, esito, dove);
 
@@ -560,6 +596,10 @@ export function controllaAndata(andata, esito, dove, pratica) {
       campi.add(d.campo);
     }
   });
+  const esistenti = new Set(andata.evidenzeEsistenti);
+  controllaTimeline(andata.timeline, beniNoti, null, esito, dove);
+  andata.timeline.forEach((r, i) => controllaIdEvidenze(r.prove.map(x => x.idEvidenza), new Map(), esito, `${dove}#/timeline/${i}`, esistenti));
+  andata.timeline.forEach((r, i) => { if (r.rifTimeline) esito.errore('RIF_TIMELINE_FUORI_POSTO', `${dove}#/timeline/${i}`, 'rifTimeline si usa solo nelle date rilevate in campo'); });
   for (const a of andata.azioniAperte) {
     if (a.stato !== 'aperta') esito.errore('ANDATA_AZIONE_CHIUSA', dove, `${a.id} non è aperta`);
     for (const b of a.beni) if (!beniNoti.has(b)) esito.errore('BENE_INESISTENTE', dove, `azione ${a.id}: bene ${b} non nell'andata`);
@@ -574,6 +614,8 @@ export function controllaAndata(andata, esito, dove, pratica) {
     for (const a of andata.azioniAperte) if (!azioni.has(a.id)) esito.errore('AZIONE_INESISTENTE', dove, `${a.id} non nella pratica`);
     const ev = new Set(pratica.evidenze.map(e => e.id));
     for (const id of andata.evidenzeEsistenti) if (!ev.has(id)) esito.errore('EVIDENZA_INESISTENTE', dove, `${id} non nella pratica`);
+    const tl = new Set(pratica.timeline.map(r => r.id));
+    for (const r of andata.timeline) if (!tl.has(r.id)) esito.avviso('TIMELINE_NON_IN_PRATICA', dove, `${r.id} dell'andata non è più nella timeline della pratica`);
   }
   return beniNoti;
 }
@@ -604,8 +646,9 @@ export function controllaVolumeRientro(vol, andata, esitoFinale, dove, { soloFil
     for (const b of a.beni) { beniNoti.add(b.codice); for (const c of b.componenti) beniNoti.add(c.codice); }
   } else {
     esito.avviso('RIENTRO_SENZA_ANDATA', dove, "pacchetto di andata non disponibile: controlli incrociati non eseguiti");
-    beniNoti = new Set(r.evidenze.flatMap(e => e.beni));
+    beniNoti = new Set(r.evidenze.flatMap(e => e.beni).filter(b => !r.beniNuovi.some(n => n.codice === beneDi(b))));
   }
+  aggiungiBeniNuovi(r.beniNuovi, beniNoti, esito, dove);
 
   const evidenze = controllaEvidenze(r.evidenze, beniNoti, esito, dove);
   for (const id of evidenze.keys()) if (esistenti.has(id)) esito.errore('EVIDENZA_ID_COLLISIONE', dove, `${id} è già usato nel fascicolo (evidenzeEsistenti dell'andata)`);
@@ -649,8 +692,22 @@ export function controllaVolumeRientro(vol, andata, esitoFinale, dove, { soloFil
   controllaRiscontri(r.riscontriDiretti, beniNoti, evidenze, sopralluoghi, esito, dove, esistenti);
   controllaDichiarazioni(r.dichiarazioniTerzi, beniNoti, evidenze, esito, dove, esistenti);
   controllaTimeline(r.dateRilevate, beniNoti, evidenze, esito, dove, 'dateRilevate');
+  const timelineAtti = new Map((andata ? andata.doc.timeline : []).map(x => [x.id, x]));
+  r.dateRilevate.forEach((d, i) => {
+    if (!d.rifTimeline || !andata) return;
+    const p = `${dove}#/dateRilevate/${i}`;
+    const atti = timelineAtti.get(d.rifTimeline);
+    if (!atti) { esito.errore('RIF_TIMELINE_INESISTENTE', p, `${d.rifTimeline} non è nella timeline dell'andata`); return; }
+    if (atti.evento !== d.evento) esito.errore('RIF_TIMELINE_EVENTO', p, `${d.rifTimeline} è un evento ${atti.evento}, la data rilevata è ${d.evento}`);
+    if (!d.beni.some(b => atti.beni.map(beneDi).includes(beneDi(b)))) esito.errore('RIF_TIMELINE_BENE', p, `${d.rifTimeline} riguarda altri beni`);
+    if (d.esitoRif === 'confermata' && d.data.valore !== atti.data.valore) esito.errore('RIF_TIMELINE_ESITO', p, `confermata ma ${d.data.valore} è diversa da ${atti.data.valore}`);
+    if (d.esitoRif === 'difforme') esito.avviso('ALERT_DATA_DIFFORME', p, `${d.evento}: in campo ${d.data.valore}, agli atti ${atti.data.valore}`);
+  });
+  const note = controllaNoteCampo(r.noteCampo, beniNoti, esito, dove);
   const riscontri = new Set(r.riscontriDiretti.map(x => x.id));
-  controllaAzioni(r.nuoveAzioni, beniNoti, evidenze, riscontri, esito, dove, 'nuoveAzioni');
+  controllaAzioni(r.nuoveAzioni, beniNoti, evidenze, riscontri, esito, dove, 'nuoveAzioni', {
+    dichiarazione: new Set(r.dichiarazioniTerzi.map(d => d.id)), riscontro: riscontri, nota: note,
+  });
   for (const a of r.nuoveAzioni) if (a.stato !== 'aperta') esito.errore('AZIONE_CHIUSA_IN_CAMPO', dove, `${a.id}: le nuove azioni nascono aperte; la chiusura la decide il perito sul PC`);
   controllaRiferimenti({ dateRilevate: r.dateRilevate, nuoveAzioni: r.nuoveAzioni, dichiarazioniTerzi: r.dichiarazioniTerzi }, evidenze, esito, dove, esistenti);
   r.verificheDati.forEach((v, i) => controllaIdEvidenze(v.evidenze, evidenze, esito, `${dove}#/verificheDati/${i}`, esistenti));
@@ -742,4 +799,8 @@ export function controllaImportazione(pratica, schedePerCodice, rientro, esito, 
   for (const d of rientro.dichiarazioniTerzi) if (!dt.has(d.id)) esito.avviso('DICHIARAZIONE_NON_IMPORTATA', dove, `${d.id} non nel registro della pratica`);
   const az = new Set(pratica.azioni.map(a => a.id));
   for (const a of rientro.nuoveAzioni) if (!az.has(a.id)) esito.avviso('AZIONE_NON_IMPORTATA', dove, `${a.id} non tra le azioni della pratica`);
+  const nc = new Set((pratica.noteCampo || []).map(n => n.id));
+  for (const n of rientro.noteCampo) if (!nc.has(n.id)) esito.avviso('NOTA_NON_IMPORTATA', dove, `${n.id} non tra le note di campo della pratica`);
+  const beni = new Set([...pratica.beni.map(b => b.codice), ...(pratica.beniNuovi || []).map(b => b.codice)]);
+  for (const b of rientro.beniNuovi) if (!beni.has(b.codice)) esito.avviso('BENE_NUOVO_NON_IMPORTATO', dove, `${b.codice} censito in campo ma assente dalla pratica`);
 }

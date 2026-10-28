@@ -2,13 +2,15 @@
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { join, relative, dirname, sep } from 'node:path';
+import { inflateRawSync } from 'node:zlib';
+import { join, relative, dirname, sep, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   nuovoEsito, creaRegistroSchemi, validaStruttura, controllaRiservatezza, controllaScheda,
   controllaPratica, controllaPacchetti, controllaAndata, controllaVolumeRientro, controllaVolumi,
   controllaImportazione,
 } from './validatore.mjs';
+import { leggiZip } from './zip.mjs';
 
 const CARTELLA_SCHEMI = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'schemi', 'v1');
 
@@ -32,22 +34,37 @@ export function sha256(buf) {
   return createHash('sha256').update(buf).digest('hex');
 }
 
-// Legge una cartella pratica: impronte di tutti i file, documenti JSON riconosciuti, file hash.sha256
-export function caricaCartella(cartella) {
-  const file = new Map();
-  const documenti = new Map();
-  const testi = new Map();
-  const illeggibili = [];
-  for (const p of elencaFile(cartella)) {
-    const r = rel(cartella, p);
-    const buf = readFileSync(p);
-    file.set(r, { sha256: sha256(buf), byte: buf.length });
-    if (r.endsWith('.json')) {
-      try { documenti.set(r, JSON.parse(buf.toString('utf8'))); } catch (e) { illeggibili.push([r, e.message]); }
-    }
-    if (r.endsWith('hash.sha256')) testi.set(r, buf.toString('utf8'));
+function nuovoCaricamento(cartella) {
+  return { cartella, file: new Map(), documenti: new Map(), testi: new Map(), illeggibili: [] };
+}
+
+// Registra un file; un .zip viene anche aperto e le sue voci compaiono sotto "<percorso dello zip>/"
+function aggiungi(car, r, buf) {
+  car.file.set(r, { sha256: sha256(buf), byte: buf.length });
+  if (r.endsWith('.json')) {
+    try { car.documenti.set(r, JSON.parse(Buffer.from(buf).toString('utf8'))); } catch (e) { car.illeggibili.push([r, e.message]); }
   }
-  return { cartella, file, documenti, testi, illeggibili };
+  if (r.endsWith('hash.sha256')) car.testi.set(r, Buffer.from(buf).toString('utf8'));
+  if (r.toLowerCase().endsWith('.zip')) {
+    let voci;
+    try { voci = leggiZip(buf, inflateRawSync); } catch (e) { car.illeggibili.push([r, e.message]); return; }
+    for (const [nome, dati] of voci) aggiungi(car, `${r}/${nome}`, dati);
+  }
+}
+
+// Legge una cartella pratica: impronte di tutti i file (anche dentro gli ZIP), documenti JSON, file hash.sha256
+export function caricaCartella(cartella) {
+  const car = nuovoCaricamento(cartella);
+  for (const p of elencaFile(cartella)) aggiungi(car, rel(cartella, p), readFileSync(p));
+  return car;
+}
+
+// Legge uno o più ZIP di rientro senza la pratica; andata facoltativa per i controlli incrociati
+export function caricaZip(percorsi, andata = null) {
+  const car = nuovoCaricamento(percorsi.join(', '));
+  for (const p of percorsi) aggiungi(car, basename(p), readFileSync(p));
+  if (andata) aggiungi(car, 'andata/perizia40-andata.json', readFileSync(andata));
+  return car;
 }
 
 function sottoMappa(file, prefisso) {
@@ -56,7 +73,7 @@ function sottoMappa(file, prefisso) {
   return m;
 }
 
-// Valida una pratica caricata. opzioni: { repoPubblico }
+// Valida una pratica caricata. opzioni: { repoPubblico, soloRientro (ZIP senza pratica) }
 export function validaCaricata(car, registro, opzioni = {}) {
   const esito = nuovoEsito();
   for (const [r, m] of car.illeggibili) esito.errore('JSON_ILLEGGIBILE', r, m);
@@ -71,7 +88,7 @@ export function validaCaricata(car, registro, opzioni = {}) {
     if (opzioni.repoPubblico && d.demo !== true) esito.errore('DEMO_FLAG', r, 'nel repository pubblico ogni file deve avere demo = true');
     controllaRiservatezza(d, esito, r, { demo });
   }
-  if (!pratica) { esito.errore('PRATICA_MANCANTE', car.cartella, 'manca pratica_40.json'); return esito; }
+  if (!pratica && !opzioni.soloRientro) { esito.errore('PRATICA_MANCANTE', car.cartella, 'manca pratica_40.json'); return esito; }
   const ok = r => strutturaOk.get(r) === true;
 
   const schede = new Map();

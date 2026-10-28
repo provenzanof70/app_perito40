@@ -1,6 +1,6 @@
 {
   "formato": "perizia40.andata",
-  "versioneSchema": "1.0.0",
+  "versioneSchema": "1.1.0",
   "demo": true,
   "idAndata": "5f0c2a1e-1d2b-4c3a-9e00-00000000a001",
   "revisione": "rev001",
@@ -466,6 +466,177 @@
       ]
     }
   ],
+  "timeline": [
+    {
+      "id": "T001",
+      "evento": "ordine",
+      "descrizione": "Ordine al fornitore",
+      "beni": [
+        "B01",
+        "B02"
+      ],
+      "data": {
+        "valore": "2025-01",
+        "precisione": "mese"
+      },
+      "tipoData": "documento",
+      "origine": "dichiarazione_impresa",
+      "stato": "dichiarata",
+      "prove": [],
+      "coerenza": "S",
+      "nota": "conferma d'ordine non ancora ricevuta"
+    },
+    {
+      "id": "T002",
+      "evento": "dichiarazione_conformita",
+      "descrizione": "DdC di B02",
+      "beni": [
+        "B02"
+      ],
+      "data": {
+        "valore": "2025-02-28",
+        "precisione": "giorno"
+      },
+      "tipoData": "documento",
+      "origine": "documento_terzo",
+      "stato": "documentata",
+      "prove": [
+        {
+          "idEvidenza": "B02-RO5-001",
+          "file": "DdC_B02_DdC-DEMO-0002.pdf",
+          "posizione": "p.1",
+          "fattoLetto": "data 28/02/2025"
+        }
+      ],
+      "coerenza": "S"
+    },
+    {
+      "id": "T003",
+      "evento": "dichiarazione_conformita",
+      "descrizione": "DdC di B01",
+      "beni": [
+        "B01"
+      ],
+      "data": {
+        "valore": "2025-03-10",
+        "precisione": "giorno"
+      },
+      "tipoData": "documento",
+      "origine": "documento_terzo",
+      "stato": "documentata",
+      "prove": [
+        {
+          "idEvidenza": "B01-RO5-001",
+          "file": "DdC_B01_DdC-DEMO-0001.pdf",
+          "posizione": "p.1",
+          "fattoLetto": "data 10/03/2025"
+        }
+      ],
+      "coerenza": "S"
+    },
+    {
+      "id": "T004",
+      "evento": "fattura",
+      "descrizione": "Fattura FT-DEMO-0042",
+      "beni": [
+        "B01",
+        "B02"
+      ],
+      "data": {
+        "valore": "2025-04-02",
+        "precisione": "giorno"
+      },
+      "tipoData": "documento",
+      "origine": "documento_fiscale",
+      "stato": "documentata",
+      "prove": [
+        {
+          "idEvidenza": "B01-DOC-001",
+          "file": "fattura_FT-DEMO-0042.pdf",
+          "posizione": "p.1",
+          "fattoLetto": "data 02/04/2025"
+        }
+      ],
+      "coerenza": "S"
+    },
+    {
+      "id": "T005",
+      "evento": "installazione",
+      "descrizione": "Installazione di B01",
+      "beni": [
+        "B01"
+      ],
+      "data": {
+        "valore": "2025-04",
+        "precisione": "mese"
+      },
+      "tipoData": "documento",
+      "origine": "dichiarazione_impresa",
+      "stato": "dichiarata",
+      "prove": [],
+      "coerenza": "S",
+      "nota": "verbale di installazione da richiedere"
+    },
+    {
+      "id": "T006",
+      "evento": "installazione",
+      "descrizione": "Installazione di B02",
+      "beni": [
+        "B02"
+      ],
+      "data": {
+        "valore": "2025-04-10/2025-04-20",
+        "precisione": "periodo"
+      },
+      "tipoData": "documento",
+      "origine": "dichiarazione_impresa",
+      "stato": "dichiarata",
+      "prove": [],
+      "coerenza": "S"
+    },
+    {
+      "id": "T007",
+      "evento": "entrata_in_funzione",
+      "descrizione": "Entrata in funzione di B01",
+      "beni": [
+        "B01"
+      ],
+      "data": {
+        "valore": "2025-05-05",
+        "precisione": "giorno"
+      },
+      "tipoData": "documento",
+      "origine": "dichiarazione_impresa",
+      "stato": "dichiarata",
+      "prove": [],
+      "coerenza": "S"
+    },
+    {
+      "id": "T008",
+      "evento": "interconnessione_dichiarata",
+      "descrizione": "Interconnessione dichiarata dalla referente IT",
+      "beni": [
+        "B01",
+        "B02"
+      ],
+      "data": {
+        "valore": "2025-05-20",
+        "precisione": "giorno"
+      },
+      "tipoData": "documento",
+      "origine": "dichiarazione_impresa",
+      "stato": "dichiarata",
+      "prove": [
+        {
+          "idEvidenza": "B01-RO2-001",
+          "file": "dichiarazione_rete_cliente.pdf",
+          "posizione": "p.1",
+          "fattoLetto": "interconnessione dal 20/05/2025"
+        }
+      ],
+      "coerenza": "S"
+    }
+  ],
   "azioniAperte": [
     {
       "id": "A001",
@@ -478,6 +649,7 @@
       "requisito": "RO2",
       "esempioAccettabile": "Export CSV del MES con numero ordine, data, ora e identificativo macchina B01",
       "destinatario": "cliente",
+      "categoria": "documento",
       "stato": "aperta",
       "apertaIl": "2026-10-01"
     },
@@ -492,6 +664,7 @@
       "requisito": "RO5",
       "esempioAccettabile": "DdC o attestazione del costruttore con modello e matricola di B02",
       "destinatario": "fornitore",
+      "categoria": "documento",
       "stato": "aperta",
       "apertaIl": "2026-10-01"
     },
@@ -506,6 +679,7 @@
       "requisito": "RO2",
       "esempioAccettabile": "Stesso ordine visibile sul MES e sull'HMI di B01, con foto di entrambi i lati",
       "destinatario": "perito",
+      "categoria": "evidenza",
       "stato": "aperta",
       "apertaIl": "2026-10-01"
     }

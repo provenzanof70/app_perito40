@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;color:{{tx}};background:{{bg}};width:100%">
+<div style="height:54px;position:relative;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 44px;box-sizing:border-box;font-size:16px;font-weight:600"><span>9:41</span><div style="position:absolute;left:50%;top:11px;transform:translateX(-50%);width:124px;height:36px;border-radius:18px;background:#000"></div><div style="display:flex;gap:6px;align-items:center"><svg viewBox="0 0 256 256" fill="currentColor" style="width:17px;height:17px;flex:none;"><path d="M208,40V200a16,16,0,0,1-16,16H32A16,16,0,0,1,20.7,188.68l160-160A16,16,0,0,1,208,40Z"></path></svg><svg viewBox="0 0 256 256" fill="currentColor" style="width:24px;height:24px;flex:none;"><path d="M200,56H32A24,24,0,0,0,8,80v96a24,24,0,0,0,24,24H200a24,24,0,0,0,24-24V80A24,24,0,0,0,200,56Zm8,120a8,8,0,0,1-8,8H32a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H200a8,8,0,0,1,8,8ZM192,96v64a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V96a8,8,0,0,1,8-8H184A8,8,0,0,1,192,96Zm64,0v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0Z"></path></svg></div></div>
+<div style="height:44px;display:grid;grid-template-columns:100px minmax(0,1fr) 100px;align-items:center;padding:0 8px">
+<div style="display:flex;align-items:center;gap:1px;color:{{ac}};font-size:17px;cursor:pointer"><svg viewBox="0 0 256 256" fill="currentColor" style="width:24px;height:24px;flex:none;"><path d="M164.24,203.76a6,6,0,1,1-8.48,8.48l-80-80a6,6,0,0,1,0-8.48l80-80a6,6,0,0,1,8.48,8.48L88.49,128Z"></path></svg><span>{{indietro}}</span></div>
+<div style="text-align:center;line-height:1.2;min-width:0"><div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Officina Esempio S.r.l.</div><div style="font-size:12px;color:{{t2}}">P-2026-001</div></div>
+<div style="display:flex;justify-content:flex-end;color:{{ac}}"><div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg viewBox="0 0 256 256" fill="currentColor" style="width:24px;height:24px;flex:none;"><path d="M198,136a6,6,0,0,1-6,6H64a6,6,0,0,1,0-12H192A6,6,0,0,1,198,136Zm34-54H24a6,6,0,0,0,0,12H232a6,6,0,0,0,0-12Zm-80,96H104a6,6,0,0,0,0,12h48a6,6,0,0,0,0-12Z"></path></svg></div></div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;padding:6px 16px 10px">
+<sc-if value="{{hasCodice}}" hint-placeholder-val="{{false}}"><span style="font-size:15px;font-weight:700;color:{{ac}};background:{{acT}};padding:4px 8px;border-radius:8px;flex:none">{{codice}}</span></sc-if>
+<h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-0.4px;flex:1;line-height:1.15;min-width:0">{{titolo}}</h1>
+<sc-if value="{{offline}}" hint-placeholder-val="{{true}}"><span style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:{{offFg}};background:{{offBg}};padding:5px 9px;border-radius:12px;flex:none"><svg viewBox="0 0 256 256" fill="currentColor" style="width:14px;height:14px;flex:none;"><path d="M52.44,36A6,6,0,0,0,43.56,44l40.18,44.2c-.45.87-.9,1.75-1.32,2.64A62,62,0,1,0,72,214h88a85.23,85.23,0,0,0,32.35-6.3L203.56,220a6,6,0,0,0,8.88-8.08ZM160,202H72a50,50,0,1,1,5.9-99.64A86.25,86.25,0,0,0,74,128a6,6,0,0,0,12,0,73.92,73.92,0,0,1,6.44-30.2l91.22,100.34A73.65,73.65,0,0,1,160,202Zm86-74a85.85,85.85,0,0,1-21.85,57.27,6,6,0,0,1-4.47,2,6,6,0,0,1-4.47-10,74,74,0,0,0-99-108.92,6,6,0,1,1-7.11-9.67A86,86,0,0,1,246,128Z"></path></svg>Offline</span></sc-if>
+</div>
+<sc-if value="{{showCont}}" hint-placeholder-val="{{true}}">
+<div style="margin:0 16px 12px;background:{{card}};border-radius:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:8px 0">
+<sc-for list="{{cont}}" as="c" hint-placeholder-count="4"><div style="text-align:center;line-height:1.2"><div style="font-size:17px;font-weight:700;font-variant-numeric:tabular-nums">{{c.n}}</div><div style="font-size:11px;color:{{t2}}">{{c.l}}</div></div></sc-for>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:200},&quot;titolo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Beni&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;codice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;indietro&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Pratiche&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;offline&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;contatori&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;evidenze&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:47,&quot;tsType&quot;:&quot;number&quot;},&quot;azioni&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:3,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props, d = !!p.dark;
+    const c = d
+      ? { bg:'#000', tx:'#F2F2F7', t2:'#98989F', ac:'#5A9BFF', acT:'#1A2B44', card:'#1C1C1E', offBg:'#2C2C2E', offFg:'#AEAEB2' }
+      : { bg:'#F2F2F7', tx:'#1C1C1E', t2:'#8A8A8E', ac:'#1E5AA8', acT:'#E6EEF8', card:'#fff', offBg:'#E5E5EA', offFg:'#6C6C70' };
+    return { ...c, titolo: p.titolo ?? 'Beni', codice: p.codice, hasCodice: !!p.codice, indietro: p.indietro ?? 'Pratiche',
+      offline: p.offline ?? true, showCont: p.contatori ?? true,
+      cont: [{n:3,l:'beni'},{n:3,l:'targhe'},{n:p.evidenze ?? 47,l:'evidenze'},{n:p.azioni ?? 3,l:'azioni aperte'}] };
+  }
+}
+</script>
+</body>
+</html>

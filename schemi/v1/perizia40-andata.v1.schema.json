@@ -4,7 +4,7 @@
   "title": "Pacchetto di andata Perizia 4.0 — v1",
   "description": "File perizia40-andata.json generato sul PC dalla pratica e caricato nell'app sul telefono. Porta il censimento dei beni, i gruppi di evidenze attesi, i dati agli atti da verificare e le azioni aperte da chiudere in campo. Contiene solo ciò che serve al sopralluogo (§12.5).",
   "type": "object",
-  "required": ["formato", "versioneSchema", "demo", "idAndata", "revisione", "creatoIl", "codicePratica", "regime", "cliente", "sopralluogo", "beni", "azioniAperte", "evidenzeEsistenti"],
+  "required": ["formato", "versioneSchema", "demo", "idAndata", "revisione", "creatoIl", "codicePratica", "regime", "cliente", "sopralluogo", "beni", "timeline", "azioniAperte", "evidenzeEsistenti"],
   "additionalProperties": false,
   "properties": {
     "formato": { "const": "perizia40.andata" },
@@ -96,6 +96,11 @@
           }
         }
       }
+    },
+    "timeline": {
+      "type": "array",
+      "description": "Date agli atti della pratica, in sola lettura sul telefono; le date verificate in campo tornano come dateRilevate con rifTimeline (v1.1)",
+      "items": { "$ref": "comuni.v1.schema.json#/$defs/rigaTimeline" }
     },
     "azioniAperte": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/azione" } },
     "evidenzeEsistenti": {
