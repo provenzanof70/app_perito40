@@ -8,7 +8,7 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 
 - **Nessuna API e nessun servizio AI esterno** nell'app o negli script. Le letture di testo (targhe, schermate, vocali) si fanno a mano in campo oppure in una sessione Claude sul PC, sulla cartella della pratica.
 - **Nessun dato esce dal telefono** se non lo esporta il perito.
-- Gli script richiedono solo **Node.js 22 o successivo**, senza `npm install`.
+- Gli script richiedono solo **Node.js 22 o successivo**, senza `npm install`; l'app non ha passaggi di compilazione.
 
 ## Stato
 
@@ -16,11 +16,17 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 |---|---|---|
 | F1 | Schemi JSON v1, pratica DEMO, validatore, README | fatta |
 | F2.0 | Schemi v1.1 allineati ai mockup (`docs/F2_confronto_mockup_schemi.md`), rientro in ZIP, validatore aggiornato | fatta |
-| F2.1–F2.8 | Interfaccia PWA (dai mockup di Claude Design in `design/`) | da fare |
+| F2.1 | Base della PWA: installazione, offline, archivio sul telefono, importazione dell'andata, elenco pratiche, visita, promemoria di checkpoint | fatta |
+| F2.2–F2.8 | Scheda bene, rilievo, requisiti, azioni, pacchetto di rientro, prove, pubblicazione | da fare |
 
 ## Struttura
 
 ```
+app/                           PWA di sopralluogo (moduli JavaScript senza compilazione)
+  index.html, stile.css, manifest.webmanifest, sw.js, precache.js (generato)
+  js/                          interfaccia (Preact + htm), archivio IndexedDB, importazione, promemoria
+  vendor/                      Preact e htm copiati dal registro npm, con licenze e impronte (vendor/LEGGIMI.md)
+  img/                         logo e icone (generate da strumenti/genera_icone.mjs)
 schemi/v1/                     formati dei file
   comuni.v1.schema.json        definizioni condivise (codici, date, evidenze, timeline, azioni, registri, manifesto)
   pratica_40.v1.schema.json    fascicolo della pratica sul PC
@@ -31,6 +37,8 @@ strumenti/
   valida.mjs                   validatore da riga di comando
   prova.mjs                    prova del validatore sulla DEMO e sui casi errati
   genera_demo.mjs              rigenera la pratica DEMO
+  aggiorna_app.mjs             aggiorna l'elenco dei file offline dell'app e la policy di sicurezza
+  genera_icone.mjs             genera le icone dell'app dal logo
   lib/validatore.mjs           nucleo dei controlli, senza dipendenze né accesso al disco (riusabile nella PWA)
   lib/zip.mjs                  lettura e scrittura ZIP senza dipendenze (riusabile nella PWA)
   lib/disco.mjs                lettura di cartelle e ZIP, calcolo delle impronte (Node)
@@ -176,6 +184,35 @@ Prova del validatore: la DEMO deve passare e ogni caso errato deve essere rifiut
 ```bash
 node strumenti/prova.mjs
 ```
+
+## App di sopralluogo (PWA)
+
+Requisiti sul telefono: **iPhone con iOS 16.4 o successivo**, Safari; l'app va aggiunta alla schermata Home (Condividi › Aggiungi alla schermata Home).
+
+Cosa fa oggi (F2.1):
+- **Offline**: il service worker conserva sul telefono tutti i file dell'app; un aggiornamento si propone dal menu e non si installa mai durante una visita in corso.
+- **Archivio sul telefono** (IndexedDB) e **richiesta di archiviazione persistente** all'avvio; se il sistema non la concede, l'app lo dice.
+- **Importazione del pacchetto di andata** da File: impronta SHA-256 dei byte ricevuti e controllo con lo stesso validatore del PC. Un'andata non valida viene rifiutata con l'elenco degli errori; una pratica con dati già raccolti non si sovrascrive.
+- **Elenco pratiche** (mockup 1a), testata e barra in basso dei mockup, modalità chiara e scura.
+- **Avvertenze** del pacchetto all'apertura della pratica; **inizio visita** con scelta dei presenti.
+- **Promemoria di checkpoint**: ogni 2 ore o 30 evidenze dall'ultimo pacchetto (o dall'inizio visita); «Più tardi» lo sospende per 30 minuti.
+- **Sicurezza**: la policy dell'app permette di contattare solo il proprio indirizzo (nessun servizio esterno) e vieta il codice valutato al volo.
+
+Per provarla sul PC, dalla radice del repository:
+
+```bash
+python -m http.server 8040 --bind 127.0.0.1
+```
+
+e aprire `http://localhost:8040/app/`; con «Prova con la pratica DEMO» si importa l'andata della DEMO.
+
+Dopo ogni modifica ai file dell'app:
+
+```bash
+node strumenti/aggiorna_app.mjs
+```
+
+(la prova `node strumenti/prova.mjs` fallisce se ce ne si dimentica).
 
 ## Pratica DEMO
 

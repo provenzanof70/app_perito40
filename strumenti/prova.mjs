@@ -53,6 +53,28 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   verifica('ZIP: archivio troncato rifiutato', errore !== '');
 }
 
+// App: promemoria di checkpoint (2 ore o 30 evidenze dall'ultimo pacchetto o dall'inizio visita)
+{
+  const { statoCheckpoint } = await import('../app/js/promemoria.js');
+  const ora = new Date('2026-10-15T12:00:00+02:00');
+  const p = (inizio, ultimo = null, rinviatoFino = null) => ({ visita: { inizio }, esportazioni: { ultimo }, promemoria: { rinviatoFino } });
+  verifica('Checkpoint: nessun promemoria prima dell\'inizio visita', !statoCheckpoint({ visita: null, esportazioni: { ultimo: null }, promemoria: {} }, 99, ora).dovuto);
+  verifica('Checkpoint: dovuto dopo 2 ore dall\'inizio visita', statoCheckpoint(p('2026-10-15T09:59:00+02:00'), 3, ora).motivo === 'tempo');
+  verifica('Checkpoint: non dovuto a 1 h 59 min', !statoCheckpoint(p('2026-10-15T10:01:00+02:00'), 3, ora).dovuto);
+  verifica('Checkpoint: dovuto a 30 evidenze dall\'ultimo pacchetto', statoCheckpoint(p('2026-10-15T09:00:00+02:00', { data: '2026-10-15T11:30:00+02:00', evidenze: 10 }), 40, ora).motivo === 'evidenze');
+  verifica('Checkpoint: non dovuto a 29 evidenze e 30 minuti', !statoCheckpoint(p('2026-10-15T09:00:00+02:00', { data: '2026-10-15T11:30:00+02:00', evidenze: 10 }), 39, ora).dovuto);
+  verifica('Checkpoint: «più tardi» sospende il promemoria', !statoCheckpoint(p('2026-10-15T09:00:00+02:00', null, '2026-10-15T12:20:00+02:00'), 3, ora).dovuto);
+}
+
+// App: elenco dei file offline e impronta della mappa di importazione aggiornati
+{
+  const { calcola } = await import('./aggiorna_app.mjs');
+  const { indice, precache } = calcola();
+  const app = join(RADICE, 'app');
+  verifica('App: precache.js e policy di sicurezza aggiornati (node strumenti/aggiorna_app.mjs)',
+    readFileSync(join(app, 'index.html'), 'utf8') === indice && readFileSync(join(app, 'precache.js'), 'utf8') === precache);
+}
+
 const esitoDemo = validaCaricata(base, registro, { repoPubblico: true });
 if (esitoDemo.errori.length) {
   falliti++;

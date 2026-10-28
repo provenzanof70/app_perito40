@@ -1,2 +1,2 @@
-# Le impronte SHA-256 della DEMO valgono sui byte esatti: nessuna conversione dei fine riga.
-demo/** -text
+# Impronte SHA-256 (DEMO, librerie copiate, versione dell'app) valide sui byte esatti: nessuna conversione dei fine riga.
+* -text
