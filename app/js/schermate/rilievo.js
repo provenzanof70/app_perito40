@@ -31,11 +31,12 @@ function Anteprima({ evidenza }) {
     ${!url && html`<${Icona} nome=${evidenza.tipo === 'vocale' ? 'chat_text' : evidenza.tipo === 'video' ? 'camera' : 'file_text'} dim=${22} />`}</button>`;
 }
 
-function Registrazioni({ pratica, evidenze, bene }) {
-  const lista = evidenze.filter(e => (e.tipo === 'vocale' || e.tipo === 'video') && beneDi(e.beni[0]) === beneDi(bene)).reverse();
-  if (!lista.length) return html`<div class="meta registrazioni-vuote">Nessun vocale o video per ${beneDi(bene)}.</div>`;
+function Registrazioni({ pratica, evidenze, bene, tipo }) {
+  const lista = evidenze.filter(e => e.tipo === tipo && beneDi(e.beni[0]) === beneDi(bene)).reverse();
+  const nome = tipo === 'video' ? 'Video' : 'Note vocali';
+  if (!lista.length) return html`<div class="meta registrazioni-vuote">${tipo === 'video' ? 'Nessun video' : 'Nessuna nota vocale'} per ${beneDi(bene)}.</div>`;
   return html`<div class="registrazioni">
-    <div class="sezione chiara">Registrazioni · ${beneDi(bene)}</div>
+    <div class="sezione chiara">${nome} · ${beneDi(bene)}</div>
     ${lista.map(e => html`<button class="registrazione" onClick=${() => vai(rottaPratica(pratica.codicePratica, 'evidenza', e.id))}>
       <${Icona} nome=${e.tipo === 'video' ? 'camera' : 'chat_text'} dim=${22} />
       <span class="etichetta">${e.descrizione || 'Senza titolo'}
@@ -61,6 +62,7 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
   const [livelli, setLivelli] = useState(Array(36).fill(0.1));
   const input = useRef(null);
   const libreria = useRef(null);
+  const allegato = useRef(null);
   const apertaIl = useRef(null);
   const attiva = useRef(null);
   attiva.current = registrazione;
@@ -85,13 +87,15 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
     } finally { setLavoro(false); }
   }
 
-  async function suFile(f, daFotocamera) {
+  // origine: 'fotocamera' (aperta dall'app), 'libreria' (foto/video già scattati), 'file' (allegato da File)
+  async function suFile(f, origine) {
     if (!f) return;
     const rientro = new Date();
-    const tipo = modo === 'file' ? (f.type === 'application/pdf' ? 'documento' : f.type.startsWith('image/') ? 'screenshot' : 'documento')
+    const pdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+    const tipo = origine === 'file' ? (pdf || !f.type.startsWith('image/') ? 'documento' : 'screenshot')
       : f.type.startsWith('video/') ? 'video' : 'foto';
     const extra = { nomeOriginale: f.name };
-    if (daFotocamera && apertaIl.current) { extra.aperturaFotocamera = apertaIl.current; extra.rientroFotocamera = rientro; }
+    if (origine === 'fotocamera' && apertaIl.current) { extra.aperturaFotocamera = apertaIl.current; extra.rientroFotocamera = rientro; }
     apertaIl.current = null;
     if (tipo === 'video') extra.durataSecondi = await durata(f, 'video');
     await salva(f, tipo, extra);
@@ -99,7 +103,8 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
 
   async function scatta(visitaAvviata = false) {
     if (!pratica.visita && !visitaAvviata) return alVisitaNecessaria(() => scatta(true));
-    if (modo !== 'vocale') { apertaIl.current = modo === 'file' ? null : new Date(); return input.current.click(); }
+    if (modo === 'file') { apertaIl.current = null; return allegato.current.click(); }
+    if (modo !== 'vocale') { apertaIl.current = new Date(); return input.current.click(); }
     if (!registrazione) {
       try { setSecondi(0); setRegistrazione(await avviaRegistrazione(setLivelli)); }
       catch (e) { mostra(`Microfono non disponibile: ${e.message}`); }
@@ -112,7 +117,7 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
     await salva(r.blob, 'vocale', { durataSecondi: s, dataRegistrazione: isoLocale(r.inizio), descrizione: `Nota vocale · ${ui.nome.replace('­', '')} · ${codice}` });
   }
 
-  const accetta = modo === 'foto' ? 'image/*' : modo === 'video' ? 'video/*' : 'image/*,application/pdf';
+  const accetta = modo === 'video' ? 'video/*' : 'image/*';
   return html`<div class="rilievo">
     <div class="rilievo-stato">Offline o in rete: le evidenze si salvano sul telefono</div>
     <div class="rilievo-centro">
@@ -122,11 +127,12 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
             <div class="tempo">${minSec(secondi)}</div>
             <div class="meta chiara">${registrazione ? 'In registrazione · salvata sul dispositivo' : 'Pronto · tocca per registrare'}</div>
           </div>
-          <${Registrazioni} pratica=${pratica} evidenze=${evidenze} bene=${codice} />`
+          <${Registrazioni} pratica=${pratica} evidenze=${evidenze} bene=${codice} tipo="vocale" />`
         : html`<div class="suggerimento"><div><b>${ui.nome ? ui.nome.replace('­', '') : ''}</b> · ${(cosaCercare && cosaCercare.cosaCercare) || 'contesto prima del dettaglio, poi il particolare'}</div>
             <span class="meta chiara">${modo === 'foto' ? 'Si apre la fotocamera dell\'iPhone: foto a piena risoluzione con la data di scatto originale.'
               : modo === 'video' ? 'Si apre la videocamera dell\'iPhone.' : 'Scegli un PDF o un\'immagine da File (report, schermate, documenti mostrati in campo).'}</span>
-            ${(modo === 'foto' || modo === 'video') && html`<span class="meta chiara">«Dalla libreria» prende ${modo === 'foto' ? 'una foto già scattata' : 'un video già registrato'} con la Fotocamera dell'iPhone: se il file conserva la data di scatto, l'app la legge.</span>`}</div>`}
+            ${(modo === 'foto' || modo === 'video') && html`<span class="meta chiara">«Dalla libreria» prende ${modo === 'foto' ? 'una foto già scattata' : 'un video già registrato'} con la Fotocamera dell'iPhone: se il file conserva la data di scatto, l'app la legge.</span>`}</div>
+          ${modo === 'video' && html`<${Registrazioni} pratica=${pratica} evidenze=${evidenze} bene=${codice} tipo="video" />`}`}
     </div>
     <div class="rilievo-pannello">
       <div class="rilievo-bene">
@@ -145,10 +151,12 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
           aria-label=${modo === 'vocale' ? (registrazione ? 'Ferma registrazione' : 'Registra') : 'Acquisisci'} onClick=${() => scatta()}><span></span></button>
         <div class="ultima vuota"></div>
       </div>
-      <input ref=${input} type="file" class="nascosto" accept=${accetta} capture=${modo === 'file' ? undefined : 'environment'}
-        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f, modo !== 'file'); }} />
-      <input ref=${libreria} type="file" class="nascosto" accept=${modo === 'video' ? 'video/*' : 'image/*'}
-        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f, false); }} />
+      <input ref=${input} type="file" class="nascosto" accept=${accetta} capture="environment"
+        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f, 'fotocamera'); }} />
+      <input ref=${libreria} type="file" class="nascosto" accept=${accetta}
+        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f, 'libreria'); }} />
+      <input ref=${allegato} type="file" class="nascosto" accept=".pdf,application/pdf,image/*"
+        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f, 'file'); }} />
       ${(modo === 'foto' || modo === 'video') && html`<button class="collegamento chiaro dalla-libreria" disabled=${lavoro || !codice}
         onClick=${() => pratica.visita ? libreria.current.click() : alVisitaNecessaria(() => libreria.current.click())}>Dalla libreria</button>`}
     </div>
