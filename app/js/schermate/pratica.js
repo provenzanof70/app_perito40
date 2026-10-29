@@ -1,10 +1,11 @@
-// Schermate di una pratica: testata, barra in basso, promemoria di checkpoint e scheda «Pratica».
-// Beni, Rilievo, Requisiti e Azioni arrivano nelle fasi F2.2–F2.5.
+// Schermate di una pratica: testata, barra in basso, promemoria di checkpoint, schede Beni e Pratica.
+// Rilievo, Requisiti e Azioni arrivano nelle fasi F2.3–F2.5.
 
 import { useState, useEffect } from 'preact/hooks';
 import { html, dataBreve, oraBreve, megabyte } from '../ui.js';
 import { Testata, Barra, Foglio, Avviso } from '../componenti.js';
-import { vai } from '../rotte.js';
+import { vai, rottaPratica } from '../rotte.js';
+import { ElencoBeni, SchedaBene } from './beni.js';
 import { riepilogo, contatoriTestata } from '../stato.js';
 import { statoCheckpoint, testoPromemoria, rinviaFino, SOGLIA_ORE, SOGLIA_EVIDENZE } from '../promemoria.js';
 
@@ -47,15 +48,6 @@ function FoglioIniziaVisita({ pratica, alChiudi, alConferma }) {
     <${Avvertenze} andata=${pratica.andata} />
     <div class="elenco"><button class="scelta" onClick=${() => setLetto(!letto)}><${Spunta} si=${letto} /><span class="etichetta">Ho letto le avvertenze</span></button></div>
   </${Foglio}>`;
-}
-
-function SchedaBeni({ pratica }) {
-  return html`${pratica.andata.beni.map(b => html`<div class="scheda">
-    <div class="riga-alta"><span class="chip-codice">${b.codice}</span><span class="pastiglia p-neutra">${b.classificazione.profilo === 'completo' ? 'Profilo completo 5+2' : `Profilo ridotto · All. ${b.classificazione.allegato}${b.classificazione.gruppo ? ` Gr. ${b.classificazione.gruppo}` : ''}`}</span></div>
-    <div><div class="cliente-grande">${b.denominazione}</div><div class="sede">${b.funzione}</div></div>
-    ${b.componenti.length ? html`<div class="meta">${b.componenti.map(c => `${c.codice} ${c.denominazione}`).join(' · ')}</div>` : null}
-  </div>`)}
-  <div class="meta" style=${{ textAlign: 'center' }}>Scheda bene e verifica dei dati agli atti: fase F2.2</div>`;
 }
 
 function Segnaposto({ scheda }) {
@@ -110,12 +102,14 @@ function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita }) {
     </div>`;
 }
 
-export function SchermataPratica({ pratica, evidenze, scheda, sistema, aggiorna, mostra, alMenu }) {
+export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBene, sistema, aggiorna, mostra, alMenu }) {
   const [foglio, setFoglio] = useState(pratica.avvertenzeVisteIl ? null : 'avvertenze');
   const [, setBattito] = useState(0);
   useEffect(() => { const t = setInterval(() => setBattito(n => n + 1), 60000); return () => clearInterval(t); }, []);
 
-  const r = riepilogo(pratica, evidenze);
+  const r = riepilogo(pratica, evidenze, registri);
+  const bene = codiceBene && (pratica.andata.beni.find(b => b.codice === codiceBene) || registri.beneNuovo.get(codiceBene));
+  const serveVisita = () => mostra('Prima inizia la visita dalla scheda Pratica');
   const cp = statoCheckpoint(pratica, r.evidenze);
   const codice = pratica.codicePratica;
 
@@ -128,14 +122,16 @@ export function SchermataPratica({ pratica, evidenze, scheda, sistema, aggiorna,
   const rinvia = () => aggiorna(codice, p => { p.promemoria.rinviatoFino = rinviaFino(); });
 
   return html`<div class="schermo con-barra">
-    <${Testata} pratica=${pratica} titolo=${TITOLI[scheda] || 'Beni'} offline=${!sistema.online}
-      indietro=${{ etichetta: scheda === 'beni' ? 'Pratiche' : 'Beni', rotta: scheda === 'beni' ? '/' : `/p/${encodeURIComponent(codice)}/beni` }}
-      contatori=${scheda === 'beni' || scheda === 'pratica' ? contatoriTestata(r) : null} alMenu=${alMenu} />
+    <${Testata} pratica=${pratica} titolo=${bene ? bene.denominazione : TITOLI[scheda] || 'Beni'} codice=${bene && bene.codice} offline=${!sistema.online}
+      indietro=${bene ? { etichetta: 'Beni', rotta: rottaPratica(codice, 'beni') }
+        : { etichetta: scheda === 'beni' ? 'Pratiche' : 'Beni', rotta: scheda === 'beni' ? '/' : rottaPratica(codice, 'beni') }}
+      contatori=${!bene && (scheda === 'beni' || scheda === 'pratica') ? contatoriTestata(r) : null} alMenu=${alMenu} />
     <div class="contenuto">
       ${cp.dovuto && html`<${Avviso} tipo="att" titolo="Crea un checkpoint" tasti=${[
-        ['Crea checkpoint', () => { vai(`/p/${encodeURIComponent(codice)}/pratica`); mostra('La creazione del pacchetto arriva nella fase F2.6'); }],
+        ['Crea checkpoint', () => { vai(rottaPratica(codice, 'pratica')); mostra('La creazione del pacchetto arriva nella fase F2.6'); }],
         ['Più tardi', rinvia]]}>${testoPromemoria(cp)}</${Avviso}>`}
-      ${scheda === 'beni' ? html`<${SchedaBeni} pratica=${pratica} />`
+      ${scheda === 'beni' && bene ? html`<${SchedaBene} pratica=${pratica} bene=${bene} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
+        : scheda === 'beni' ? html`<${ElencoBeni} pratica=${pratica} evidenze=${evidenze} registri=${registri} alVisitaNecessaria=${serveVisita} />`
         : scheda === 'pratica' ? html`<${SchedaPraticaDettagli} pratica=${pratica} sistema=${sistema} cp=${cp} alIniziaVisita=${() => setFoglio('visita')} />`
         : html`<${Segnaposto} scheda=${scheda} />`}
     </div>

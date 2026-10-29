@@ -6,10 +6,11 @@ import { Foglio, Avviso, ElencoErrori } from './componenti.js';
 import { rottaCorrente, vai } from './rotte.js';
 import { tutti, transazione, impostazione, salvaImpostazione } from './archivio.js';
 import { importaAndata } from './importa.js';
+import { perTipo } from './registri.js';
 import { Elenco } from './schermate/elenco.js';
 import { SchermataPratica } from './schermate/pratica.js';
 
-export const VERSIONE_APP = '0.1.0 · F2.1';
+export const VERSIONE_APP = '0.2.0 · F2.2';
 const NOME_PERITO = 'Perito Ing. Francesco Provenzano';
 
 function MenuApp({ sistema, nomePerito, alNome, visitaInCorso, alChiudi }) {
@@ -35,6 +36,7 @@ export function App({ sistema: sistemaIniziale }) {
   const [rotta, setRotta] = useState(rottaCorrente());
   const [pratiche, setPratiche] = useState(null);
   const [evidenzePer, setEvidenzePer] = useState({});
+  const [registriPer, setRegistriPer] = useState({});
   const [sistema, setSistema] = useState(sistemaIniziale);
   const [nomePerito, setNomePerito] = useState(NOME_PERITO);
   const [toast, setToast] = useState(null);
@@ -45,8 +47,13 @@ export function App({ sistema: sistemaIniziale }) {
 
   async function ricarica() {
     const p = await tutti('pratiche');
-    const ev = {};
-    for (const x of p) ev[x.codicePratica] = await tutti('evidenze', 'perPratica', x.codicePratica);
+    const ev = {}, reg = {};
+    const righe = await tutti('registri');
+    for (const x of p) {
+      ev[x.codicePratica] = await tutti('evidenze', 'perPratica', x.codicePratica);
+      reg[x.codicePratica] = perTipo(righe.filter(r => r.codicePratica === x.codicePratica));
+    }
+    setRegistriPer(reg);
     p.sort((a, b) => (a.andata.sopralluogo.dataPrevista).localeCompare(b.andata.sopralluogo.dataPrevista));
     setEvidenzePer(ev);
     setPratiche(p);
@@ -82,17 +89,18 @@ export function App({ sistema: sistemaIniziale }) {
     addEventListener('hashchange', suHash);
     addEventListener('online', rete); addEventListener('offline', rete);
     addEventListener('perito40:aggiornamento', agg);
+    addEventListener('perito40:ricarica', ricarica);
     ricarica();
     impostazione('nomePerito', NOME_PERITO).then(setNomePerito);
-    return () => { removeEventListener('hashchange', suHash); removeEventListener('online', rete); removeEventListener('offline', rete); removeEventListener('perito40:aggiornamento', agg); };
+    return () => { removeEventListener('hashchange', suHash); removeEventListener('online', rete); removeEventListener('offline', rete); removeEventListener('perito40:aggiornamento', agg); removeEventListener('perito40:ricarica', ricarica); };
   }, []);
 
   let schermata;
   if (rotta.nome === 'pratica' && pratiche) {
     const p = pratiche.find(x => x.codicePratica === rotta.codice);
     if (!p) { vai('/'); return null; }
-    schermata = html`<${SchermataPratica} key=${p.codicePratica + rotta.scheda} pratica=${p} evidenze=${evidenzePer[p.codicePratica] || []}
-      scheda=${rotta.scheda} sistema=${sistema} aggiorna=${aggiorna} mostra=${mostra} alMenu=${() => setMenu(true)} />`;
+    schermata = html`<${SchermataPratica} key=${p.codicePratica + rotta.scheda + (rotta.bene || '')} pratica=${p} evidenze=${evidenzePer[p.codicePratica] || []}
+      registri=${registriPer[p.codicePratica] || perTipo([])} scheda=${rotta.scheda} codiceBene=${rotta.bene} sistema=${sistema} aggiorna=${aggiorna} mostra=${mostra} alMenu=${() => setMenu(true)} />`;
   } else {
     schermata = html`<${Elenco} pratiche=${pratiche} evidenzePer=${evidenzePer} sistema=${sistema} nomePerito=${nomePerito}
       alMenu=${() => setMenu(true)}

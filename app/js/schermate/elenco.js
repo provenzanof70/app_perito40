@@ -47,7 +47,7 @@ export function Elenco({ pratiche, evidenzePer, sistema, nomePerito, alFile, alD
   return html`<div class="schermo">
     <div class="intestazione">
       <div class="marchio">
-        <div><img class="logo" src="img/logo-fp.png" alt="Logo FP" /><span>${nomePerito}</span></div>
+        <div><span>${nomePerito}</span></div>
         <button class="tasto-icona" aria-label="Menu" onClick=${alMenu}><${Icona} nome="menu" /></button>
       </div>
       <h1>Pratiche</h1>

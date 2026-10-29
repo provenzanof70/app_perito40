@@ -17,7 +17,9 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | F1 | Schemi JSON v1, pratica DEMO, validatore, README | fatta |
 | F2.0 | Schemi v1.1 allineati ai mockup (`docs/F2_confronto_mockup_schemi.md`), rientro in ZIP, validatore aggiornato | fatta |
 | F2.1 | Base della PWA: installazione, offline, archivio sul telefono, importazione dell'andata, elenco pratiche, visita, promemoria di checkpoint | fatta |
-| F2.2–F2.8 | Scheda bene, rilievo, requisiti, azioni, pacchetto di rientro, prove, pubblicazione | da fare |
+| F2.2 | Elenco beni, scheda bene con verifica riga per riga dei dati agli atti, censimento dei beni nuovi | fatta |
+| F2.3–F2.7 | Rilievo, requisiti, azioni, pacchetto di rientro, prove | da fare |
+| F2.8 | Pubblicazione su GitHub Pages | attiva: https://provenzanof70.github.io/app_perito40/app/ |
 
 ## Struttura
 
@@ -189,12 +191,13 @@ node strumenti/prova.mjs
 
 Requisiti sul telefono: **iPhone con iOS 16.4 o successivo**, Safari; l'app va aggiunta alla schermata Home (Condividi › Aggiungi alla schermata Home).
 
-Cosa fa oggi (F2.1):
+Cosa fa oggi (F2.1–F2.2):
 - **Offline**: il service worker conserva sul telefono tutti i file dell'app; un aggiornamento si propone dal menu e non si installa mai durante una visita in corso.
 - **Archivio sul telefono** (IndexedDB) e **richiesta di archiviazione persistente** all'avvio; se il sistema non la concede, l'app lo dice.
 - **Importazione del pacchetto di andata** da File: impronta SHA-256 dei byte ricevuti e controllo con lo stesso validatore del PC. Un'andata non valida viene rifiutata con l'elenco degli errori; una pratica con dati già raccolti non si sovrascrive.
 - **Elenco pratiche** (mockup 1a), testata e barra in basso dei mockup, modalità chiara e scura.
 - **Avvertenze** del pacchetto all'apertura della pratica; **inizio visita** con scelta dei presenti.
+- **Beni (F2.2)**: elenco con gruppi di evidenze per profilo, scheda del bene con la verifica riga per riga dei dati agli atti (confermato / corretto con nuovo valore / difforme / non verificabile con nota obbligatoria, evidenza collegata), date agli atti in sola lettura, censimento dei beni nuovi con matricola letta, illeggibile o mancante.
 - **Promemoria di checkpoint**: ogni 2 ore o 30 evidenze dall'ultimo pacchetto (o dall'inizio visita); «Più tardi» lo sospende per 30 minuti.
 - **Sicurezza**: la policy dell'app permette di contattare solo il proprio indirizzo (nessun servizio esterno) e vieta il codice valutato al volo.
 
