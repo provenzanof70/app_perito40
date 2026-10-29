@@ -148,8 +148,15 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   app.noteCampo = [R.notaPerRientro({ tipo: 'nota', id: 'NC-002', bene: 'B01', requisito: 'RO3', testo: 'collegamento al magazzino utensili da fotografare', ora: '2026-10-15T09:44:00Z', base: 'promemoria' })];
   app.nuoveAzioni = [...app.nuoveAzioni, R.bozzaPerRientro({ tipo: 'azione', id: 'A008', categoria: 'evidenza', beni: ['B01'], requisito: 'RO2', cosaServe: 'Riscontro oggettivo della dichiarazione DT-003',
     nota: 'dichiarazione verbale', generataDa: { tipo: 'dichiarazione', id: 'DT-003' }, stato: 'aperta', apertaIl: '2026-10-15' })];
+  // F2.5: proposta di chiusura e data rilevata che precisa una data agli atti
+  app.aggiornamentiAzioni = [R.aggiornamentoPerRientro({ tipo: 'aggiornamento', id: 'A003', idAzione: 'A003', esitoCampo: 'proposta_chiusura', motivoProposto: 'riscontro_diretto', riscontro: 'RD-003', evidenze: ['B01-ID-009'], nota: undefined }),
+    R.aggiornamentoPerRientro({ tipo: 'aggiornamento', id: 'A001', idAzione: 'A001', esitoCampo: 'parziale', nota: 'storico visto a video, export da richiedere' })];
+  app.dateRilevate = [R.dataPerRientro({ tipo: 'data', id: 'T001', evento: 'installazione', beni: ['B01'], data: { valore: '2025-04-14', precisione: 'giorno' }, tipoData: 'documento', origine: 'verbale',
+    stato: R.statoData(['B01-ID-009'], 'verbale'), prove: [{ idEvidenza: 'B01-ID-009', file: 'x.jpg', fattoLetto: 'data 14/04/2025' }], coerenza: 'S', nota: undefined, rifTimeline: 'T005', esitoRif: 'precisata', descrizione: undefined })];
+  verifica('App: stato di una data rilevata (documentata solo con prova e origine non dichiarativa)',
+    R.statoData(['x'], 'verbale') === 'documentata' && R.statoData(['x'], 'dichiarazione_impresa') === 'dichiarata' && R.statoData([], 'verbale') === 'da_verificare');
   const es3 = nuovoEsito();
-  verifica('App: riscontro, dichiarazione, nota e bozza dell\'app validi per lo schema 1.2', validaStruttura(app, reg, es3, 'rientro') || (console.log(es3.errori), false));
+  verifica('App: riscontro, dichiarazione, nota, bozza, proposta di chiusura e data rilevata dell\'app validi per lo schema 1.2', validaStruttura(app, reg, es3, 'rientro') || (console.log(es3.errori), false));
 }
 
 // App: elenco dei file offline e impronta della mappa di importazione aggiornati

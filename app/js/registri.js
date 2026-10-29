@@ -6,11 +6,13 @@
 //   dichiarazione  dichiarazione di terzi (DT-001)                                   → dichiarazioniTerzi
 //   nota           nota del perito per bene e requisito, promemoria (NC-001)         → noteCampo
 //   azione         bozza di azione nata in campo (A004)                               → nuoveAzioni
+//   aggiornamento  esito in campo di un'azione dell'andata (id = codice dell'azione)  → aggiornamentiAzioni
+//   data           data rilevata in campo, nuova o verifica di una data agli atti (T001) → dateRilevate
 
 import { transazione } from './archivio.js';
 import { oggi } from './tempo.js';
 
-export const TIPI_REGISTRO = ['verifica', 'beneNuovo', 'riscontro', 'dichiarazione', 'nota', 'azione'];
+export const TIPI_REGISTRO = ['verifica', 'beneNuovo', 'riscontro', 'dichiarazione', 'nota', 'azione', 'aggiornamento', 'data'];
 
 export function salvaRegistro(codicePratica, tipo, id, dati) {
   return transazione('registri', 'readwrite', s => {
@@ -53,7 +55,7 @@ export function prossimoCodiceBene(andata, beniNuovi) {
 }
 
 // Primo progressivo libero per un registro, esclusi i codici già usati nel fascicolo (idUsati dell'andata)
-const PREFISSI = { riscontro: ['RD-', 'riscontri'], dichiarazione: ['DT-', 'dichiarazioni'], nota: ['NC-', 'note'], azione: ['A', 'azioni'] };
+const PREFISSI = { riscontro: ['RD-', 'riscontri'], dichiarazione: ['DT-', 'dichiarazioni'], nota: ['NC-', 'note'], azione: ['A', 'azioni'], data: ['T', 'date'] };
 
 export function prossimoId(andata, registri, tipo) {
   const [prefisso, chiave] = PREFISSI[tipo];
@@ -90,4 +92,13 @@ export const bozzaPerRientro = a => solo(a, ['id', 'categoria', 'beni', 'requisi
 
 export function cancellaRegistro(codicePratica, tipo, id) {
   return transazione('registri', 'readwrite', s => { s.delete([codicePratica, tipo, id]); });
+}
+
+export const aggiornamentoPerRientro = u => solo(u, ['idAzione', 'esitoCampo', 'motivoProposto', 'evidenze', 'riscontro', 'nota']);
+export const dataPerRientro = d => solo(d, ['id', 'evento', 'descrizione', 'beni', 'data', 'tipoData', 'origine', 'stato', 'prove', 'coerenza', 'nota', 'rifTimeline', 'esitoRif']);
+
+// Stato documentale di una data rilevata (§6.1): documentata solo con prova e origine non dichiarativa
+export function statoData(prove, origine) {
+  if (prove.length && origine !== 'dichiarazione_impresa') return 'documentata';
+  return origine === 'dichiarazione_impresa' ? 'dichiarata' : 'da_verificare';
 }

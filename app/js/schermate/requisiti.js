@@ -81,7 +81,7 @@ function Miniatura({ evidenza: e, scelta, alTocco }) {
     <span class="mini-ev-id">${e.id}</span>${scelta && html`<span class="mini-ev-spunta">✓</span>`}</button>`;
 }
 
-function SceltaEvidenze({ pratica, evidenze, registri, bene, requisito, scelte, setScelte, idCampo, mostra, gruppo }) {
+export function SceltaEvidenze({ pratica, evidenze, registri, bene, requisito, scelte, setScelte, idCampo, mostra, gruppo }) {
   const [lavoro, setLavoro] = useState(false);
   const elenco = evidenze.filter(e => e.stato === 'valida' && e.beni.some(b => beneDi(b) === bene))
     .sort((a, b) => (b.requisiti.includes(requisito) - a.requisiti.includes(requisito)) || b.acquisitaIl.localeCompare(a.acquisitaIl));

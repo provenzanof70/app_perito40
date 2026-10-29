@@ -1,5 +1,5 @@
 // Generato da strumenti/aggiorna_app.mjs: non modificare a mano.
-self.VERSIONE = '8696aa9ba18fa02d';
+self.VERSIONE = 'a140b30c9de0095c';
 self.FILE_APP = [
   "./img/icona-180.png",
   "./img/icona-192.png",
@@ -19,7 +19,9 @@ self.FILE_APP = [
   "./js/promemoria.js",
   "./js/registri.js",
   "./js/rotte.js",
+  "./js/schermate/azioni.js",
   "./js/schermate/beni.js",
+  "./js/schermate/cronologia.js",
   "./js/schermate/elenco.js",
   "./js/schermate/evidenza.js",
   "./js/schermate/pratica.js",

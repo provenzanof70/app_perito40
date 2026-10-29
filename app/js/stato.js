@@ -62,7 +62,7 @@ export function riepilogo(pratica, evidenze = [], registri = null) {
     beni: tutti.length,
     targhe,
     evidenze: valide.length,
-    azioniAperte: a.azioniAperte.length,
+    azioniAperte: a.azioniAperte.length + (registri ? registri.azione.size : 0),
     gruppiAttesi: attesi,
     gruppiConMateriale: coperti,
   };

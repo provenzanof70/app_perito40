@@ -206,8 +206,8 @@ export function SchedaBene({ pratica, bene, evidenze, registri, mostra, alVisita
     </div>` : null}
 
     ${date.length ? html`<div class="scheda-dati">
-      <div class="dati-testa"><b>Date agli atti</b><span class="meta">verifica in campo: fase F2.5</span></div>
-      ${date.map(r => html`<div class="riga-dato fissa">
+      <div class="dati-testa"><b>Date agli atti</b><span class="meta">tocca per verificare in campo</span></div>
+      ${date.map(r => html`<div class="riga-dato fissa" role="button" onClick=${() => pratica.visita ? vai(rottaPratica(pratica.codicePratica, 'data', 'verifica', r.id)) : alVisitaNecessaria(() => vai(rottaPratica(pratica.codicePratica, 'data', 'verifica', r.id)))}>
         <div class="riga-su"><span class="riga-etichetta">${r.descrizione || r.evento.replace(/_/g, ' ')}</span>
           <span class=${`pastiglia mini ${r.stato === 'documentata' ? 'p-ok' : 'p-att'}`}>${r.stato === 'da_verificare' ? 'da verificare' : r.stato}</span></div>
         <div class="riga-giu"><span class="riga-valore">${r.data.precisione === 'giorno' ? dataBreve(r.data.valore) : r.data.valore.replace('/', ' – ')}</span>

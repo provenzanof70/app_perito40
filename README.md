@@ -20,7 +20,8 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | F2.2 | Elenco beni, scheda bene con verifica riga per riga dei dati agli atti, censimento dei beni nuovi | fatta |
 | F2.3 | Rilievo: foto e video nativi, vocali, allegati, annotazione, galleria per gruppo, annullamento | fatta |
 | F2.4 | Requisiti, riscontro diretto guidato, dichiarazione di terzi, note del perito | fatta |
-| F2.5–F2.7 | Azioni e cronologia, pacchetto di rientro, prove | da fare |
+| F2.5 | Azioni (bozze e proposte di chiusura), cronologia con date rilevate, registro della visita | fatta |
+| F2.6–F2.7 | Pacchetto di rientro, prove | da fare |
 | F2.8 | Pubblicazione su GitHub Pages | attiva: https://provenzanof70.github.io/app_perito40/app/ |
 
 ## Struttura
@@ -193,7 +194,7 @@ node strumenti/prova.mjs
 
 Requisiti sul telefono: **iPhone con iOS 16.4 o successivo**, Safari; l'app va aggiunta alla schermata Home (Condividi › Aggiungi alla schermata Home).
 
-Cosa fa oggi (F2.1–F2.4):
+Cosa fa oggi (F2.1–F2.5):
 - **Offline**: il service worker conserva sul telefono tutti i file dell'app; un aggiornamento si propone dal menu e non si installa mai durante una visita in corso.
 - **Archivio sul telefono** (IndexedDB) e **richiesta di archiviazione persistente** all'avvio; se il sistema non la concede, l'app lo dice.
 - **Importazione del pacchetto di andata** da File: impronta SHA-256 dei byte ricevuti e controllo con lo stesso validatore del PC. Un'andata non valida viene rifiutata con l'elenco degli errori; una pratica con dati già raccolti non si sovrascrive.
@@ -208,6 +209,9 @@ Cosa fa oggi (F2.1–F2.4):
 - **Riscontro diretto guidato**: fatto, oggetto, circostanza, ora; data della visita automatica; frase verbalizzata composta dall'app; foto o video scattati dal modulo e collegati.
 - **Dichiarazione di terzi**: persona dai referenti, forma (con foto del documento se scritta), data, contenuto, riscontro oggettivo Sì (con evidenza obbligatoria) / No / Da acquisire, che crea una bozza di azione collegata.
 - I codici dei registri (RD, DT, NC, A) non riusano quelli già nel fascicolo: l'andata li elenca in `idUsati` (schema 1.2).
+- **Azioni (F2.5)**: aperte (dall'andata e bozze nate in campo, anche da «Da acquisire») e proposte. «Nuova azione» con categoria, bene, requisito, cosa serve; «Proponi chiusura» con motivo ed evidenza o riscontro obbligatori; «Annota esito» (risolta in parte / non risolta). La chiusura la decide il perito sul PC; una bozza si scarta solo prima del primo pacchetto esportato.
+- **Cronologia e date**: date agli atti per bene con origine, precisione e stato; verifica in campo (confermata / precisata / difforme) e date nuove, con prova collegata e stato calcolato (documentata solo con prova e origine non dichiarativa); coerenza con nota obbligatoria se non coerente.
+- **Registro della visita** ricavato da inizio visita, evidenze, riscontri, dichiarazioni, beni nuovi e date, senza dati nuovi.
 - **Promemoria di checkpoint**: ogni 2 ore o 30 evidenze dall'ultimo pacchetto (o dall'inizio visita); «Più tardi» lo sospende per 30 minuti.
 - **Sicurezza**: la policy dell'app permette di contattare solo il proprio indirizzo (nessun servizio esterno) e vieta il codice valutato al volo.
 
