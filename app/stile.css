@@ -31,6 +31,8 @@ button, input, textarea, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
 h1 { margin: 0; font-size: 34px; font-weight: 700; letter-spacing: -0.5px; }
 .nascosto { display: none !important; }
+/* Campi file invisibili ma presenti nella pagina: Safari su iPhone non apre il selettore di un campo con display: none */
+.campo-file { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; left: 0; top: 0; }
 
 .schermo { display: flex; flex-direction: column; height: 100dvh; max-width: 600px; margin: 0 auto; position: relative; }
 .contenuto { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0 16px calc(100px + var(--sicuro-basso)); display: flex; flex-direction: column; gap: 12px; }
@@ -294,3 +296,6 @@ button.scheda { border: none; text-align: left; width: 100%; color: var(--testo)
 .miniatura-testo span { color: var(--testo2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .dalla-libreria { align-self: center; font-size: 14px; padding: 0; }
+.scegli-file { height: 56px; padding: 0 26px; border-radius: 28px; border: none; background: #fff; color: #0B0B0C; font-size: 17px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.scegli-file[disabled] { opacity: .4; }

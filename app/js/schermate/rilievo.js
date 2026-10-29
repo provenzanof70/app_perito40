@@ -144,18 +144,23 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
         return html`<button class=${g.gruppo === gruppo ? 'attivo' : ''} onClick=${() => setGruppo(g.gruppo)}>
           ${GRUPPI_UI[g.gruppo].nome.replace('­', '')}<span class="n">${n}</span>${g.attesa === 'si' && !n ? html`<span class="manca"></span>` : null}</button>`;
       })}</div>
-      <div class="modi">${MODI.map(([k, l]) => html`<button class=${modo === k ? 'attivo' : ''} disabled=${!!registrazione} onClick=${() => setModo(k)}>${l}</button>`)}</div>
+      <div class="modi">${MODI.map(([k, l]) => html`<button class=${modo === k ? 'attivo' : ''} disabled=${!!registrazione}
+        onClick=${() => { setModo(k); if (k === 'file' && pratica.visita && codice) allegato.current.click(); }}>${l}</button>`)}</div>
       <div class="scatto-riga">
         <${Anteprima} evidenza=${ultima} />
-        <button class=${`otturatore ${modo === 'vocale' ? 'vocale' : ''} ${registrazione ? 'in-corso' : ''}`} disabled=${lavoro || !codice}
-          aria-label=${modo === 'vocale' ? (registrazione ? 'Ferma registrazione' : 'Registra') : 'Acquisisci'} onClick=${() => scatta()}><span></span></button>
+        ${modo === 'file'
+          ? (pratica.visita && codice && !lavoro
+            ? html`<label class="scegli-file" for="campo-allegato"><${Icona} nome="file_text" dim=${22} />Scegli file</label>`
+            : html`<button class="scegli-file" disabled=${lavoro || !codice} onClick=${() => scatta()}><${Icona} nome="file_text" dim=${22} />Scegli file</button>`)
+          : html`<button class=${`otturatore ${modo === 'vocale' ? 'vocale' : ''} ${registrazione ? 'in-corso' : ''}`} disabled=${lavoro || !codice}
+              aria-label=${modo === 'vocale' ? (registrazione ? 'Ferma registrazione' : 'Registra') : 'Acquisisci'} onClick=${() => scatta()}><span></span></button>`}
         <div class="ultima vuota"></div>
       </div>
-      <input ref=${input} type="file" class="nascosto" accept=${accetta} capture="environment"
+      <input ref=${input} type="file" class="campo-file" accept=${accetta} capture="environment"
         onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f, 'fotocamera'); }} />
-      <input ref=${libreria} type="file" class="nascosto" accept=${accetta}
+      <input ref=${libreria} type="file" class="campo-file" accept=${accetta}
         onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f, 'libreria'); }} />
-      <input ref=${allegato} type="file" class="nascosto" accept=".pdf,application/pdf,image/*"
+      <input ref=${allegato} id="campo-allegato" type="file" class="campo-file" accept=".pdf,application/pdf,image/*"
         onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f, 'file'); }} />
       ${(modo === 'foto' || modo === 'video') && html`<button class="collegamento chiaro dalla-libreria" disabled=${lavoro || !codice}
         onClick=${() => pratica.visita ? libreria.current.click() : alVisitaNecessaria(() => libreria.current.click())}>Dalla libreria</button>`}

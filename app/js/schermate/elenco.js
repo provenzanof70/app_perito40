@@ -72,7 +72,7 @@ export function Elenco({ pratiche, evidenzePer, sistema, nomePerito, alFile, alD
           </div>`}
     </div>
     <div class="piede">
-      <input ref=${input} type="file" accept=".json,application/json" class="nascosto"
+      <input ref=${input} type="file" accept=".json,application/json" class="campo-file"
         onChange=${e => { const f = e.target.files[0]; e.target.value = ''; if (f) alFile(f); }} />
       <button class="primario" onClick=${() => input.current.click()}><${Icona} nome="importa" dim=${20} />Importa pacchetto di andata</button>
     </div>
