@@ -92,8 +92,8 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
     await salva(f, tipo, extra);
   }
 
-  async function scatta() {
-    if (!pratica.visita) return alVisitaNecessaria();
+  async function scatta(visitaAvviata = false) {
+    if (!pratica.visita && !visitaAvviata) return alVisitaNecessaria(() => scatta(true));
     if (modo !== 'vocale') return input.current.click();
     if (!registrazione) {
       try { setSecondi(0); setRegistrazione(await avviaRegistrazione(setLivelli)); }
@@ -136,7 +136,7 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
       <div class="scatto-riga">
         <${Anteprima} evidenza=${ultima} />
         <button class=${`otturatore ${modo === 'vocale' ? 'vocale' : ''} ${registrazione ? 'in-corso' : ''}`} disabled=${lavoro || !codice}
-          aria-label=${modo === 'vocale' ? (registrazione ? 'Ferma registrazione' : 'Registra') : 'Acquisisci'} onClick=${scatta}><span></span></button>
+          aria-label=${modo === 'vocale' ? (registrazione ? 'Ferma registrazione' : 'Registra') : 'Acquisisci'} onClick=${() => scatta()}><span></span></button>
         <div class="ultima vuota"></div>
       </div>
       <input ref=${input} type="file" class="nascosto" accept=${accetta} capture=${modo === 'file' ? undefined : 'environment'}

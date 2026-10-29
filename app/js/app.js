@@ -10,7 +10,7 @@ import { perTipo } from './registri.js';
 import { Elenco } from './schermate/elenco.js';
 import { SchermataPratica } from './schermate/pratica.js';
 
-export const VERSIONE_APP = '0.3.0 · F2.3';
+export const VERSIONE_APP = '0.3.1 · F2.3';
 const NOME_PERITO = 'Perito Ing. Francesco Provenzano';
 
 function MenuApp({ sistema, nomePerito, alNome, visitaInCorso, alChiudi }) {

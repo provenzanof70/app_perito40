@@ -26,22 +26,19 @@ function Avvertenze({ andata }) {
     : html`<div class="meta">Nessuna avvertenza nel pacchetto di andata.</div>`;
 }
 
-function FoglioAvvertenze({ pratica, alChiudi, alConferma }) {
-  return html`<${Foglio} titolo="Avvertenze" conferma="Ho letto" alConferma=${alConferma} alChiudi=${alChiudi}>
-    <div class="meta">Dal pacchetto di andata (${pratica.andata.cliente.ragioneSociale}): restano consultabili nella scheda Pratica.</div>
-    <${Avvertenze} andata=${pratica.andata} />
-  </${Foglio}>`;
-}
+// Pratiche per cui, in questa sessione, il perito ha scelto «Più tardi» all'apertura
+const avvioRinviato = new Set();
 
-function FoglioIniziaVisita({ pratica, alChiudi, alConferma }) {
+function FoglioIniziaVisita({ pratica, annulla, perAzione, alChiudi, alConferma }) {
   const referenti = pratica.andata.sopralluogo.referenti;
   const [presenti, setPresenti] = useState(referenti.map(r => r.id));
   const [letto, setLetto] = useState(false);
   const cambia = id => setPresenti(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   const prevista = pratica.andata.sopralluogo.dataPrevista;
-  return html`<${Foglio} titolo="Inizia visita" annulla="Annulla" conferma="Inizia" confermaAttiva=${letto}
+  return html`<${Foglio} titolo="Inizia visita" annulla=${annulla} conferma="Inizia" confermaAttiva=${letto}
       alChiudi=${alChiudi} alConferma=${() => alConferma(presenti)}>
-    <div class="meta">Sopralluogo ${pratica.andata.sopralluogo.id}, previsto il ${dataBreve(prevista)}. L'ora di inizio sarà quella di adesso.</div>
+    ${perAzione && html`<${Avviso} tipo="info">Per acquisire evidenze e verificare i dati serve la visita avviata: l'app registra data, ora e presenti.</${Avviso}>`}
+    <div class="meta">Sopralluogo ${pratica.andata.sopralluogo.id} di ${pratica.andata.cliente.ragioneSociale}, previsto il ${dataBreve(prevista)}. L'ora di inizio sarà quella di adesso.</div>
     <div class="sezione">Presenti</div>
     <div class="elenco">
       ${referenti.map(r => html`<button class="scelta" onClick=${() => cambia(r.id)}><${Spunta} si=${presenti.includes(r.id)} />
@@ -106,24 +103,37 @@ function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita }) {
 }
 
 export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBene, gruppo, idEvidenza, sistema, aggiorna, mostra, alMenu }) {
-  const [foglio, setFoglio] = useState(pratica.avvertenzeVisteIl ? null : 'avvertenze');
+  const daAvviare = !pratica.visita && pratica.stato !== 'rientrata';
+  const [foglio, setFoglio] = useState(daAvviare && !avvioRinviato.has(pratica.codicePratica) && scheda !== 'evidenza' ? 'apertura' : null);
+  const [dopo, setDopo] = useState(null);
   const [, setBattito] = useState(0);
   useEffect(() => { const t = setInterval(() => setBattito(n => n + 1), 60000); return () => clearInterval(t); }, []);
 
   const r = riepilogo(pratica, evidenze, registri);
   const bene = codiceBene && (pratica.andata.beni.find(b => b.codice === codiceBene) || registri.beneNuovo.get(codiceBene));
-  const serveVisita = () => mostra('Prima inizia la visita dalla scheda Pratica');
+  // Chiamata da scatto, verifica o bene nuovo senza visita avviata: apre «Inizia visita» e poi prosegue l'azione
+  const serveVisita = continua => { setDopo(() => continua || null); setFoglio('azione'); };
   const galleria = scheda === 'beni' && bene && gruppo != null && GRUPPI_UI[gruppo];
   const beneScelto = scheda === 'beni' && bene;
   const cp = statoCheckpoint(pratica, r.evidenze);
   const codice = pratica.codicePratica;
 
-  const segnaAvvertenze = () => aggiorna(codice, p => { p.avvertenzeVisteIl = new Date().toISOString(); }).then(() => setFoglio(null));
-  const iniziaVisita = presenti => aggiorna(codice, p => {
-    const ora = new Date().toISOString();
-    p.visita = { id: p.andata.sopralluogo.id, inizio: ora, presenti, avvertenzeConfermateIl: ora };
-    p.avvertenzeVisteIl = p.avvertenzeVisteIl || ora;
-  }).then(() => { setFoglio(null); mostra('Visita iniziata: da ora vale il promemoria di checkpoint'); });
+  const chiudiFoglio = () => {
+    if (foglio === 'apertura') avvioRinviato.add(codice);
+    setFoglio(null); setDopo(null);
+  };
+  const iniziaVisita = presenti => {
+    // l'azione che aveva chiesto la visita riparte subito, dentro il tocco su «Inizia»: su iPhone la fotocamera si apre solo così
+    const continua = dopo;
+    setFoglio(null); setDopo(null);
+    if (continua) continua();
+    return aggiorna(codice, p => {
+      if (p.visita) return;
+      const ora = new Date().toISOString();
+      p.visita = { id: p.andata.sopralluogo.id, inizio: ora, presenti, avvertenzeConfermateIl: ora };
+      p.avvertenzeVisteIl = p.avvertenzeVisteIl || ora;
+    }).then(() => mostra('Visita iniziata: da ora vale il promemoria di checkpoint'));
+  };
   const rinvia = () => aggiorna(codice, p => { p.promemoria.rinviatoFino = rinviaFino(); });
   if (scheda === 'evidenza') {
     const e = evidenze.find(x => x.id === idEvidenza);
@@ -144,11 +154,11 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
         : scheda === 'rilievo' ? html`<${Rilievo} key=${(codiceBene || '') + gruppo} pratica=${pratica} evidenze=${evidenze} registri=${registri} beneIniziale=${codiceBene} gruppoIniziale=${gruppo} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
         : beneScelto ? html`<${SchedaBene} pratica=${pratica} bene=${bene} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
         : scheda === 'beni' ? html`<${ElencoBeni} pratica=${pratica} evidenze=${evidenze} registri=${registri} alVisitaNecessaria=${serveVisita} />`
-        : scheda === 'pratica' ? html`<${SchedaPraticaDettagli} pratica=${pratica} sistema=${sistema} cp=${cp} alIniziaVisita=${() => setFoglio('visita')} />`
+        : scheda === 'pratica' ? html`<${SchedaPraticaDettagli} pratica=${pratica} sistema=${sistema} cp=${cp} alIniziaVisita=${() => setFoglio('scheda')} />`
         : html`<${Segnaposto} scheda=${scheda} />`}
     </div>
     <${Barra} codicePratica=${codice} attiva=${scheda} distintivi=${{ azioni: r.azioniAperte }} />
-    ${foglio === 'avvertenze' && html`<${FoglioAvvertenze} pratica=${pratica} alChiudi=${segnaAvvertenze} alConferma=${segnaAvvertenze} />`}
-    ${foglio === 'visita' && html`<${FoglioIniziaVisita} pratica=${pratica} alChiudi=${() => setFoglio(null)} alConferma=${iniziaVisita} />`}
+    ${foglio && html`<${FoglioIniziaVisita} pratica=${pratica} annulla=${foglio === 'apertura' ? 'Più tardi' : 'Annulla'}
+      perAzione=${foglio === 'azione'} alChiudi=${chiudiFoglio} alConferma=${iniziaVisita} />`}
   </div>`;
 }

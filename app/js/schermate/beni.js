@@ -65,7 +65,7 @@ export function ElencoBeni({ pratica, evidenze, registri, alVisitaNecessaria }) 
     })}
     ${!visibili.length && html`<div class="vuoto">Nessun bene in questa vista</div>`}
     <div class="legenda"><span><span class="pallino presente"></span>presente</span><span><span class="pallino mancante"></span>mancante</span><span><span class="pallino da-rilevare"></span>da rilevare</span></div>
-    <div class="piede sopra-barra"><button class="primario" onClick=${() => pratica.visita ? setNuovo(true) : alVisitaNecessaria()}><${Icona} nome="piu" dim=${20} />Nuovo bene</button></div>
+    <div class="piede sopra-barra"><button class="primario" onClick=${() => pratica.visita ? setNuovo(true) : alVisitaNecessaria(() => setNuovo(true))}><${Icona} nome="piu" dim=${20} />Nuovo bene</button></div>
     ${nuovo && html`<${FoglioBeneNuovo} pratica=${pratica} nuovi=${nuovi} alChiudi=${() => setNuovo(false)} />`}`;
 }
 
@@ -198,7 +198,7 @@ export function SchedaBene({ pratica, bene, evidenze, registri, mostra, alVisita
       ${dati.map(d => {
         const sec = sezioneDi(d.campo);
         const titolo = sec !== sezione ? (sezione = sec, html`<div class="dati-sezione">${sec}</div>`) : null;
-        const apri = () => pratica.visita ? setAperta(aperta === d.campo ? null : d.campo) : alVisitaNecessaria();
+        const apri = () => pratica.visita ? setAperta(aperta === d.campo ? null : d.campo) : alVisitaNecessaria(() => setAperta(d.campo));
         return html`${titolo}<${RigaDato} dato=${d} verifica=${ver(d.campo)} aperta=${aperta === d.campo} alTocco=${apri} />
           ${aperta === d.campo && html`<${EditorVerifica} key=${d.campo} pratica=${pratica} bene=${bene} dato=${d} verifica=${ver(d.campo)}
             evidenze=${evBene} alFatto=${() => setAperta(null)} />`}`;
