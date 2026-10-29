@@ -66,6 +66,66 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   verifica('Checkpoint: «più tardi» sospende il promemoria', !statoCheckpoint(p('2026-10-15T09:00:00+02:00', null, '2026-10-15T12:20:00+02:00'), 3, ora).dovuto);
 }
 
+// App: data di scatto dai metadati (EXIF per le foto, mvhd per i video), mai inventata
+{
+  const { dataScatto, dataScattoJpeg, dataScattoVideo } = await import('../app/js/metadati.js');
+  const jpeg = (le, data, scarto) => {
+    const u16 = n => le ? [n & 255, n >> 8] : [n >> 8, n & 255];
+    const u32 = n => le ? [n & 255, (n >> 8) & 255, (n >> 16) & 255, n >>> 24] : [n >>> 24, (n >> 16) & 255, (n >> 8) & 255, n & 255];
+    const asc = s => [...Buffer.from(s + '\0', 'latin1')];
+    const voci = scarto ? 2 : 1;
+    const exifIfd = 26, dati = exifIfd + 2 + voci * 12 + 4;
+    const t = [...(le ? [0x49, 0x49] : [0x4d, 0x4d]), ...u16(42), ...u32(8),
+      ...u16(1), ...u16(0x8769), ...u16(4), ...u32(1), ...u32(exifIfd), ...u32(0),
+      ...u16(voci), ...u16(0x9003), ...u16(2), ...u32(20), ...u32(dati),
+      ...(scarto ? [...u16(0x9011), ...u16(2), ...u32(7), ...u32(dati + 20)] : []), ...u32(0),
+      ...asc(data), ...(scarto ? asc(scarto) : [])];
+    const app1 = [...Buffer.from('Exif\0\0', 'latin1'), ...t];
+    return new Uint8Array([0xff, 0xd8, 0xff, 0xe1, (app1.length + 2) >> 8, (app1.length + 2) & 255, ...app1, 0xff, 0xd9]);
+  };
+  verifica('Metadati: EXIF big-endian con fuso', dataScattoJpeg(jpeg(false, '2026:10:15 10:42:07', '+02:00')) === '2026-10-15T10:42:07+02:00');
+  verifica('Metadati: EXIF little-endian con fuso', dataScattoJpeg(jpeg(true, '2026:10:15 10:42:07', '+01:00')) === '2026-10-15T10:42:07+01:00');
+  verifica('Metadati: EXIF senza fuso usa quello del dispositivo', /^2026-10-15T10:42:07[+-]\d{2}:\d{2}$/.test(dataScattoJpeg(jpeg(false, '2026:10:15 10:42:07'))));
+  verifica('Metadati: EXIF azzerato dichiarato assente', dataScatto(jpeg(false, '0000:00:00 00:00:00'), 'image/jpeg').origine === 'assente');
+  verifica('Metadati: PNG senza EXIF dichiarato assente', dataScatto(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0, 0, 0, 0]), 'image/png').origine === 'assente');
+  const video = secondi => {
+    const b = Buffer.alloc(8 + 8 + 8 + 100);
+    b.writeUInt32BE(8, 0); b.write('ftyp', 4);
+    b.writeUInt32BE(8 + 8 + 100, 8); b.write('moov', 12);
+    b.writeUInt32BE(108, 16); b.write('mvhd', 20); b[24] = 0; b.writeUInt32BE(secondi, 28);
+    return new Uint8Array(b);
+  };
+  const s1904 = (Date.parse('2026-10-15T08:55:00Z') - Date.UTC(1904, 0, 1)) / 1000;
+  const v = dataScattoVideo(video(s1904));
+  verifica('Metadati: video MOV/MP4 da mvhd', !!v && Date.parse(v) === Date.parse('2026-10-15T08:55:00Z'));
+  verifica('Metadati: video con data zero dichiarato assente', dataScatto(video(0), 'video/quicktime').origine === 'assente');
+}
+
+// App: un'evidenza come la registra il telefono, convertita per il rientro, rispetta lo schema 1.1
+{
+  globalThis.indexedDB ??= {};
+  const { evidenzaPerRientro } = await import('../app/js/evidenze.js');
+  const { creaRegistroSchemi, validaStruttura, nuovoEsito } = await import('./lib/validatore.mjs');
+  const { leggiZip } = await import('./lib/zip.mjs');
+  const reg = creaRegistroSchemi(readdirSync(join(RADICE, 'schemi', 'v1')).map(f => JSON.parse(readFileSync(join(RADICE, 'schemi', 'v1', f), 'utf8'))));
+  const zipVol = readdirSync(join(cartella, 'rientro')).sort()[0];
+  const rientro = JSON.parse(Buffer.from(leggiZip(readFileSync(join(cartella, 'rientro', zipVol)), inflateRawSync).get('perizia40-rientro.json')).toString('utf8'));
+  const dalTelefono = {
+    codicePratica: 'DEMO-2026-001', id: 'B01-ID-009', beni: ['B01'], gruppo: 2, requisiti: ['ID', 'RO5'], tipo: 'foto',
+    file: 'evidenze/DEMO-2026-001_20261015_B01-ID-009.jpg', nomeFile: 'DEMO-2026-001_20261015_B01-ID-009.jpg', mime: 'image/jpeg',
+    sha256: 'a'.repeat(64), byte: 1234, provenienza: 'perito', idSopralluogo: 'S01', acquisitaIl: '2026-10-15T10:09:20+02:00',
+    origineDataScatto: 'assente', descrizione: 'Targa CE di B01', nota: undefined, nomeOriginale: 'IMG_0001.jpeg',
+    annotazioni: [{ tipo: 'freccia', colore: '#FF453A', x: 0.2, y: 0.8, x2: 0.5, y2: 0.5 }, { tipo: 'cerchio', colore: '#FFD60A', x: 0.3, y: 0.4, w: 0.4, h: 0.2 },
+      { tipo: 'testo', colore: '#FFFFFF', x: 0.25, y: 0.3, testo: 'matricola' }],
+    dataMostrataAVideo: { valore: '15/10/2026 09:09', orologioErrato: true }, stato: 'valida',
+  };
+  const e = evidenzaPerRientro(dalTelefono);
+  rientro.evidenze.push(e);
+  rientro.manifesto.push({ idEvidenza: e.id, file: e.file, sha256: e.sha256, byte: 1234, dataAcquisizione: e.acquisitaIl, provenienza: 'perito', hash: 'C', marcaTemporale: { tipo: 'n/a' }, volume: 1 });
+  const es = nuovoEsito();
+  verifica('App: evidenza del telefono valida per lo schema del rientro', validaStruttura(rientro, reg, es, 'rientro') || (console.log(es.errori), false));
+}
+
 // App: elenco dei file offline e impronta della mappa di importazione aggiornati
 {
   const { calcola } = await import('./aggiorna_app.mjs');

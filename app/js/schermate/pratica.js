@@ -1,16 +1,19 @@
 // Schermate di una pratica: testata, barra in basso, promemoria di checkpoint, schede Beni e Pratica.
-// Rilievo, Requisiti e Azioni arrivano nelle fasi F2.3–F2.5.
+// Requisiti e Azioni arrivano nelle fasi F2.4–F2.5.
 
 import { useState, useEffect } from 'preact/hooks';
 import { html, dataBreve, oraBreve, megabyte } from '../ui.js';
 import { Testata, Barra, Foglio, Avviso } from '../componenti.js';
 import { vai, rottaPratica } from '../rotte.js';
-import { ElencoBeni, SchedaBene } from './beni.js';
+import { ElencoBeni, SchedaBene, GalleriaGruppo } from './beni.js';
+import { Rilievo } from './rilievo.js';
+import { DettaglioEvidenza } from './evidenza.js';
+import { GRUPPI_UI } from '../stato.js';
 import { riepilogo, contatoriTestata } from '../stato.js';
 import { statoCheckpoint, testoPromemoria, rinviaFino, SOGLIA_ORE, SOGLIA_EVIDENZE } from '../promemoria.js';
 
 const TITOLI = { rilievo: 'Rilievo', beni: 'Beni', requisiti: 'Requisiti', azioni: 'Azioni', pratica: 'Pratica' };
-const FASE = { rilievo: 'F2.3', requisiti: 'F2.4', azioni: 'F2.5' };
+const FASE = { requisiti: 'F2.4', azioni: 'F2.5' };
 
 function Spunta({ si }) {
   return html`<span class=${`spunta ${si ? 'si' : ''}`}>${si ? '✓' : ''}</span>`;
@@ -102,7 +105,7 @@ function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita }) {
     </div>`;
 }
 
-export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBene, sistema, aggiorna, mostra, alMenu }) {
+export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBene, gruppo, idEvidenza, sistema, aggiorna, mostra, alMenu }) {
   const [foglio, setFoglio] = useState(pratica.avvertenzeVisteIl ? null : 'avvertenze');
   const [, setBattito] = useState(0);
   useEffect(() => { const t = setInterval(() => setBattito(n => n + 1), 60000); return () => clearInterval(t); }, []);
@@ -110,6 +113,8 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
   const r = riepilogo(pratica, evidenze, registri);
   const bene = codiceBene && (pratica.andata.beni.find(b => b.codice === codiceBene) || registri.beneNuovo.get(codiceBene));
   const serveVisita = () => mostra('Prima inizia la visita dalla scheda Pratica');
+  const galleria = scheda === 'beni' && bene && gruppo != null && GRUPPI_UI[gruppo];
+  const beneScelto = scheda === 'beni' && bene;
   const cp = statoCheckpoint(pratica, r.evidenze);
   const codice = pratica.codicePratica;
 
@@ -120,17 +125,24 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
     p.avvertenzeVisteIl = p.avvertenzeVisteIl || ora;
   }).then(() => { setFoglio(null); mostra('Visita iniziata: da ora vale il promemoria di checkpoint'); });
   const rinvia = () => aggiorna(codice, p => { p.promemoria.rinviatoFino = rinviaFino(); });
+  if (scheda === 'evidenza') {
+    const e = evidenze.find(x => x.id === idEvidenza);
+    return e ? html`<${DettaglioEvidenza} key=${e.id + (e.modificataIl || '')} pratica=${pratica} evidenza=${e} evidenze=${evidenze} registri=${registri} mostra=${mostra} />`
+      : html`<div class="vuoto">Evidenza ${idEvidenza} non trovata</div>`;
+  }
 
   return html`<div class="schermo con-barra">
-    <${Testata} pratica=${pratica} titolo=${bene ? bene.denominazione : TITOLI[scheda] || 'Beni'} codice=${bene && bene.codice} offline=${!sistema.online}
-      indietro=${bene ? { etichetta: 'Beni', rotta: rottaPratica(codice, 'beni') }
+    <${Testata} pratica=${pratica} titolo=${galleria ? GRUPPI_UI[gruppo].nome : beneScelto ? bene.denominazione : TITOLI[scheda] || 'Beni'} codice=${beneScelto && bene.codice} offline=${!sistema.online}
+      indietro=${galleria ? { etichetta: bene.codice, rotta: rottaPratica(codice, 'beni', bene.codice) } : beneScelto ? { etichetta: 'Beni', rotta: rottaPratica(codice, 'beni') }
         : { etichetta: scheda === 'beni' ? 'Pratiche' : 'Beni', rotta: scheda === 'beni' ? '/' : rottaPratica(codice, 'beni') }}
-      contatori=${!bene && (scheda === 'beni' || scheda === 'pratica') ? contatoriTestata(r) : null} alMenu=${alMenu} />
+      contatori=${!beneScelto && (scheda === 'beni' || scheda === 'pratica') ? contatoriTestata(r) : null} alMenu=${alMenu} />
     <div class="contenuto">
       ${cp.dovuto && html`<${Avviso} tipo="att" titolo="Crea un checkpoint" tasti=${[
         ['Crea checkpoint', () => { vai(rottaPratica(codice, 'pratica')); mostra('La creazione del pacchetto arriva nella fase F2.6'); }],
         ['Più tardi', rinvia]]}>${testoPromemoria(cp)}</${Avviso}>`}
-      ${scheda === 'beni' && bene ? html`<${SchedaBene} pratica=${pratica} bene=${bene} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
+      ${galleria ? html`<${GalleriaGruppo} pratica=${pratica} bene=${bene} gruppo=${gruppo} evidenze=${evidenze} />`
+        : scheda === 'rilievo' ? html`<${Rilievo} key=${(codiceBene || '') + gruppo} pratica=${pratica} evidenze=${evidenze} registri=${registri} beneIniziale=${codiceBene} gruppoIniziale=${gruppo} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
+        : beneScelto ? html`<${SchedaBene} pratica=${pratica} bene=${bene} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
         : scheda === 'beni' ? html`<${ElencoBeni} pratica=${pratica} evidenze=${evidenze} registri=${registri} alVisitaNecessaria=${serveVisita} />`
         : scheda === 'pratica' ? html`<${SchedaPraticaDettagli} pratica=${pratica} sistema=${sistema} cp=${cp} alIniziaVisita=${() => setFoglio('visita')} />`
         : html`<${Segnaposto} scheda=${scheda} />`}

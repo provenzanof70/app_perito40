@@ -6,6 +6,7 @@ import { Foglio, Avviso } from '../componenti.js';
 import { vai, rottaPratica } from '../rotte.js';
 import { GRUPPI_UI, ATTESA_UI, gruppiDelBene, statoBene } from '../stato.js';
 import { salvaVerifica, salvaRegistro, prossimoCodiceBene } from '../registri.js';
+import { useUrlFile } from '../media.js';
 
 const SEZIONI = [
   ['identita', 'Identificazione'], ['controllore', 'Controllo e interfaccia'], ['hmi', 'Controllo e interfaccia'],
@@ -177,7 +178,7 @@ export function SchedaBene({ pratica, bene, evidenze, registri, mostra, alVisita
   const tessera = g => {
     const n = conteggio(g.gruppo), ui = GRUPPI_UI[g.gruppo];
     const st = g.attesa !== 'si' ? 'na' : n ? 'ok' : 'manca';
-    return html`<button class=${`tessera ${st}`} onClick=${() => mostra('Il rilievo per gruppo arriva nella fase F2.3')}>
+    return html`<button class=${`tessera ${st}`} onClick=${() => vai(rottaPratica(pratica.codicePratica, 'beni', bene.codice, 'gruppo', g.gruppo))}>
       <div class="tessera-su"><${Icona} nome=${ui.icona} dim=${23} />${st === 'manca' ? html`<span class="esclamativo">!</span>` : html`<b>${n || (st === 'na' ? '—' : 0)}</b>`}</div>
       <div class="tessera-nome">${ui.nome}</div>
       <div class="tessera-stato">${ui.requisito} · ${st === 'ok' ? 'presente' : st === 'manca' ? 'mancante' : ATTESA_UI[g.attesa]}</div>
@@ -220,6 +221,35 @@ export function SchedaBene({ pratica, bene, evidenze, registri, mostra, alVisita
     ${gruppi.some(g => g.attesa !== 'si') && html`
       <div class="titolo-sezione piccolo"><b>Altre evidenze</b><span class="meta">non richieste dal profilo</span></div>
       <div class="tessere">${gruppi.filter(g => g.attesa !== 'si').map(tessera)}</div>`}
-    <button class="primario" onClick=${() => mostra('La fotocamera arriva nella fase F2.3')}><${Icona} nome="fotocamera" dim=${20} />Apri fotocamera</button>
+    <button class="primario" onClick=${() => vai(rottaPratica(pratica.codicePratica, 'rilievo', bene.codice, (gruppi.find(g => g.attesa === 'si' && !conteggio(g.gruppo)) || {}).gruppo))}><${Icona} nome="fotocamera" dim=${20} />Apri fotocamera</button>
     ${modifica && html`<${FoglioBeneNuovo} pratica=${pratica} nuovi=${[...registri.beneNuovo.values()]} bene=${bene} alChiudi=${() => setModifica(false)} />`}`;
+}
+
+// ---------------------------------------------------------------------------
+// Evidenze di un gruppo del bene (componenti ed evidenze comuni comprese)
+// ---------------------------------------------------------------------------
+
+function Miniatura({ evidenza: e, alTocco }) {
+  const url = useUrlFile(e.tipo === 'foto' || (e.tipo === 'screenshot' && e.mime.startsWith('image/')) ? e : null);
+  return html`<button class=${`miniatura ${e.stato === 'annullata' ? 'annullata' : ''}`} onClick=${alTocco}>
+    <div class="miniatura-img" style=${url ? { backgroundImage: `url(${url})` } : null}>
+      ${!url && html`<${Icona} nome=${e.tipo === 'vocale' ? 'chat_text' : e.tipo === 'video' ? 'camera' : 'file_text'} dim=${28} />`}
+      ${e.annotazioni && e.annotazioni.length ? html`<span class="badge-ann">${e.annotazioni.length}</span>` : null}
+    </div>
+    <div class="miniatura-testo"><b>${e.id}</b><span>${e.stato === 'annullata' ? 'annullata' : e.descrizione || 'da descrivere'}</span></div>
+  </button>`;
+}
+
+export function GalleriaGruppo({ pratica, bene, gruppo, evidenze }) {
+  const g = gruppiDelBene(bene).find(x => x.gruppo === gruppo) || { gruppo, attesa: 'non_applicabile' };
+  const ui = GRUPPI_UI[gruppo];
+  const lista = evidenze.filter(e => e.gruppo === gruppo && e.beni.some(b => b.split('.')[0] === bene.codice));
+  const cosa = bene.gruppiEvidenze && (bene.gruppiEvidenze.find(x => x.gruppo === gruppo) || {}).cosaCercare;
+  return html`
+    <div class="meta voce-bene">${ui.requisito} · ${ATTESA_UI[g.attesa]}${cosa ? ` · ${cosa}` : ''}</div>
+    ${lista.length ? html`<div class="galleria">${lista.map(e => html`<${Miniatura} key=${e.id} evidenza=${e}
+        alTocco=${() => vai(rottaPratica(pratica.codicePratica, 'evidenza', e.id))} />`)}</div>`
+      : html`<div class="vuoto">Nessuna evidenza in questo gruppo.</div>`}
+    <button class="primario" onClick=${() => vai(rottaPratica(pratica.codicePratica, 'rilievo', bene.codice, gruppo))}>
+      <${Icona} nome="fotocamera" dim=${20} />Acquisisci per ${ui.nome.replace('\u00AD', '')}</button>`;
 }

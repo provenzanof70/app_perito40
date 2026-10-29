@@ -10,7 +10,7 @@ import { perTipo } from './registri.js';
 import { Elenco } from './schermate/elenco.js';
 import { SchermataPratica } from './schermate/pratica.js';
 
-export const VERSIONE_APP = '0.2.0 · F2.2';
+export const VERSIONE_APP = '0.3.0 · F2.3';
 const NOME_PERITO = 'Perito Ing. Francesco Provenzano';
 
 function MenuApp({ sistema, nomePerito, alNome, visitaInCorso, alChiudi }) {
@@ -99,8 +99,8 @@ export function App({ sistema: sistemaIniziale }) {
   if (rotta.nome === 'pratica' && pratiche) {
     const p = pratiche.find(x => x.codicePratica === rotta.codice);
     if (!p) { vai('/'); return null; }
-    schermata = html`<${SchermataPratica} key=${p.codicePratica + rotta.scheda + (rotta.bene || '')} pratica=${p} evidenze=${evidenzePer[p.codicePratica] || []}
-      registri=${registriPer[p.codicePratica] || perTipo([])} scheda=${rotta.scheda} codiceBene=${rotta.bene} sistema=${sistema} aggiorna=${aggiorna} mostra=${mostra} alMenu=${() => setMenu(true)} />`;
+    schermata = html`<${SchermataPratica} key=${p.codicePratica + rotta.scheda + (rotta.bene || '') + (rotta.gruppo || '') + (rotta.evidenza || '')} pratica=${p} evidenze=${evidenzePer[p.codicePratica] || []}
+      registri=${registriPer[p.codicePratica] || perTipo([])} scheda=${rotta.scheda} codiceBene=${rotta.bene} gruppo=${rotta.gruppo} idEvidenza=${rotta.evidenza} sistema=${sistema} aggiorna=${aggiorna} mostra=${mostra} alMenu=${() => setMenu(true)} />`;
   } else {
     schermata = html`<${Elenco} pratiche=${pratiche} evidenzePer=${evidenzePer} sistema=${sistema} nomePerito=${nomePerito}
       alMenu=${() => setMenu(true)}
