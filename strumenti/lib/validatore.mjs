@@ -326,6 +326,11 @@ function controllaEvidenze(evidenze, beniNoti, esito, dove) {
     });
     if (e.origineDataScatto === 'assente') esito.avviso('DATA_SCATTO_ASSENTE', p, `${e.id}: metadati di scatto assenti, nota solo l'ora di acquisizione nell'app`);
     if (e.dataScatto && Date.parse(e.dataScatto) > Date.parse(e.acquisitaIl)) esito.errore('DATA_SCATTO_SUCCESSIVA', p, `${e.id}: data di scatto ${e.dataScatto} successiva all'acquisizione ${e.acquisitaIl}`);
+    if (e.aperturaFotocamera && e.dataScatto) {
+      const durata = (Date.parse(e.dataScatto) - Date.parse(e.aperturaFotocamera)) / 60000;
+      if (durata < 0) esito.errore('FOTOCAMERA_INTERVALLO', p, `${e.id}: fotocamera aperta (${e.aperturaFotocamera}) dopo il rientro della foto (${e.dataScatto})`);
+      else if (durata > 10) esito.avviso('FOTOCAMERA_INTERVALLO_LUNGO', p, `${e.id}: fotocamera rimasta aperta ${Math.round(durata)} minuti: lo scatto è collocabile solo in quell'intervallo`);
+    }
     if (e.dataMostrataAVideo && e.dataMostrataAVideo.orologioErrato) esito.avviso('OROLOGIO_ERRATO', p, `orologio del bene errato registrato (${e.dataMostrataAVideo.scartoStimato || 'scarto non stimato'})`);
   });
   evidenze.forEach((e, i) => {

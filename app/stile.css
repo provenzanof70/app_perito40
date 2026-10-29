@@ -292,3 +292,5 @@ button.scheda { border: none; text-align: left; width: 100%; color: var(--testo)
 .badge-ann { position: absolute; right: 6px; top: 6px; min-width: 20px; height: 20px; border-radius: 10px; background: #FF453A; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 5px; }
 .miniatura-testo { padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; font-size: 12px; }
 .miniatura-testo span { color: var(--testo2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.dalla-libreria { align-self: center; font-size: 14px; padding: 0; }

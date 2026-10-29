@@ -60,6 +60,8 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
   const [secondi, setSecondi] = useState(0);
   const [livelli, setLivelli] = useState(Array(36).fill(0.1));
   const input = useRef(null);
+  const libreria = useRef(null);
+  const apertaIl = useRef(null);
   const attiva = useRef(null);
   attiva.current = registrazione;
   useEffect(() => () => { if (attiva.current) attiva.current.ferma(); }, []);
@@ -76,25 +78,28 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
     try {
       const e = await registraEvidenza(pratica, evidenze, registri, { codice, gruppo, tipo, blob, ...extra });
       dispatchEvent(new Event('perito40:ricarica'));
-      mostra(`${e.id} salvata${e.origineDataScatto === 'assente' ? ' · metadati di scatto assenti' : ''}`);
+      mostra(`${e.id} salvata${e.origineDataScatto === 'assente' ? ' · data di scatto assente' : e.origineDataScatto === 'metadati' ? ' · data di scatto dai metadati' : ''}`);
       if (tipo === 'foto' || tipo === 'video' || tipo === 'documento' || tipo === 'screenshot') vai(rottaPratica(pratica.codicePratica, 'evidenza', e.id));
     } catch (err) {
       mostra(`Evidenza non salvata: ${err.message}`);
     } finally { setLavoro(false); }
   }
 
-  async function suFile(f) {
+  async function suFile(f, daFotocamera) {
     if (!f) return;
+    const rientro = new Date();
     const tipo = modo === 'file' ? (f.type === 'application/pdf' ? 'documento' : f.type.startsWith('image/') ? 'screenshot' : 'documento')
       : f.type.startsWith('video/') ? 'video' : 'foto';
     const extra = { nomeOriginale: f.name };
+    if (daFotocamera && apertaIl.current) { extra.aperturaFotocamera = apertaIl.current; extra.rientroFotocamera = rientro; }
+    apertaIl.current = null;
     if (tipo === 'video') extra.durataSecondi = await durata(f, 'video');
     await salva(f, tipo, extra);
   }
 
   async function scatta(visitaAvviata = false) {
     if (!pratica.visita && !visitaAvviata) return alVisitaNecessaria(() => scatta(true));
-    if (modo !== 'vocale') return input.current.click();
+    if (modo !== 'vocale') { apertaIl.current = modo === 'file' ? null : new Date(); return input.current.click(); }
     if (!registrazione) {
       try { setSecondi(0); setRegistrazione(await avviaRegistrazione(setLivelli)); }
       catch (e) { mostra(`Microfono non disponibile: ${e.message}`); }
@@ -120,7 +125,8 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
           <${Registrazioni} pratica=${pratica} evidenze=${evidenze} bene=${codice} />`
         : html`<div class="suggerimento"><div><b>${ui.nome ? ui.nome.replace('­', '') : ''}</b> · ${(cosaCercare && cosaCercare.cosaCercare) || 'contesto prima del dettaglio, poi il particolare'}</div>
             <span class="meta chiara">${modo === 'foto' ? 'Si apre la fotocamera dell\'iPhone: foto a piena risoluzione con la data di scatto originale.'
-              : modo === 'video' ? 'Si apre la videocamera dell\'iPhone.' : 'Scegli un PDF o un\'immagine da File (report, schermate, documenti mostrati in campo).'}</span></div>`}
+              : modo === 'video' ? 'Si apre la videocamera dell\'iPhone.' : 'Scegli un PDF o un\'immagine da File (report, schermate, documenti mostrati in campo).'}</span>
+            ${(modo === 'foto' || modo === 'video') && html`<span class="meta chiara">«Dalla libreria» prende ${modo === 'foto' ? 'una foto già scattata' : 'un video già registrato'} con la Fotocamera dell'iPhone: se il file conserva la data di scatto, l'app la legge.</span>`}</div>`}
     </div>
     <div class="rilievo-pannello">
       <div class="rilievo-bene">
@@ -140,7 +146,11 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
         <div class="ultima vuota"></div>
       </div>
       <input ref=${input} type="file" class="nascosto" accept=${accetta} capture=${modo === 'file' ? undefined : 'environment'}
-        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f); }} />
+        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f, modo !== 'file'); }} />
+      <input ref=${libreria} type="file" class="nascosto" accept=${modo === 'video' ? 'video/*' : 'image/*'}
+        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f, false); }} />
+      ${(modo === 'foto' || modo === 'video') && html`<button class="collegamento chiaro dalla-libreria" disabled=${lavoro || !codice}
+        onClick=${() => pratica.visita ? libreria.current.click() : alVisitaNecessaria(() => libreria.current.click())}>Dalla libreria</button>`}
     </div>
     ${scelta && html`<${Foglio} titolo="Bene o componente" alChiudi=${() => setScelta(false)}>
       <div class="elenco">${beni.map(b => html`<button class="scelta" style=${{ paddingLeft: `${16 + b.livello * 22}px` }}

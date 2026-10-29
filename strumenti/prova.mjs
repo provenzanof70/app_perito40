@@ -124,6 +124,11 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   rientro.manifesto.push({ idEvidenza: e.id, file: e.file, sha256: e.sha256, byte: 1234, dataAcquisizione: e.acquisitaIl, provenienza: 'perito', hash: 'C', marcaTemporale: { tipo: 'n/a' }, volume: 1 });
   const es = nuovoEsito();
   verifica('App: evidenza del telefono valida per lo schema del rientro', validaStruttura(rientro, reg, es, 'rientro') || (console.log(es.errori), false));
+  const f = evidenzaPerRientro({ ...dalTelefono, id: 'B01-ID-010', origineDataScatto: 'fotocamera_app', aperturaFotocamera: '2026-10-15T10:08:50+02:00', dataScatto: '2026-10-15T10:09:12+02:00' });
+  rientro.evidenze.push(f);
+  rientro.manifesto.push({ idEvidenza: f.id, file: f.file, sha256: f.sha256, byte: 1234, dataAcquisizione: f.acquisitaIl, provenienza: 'perito', hash: 'C', marcaTemporale: { tipo: 'n/a' }, volume: 1 });
+  const es2 = nuovoEsito();
+  verifica('App: foto dalla fotocamera dell\'app (senza metadati) valida per lo schema 1.2', validaStruttura(rientro, reg, es2, 'rientro') || (console.log(es2.errori), false));
 }
 
 // App: elenco dei file offline e impronta della mappa di importazione aggiornati

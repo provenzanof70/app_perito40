@@ -145,6 +145,7 @@ export function DettaglioEvidenza({ pratica, evidenza: e, evidenze, registri, mo
           <div>Acquisita nell'app: ${dataBreve(e.acquisitaIl)} ${oraBreve(e.acquisitaIl)}</div>
           <div>Data di scatto: ${e.origineDataScatto === 'metadati' ? `${dataBreve(e.dataScatto)} ${oraBreve(e.dataScatto)} (dai metadati del file)`
             : e.origineDataScatto === 'registrazione_app' ? `${dataBreve(e.dataScatto)} ${oraBreve(e.dataScatto)} (registrazione nell'app)`
+            : e.origineDataScatto === 'fotocamera_app' ? `${dataBreve(e.dataScatto)} ${oraBreve(e.dataScatto)} (fotocamera aperta dall'app alle ${oraBreve(e.aperturaFotocamera)}; Safari non conserva i metadati)`
             : e.origineDataScatto === 'assente' ? 'metadati assenti: vale solo l\'ora di acquisizione' : 'non applicabile'}</div>
           <div>File: ${e.nomeFile} · ${(e.byte / 1e6).toFixed(1)} MB</div>
           <div class="impronta">SHA-256 ${e.sha256}</div>

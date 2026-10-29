@@ -35,7 +35,8 @@ export function estensione(mime, nome = '') {
 }
 
 // Registra una nuova evidenza. Restituisce la riga salvata.
-// opzioni: { codice (bene o componente), gruppo, tipo, blob, nomeOriginale, durataSecondi, dataRegistrazione, descrizione, nota }
+// opzioni: { codice (bene o componente), gruppo, tipo, blob, nomeOriginale, durataSecondi, dataRegistrazione, descrizione, nota,
+//   aperturaFotocamera e rientroFotocamera (Date) se il file viene dalla fotocamera aperta dall'app }
 export async function registraEvidenza(pratica, evidenze, registri, o) {
   const ora = new Date();
   const bytes = new Uint8Array(await o.blob.arrayBuffer());
@@ -51,8 +52,12 @@ export async function registraEvidenza(pratica, evidenze, registri, o) {
   if (o.tipo === 'vocale') scatto = { origineDataScatto: 'registrazione_app', dataScatto: o.dataRegistrazione };
   else if (o.tipo === 'foto' || o.tipo === 'video') {
     const d = dataScatto(bytes, mime);
-    scatto = d.origine === 'metadati' && Date.parse(d.data) <= ora.getTime() + 60000
-      ? { origineDataScatto: 'metadati', dataScatto: d.data } : { origineDataScatto: 'assente' };
+    if (d.origine === 'metadati' && Date.parse(d.data) <= ora.getTime() + 60000) scatto = { origineDataScatto: 'metadati', dataScatto: d.data };
+    // Safari su iPhone toglie i metadati alle foto della fotocamera aperta da una pagina web:
+    // lo scatto è avvenuto tra l'apertura della fotocamera e il rientro del file nell'app
+    else if (o.aperturaFotocamera && o.rientroFotocamera) {
+      scatto = { origineDataScatto: 'fotocamera_app', aperturaFotocamera: isoLocale(o.aperturaFotocamera), dataScatto: isoLocale(o.rientroFotocamera) };
+    } else scatto = { origineDataScatto: 'assente' };
   }
   const requisiti = [...new Set([requisito, ...(g.requisiti || [])])];
   const riga = {
@@ -87,7 +92,7 @@ export function annullaEvidenza(codicePratica, id, motivo, sostituitaDa) {
 
 // Evidenza nel formato del pacchetto di rientro (schemi/v1, $defs/evidenza): solo i campi previsti
 const CAMPI_RIENTRO = ['id', 'beni', 'comune', 'gruppo', 'requisiti', 'tipo', 'file', 'mime', 'sha256', 'provenienza', 'idSopralluogo',
-  'acquisitaIl', 'dataScatto', 'origineDataScatto', 'dataMostrataAVideo', 'durataSecondi', 'descrizione', 'nota', 'annotazioni',
+  'acquisitaIl', 'dataScatto', 'origineDataScatto', 'aperturaFotocamera', 'dataMostrataAVideo', 'durataSecondi', 'descrizione', 'nota', 'annotazioni',
   'trascrizioni', 'contenutoLetto', 'storicoIdentificativi', 'stato', 'annullamento'];
 
 export function evidenzaPerRientro(e) {

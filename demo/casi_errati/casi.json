@@ -680,6 +680,50 @@
       "fileAlterati": [
         "rientro/DEMO-2026-001_rientro_FIN_20261015-1730_v1di2.zip"
       ]
+    },
+    {
+      "nome": "foto dalla fotocamera dell'app senza ora di apertura",
+      "modifiche": [
+        {
+          "file": "{vol1}/perizia40-rientro.json",
+          "puntatore": "/evidenze/0/origineDataScatto",
+          "valore": "fotocamera_app"
+        }
+      ],
+      "atteso": [
+        "SCHEMA"
+      ]
+    },
+    {
+      "nome": "fotocamera aperta dopo il rientro della foto",
+      "modifiche": [
+        {
+          "file": "{vol1}/perizia40-rientro.json",
+          "puntatore": "/evidenze/0/origineDataScatto",
+          "valore": "fotocamera_app"
+        },
+        {
+          "file": "{vol1}/perizia40-rientro.json",
+          "puntatore": "/evidenze/0/aperturaFotocamera",
+          "valore": "2026-10-15T10:06:00+02:00"
+        }
+      ],
+      "atteso": [
+        "FOTOCAMERA_INTERVALLO"
+      ]
+    },
+    {
+      "nome": "ora di apertura della fotocamera con data dai metadati",
+      "modifiche": [
+        {
+          "file": "{vol1}/perizia40-rientro.json",
+          "puntatore": "/evidenze/0/aperturaFotocamera",
+          "valore": "2026-10-15T10:04:00+02:00"
+        }
+      ],
+      "atteso": [
+        "SCHEMA"
+      ]
     }
   ]
 }

@@ -160,10 +160,14 @@
         "provenienza": { "$ref": "#/$defs/provenienza" },
         "idSopralluogo": { "$ref": "#/$defs/idSopralluogo" },
         "acquisitaIl": { "$ref": "#/$defs/dataOra", "description": "Data di acquisizione nell'app o nel fascicolo (importazione), distinta dalla data di scatto (§6.1)" },
-        "dataScatto": { "$ref": "#/$defs/dataOra", "description": "Data dello scatto o della registrazione, letta dai metadati del file o registrata dall'app durante la registrazione" },
+        "dataScatto": { "$ref": "#/$defs/dataOra", "description": "Data dello scatto o della registrazione: dai metadati del file, dall'orologio del telefono durante una registrazione fatta nell'app, oppure (fotocamera_app) l'ora in cui la foto o il video è tornato all'app dalla fotocamera" },
         "origineDataScatto": {
-          "enum": ["metadati", "registrazione_app", "assente"],
-          "description": "Da dove viene dataScatto: metadati del file (EXIF, QuickTime), orologio del telefono durante una registrazione fatta nell'app, oppure assente (metadati mancanti: lo si dichiara, non si sostituisce con l'ora di importazione). Obbligatoria per foto, video e vocali."
+          "enum": ["metadati", "registrazione_app", "fotocamera_app", "assente"],
+          "description": "Da dove viene dataScatto: metadati del file (EXIF, QuickTime); orologio del telefono durante una registrazione fatta nell'app; fotocamera_app = fotocamera nativa aperta dall'app, che non conserva i metadati (Safari su iPhone li rimuove): lo scatto è avvenuto tra aperturaFotocamera e dataScatto; assente = nessuna informazione (lo si dichiara, non si sostituisce con l'ora di importazione). Obbligatoria per foto, video e vocali. (v1.2)"
+        },
+        "aperturaFotocamera": {
+          "$ref": "#/$defs/dataOra",
+          "description": "Solo con origineDataScatto = fotocamera_app: ora in cui l'app ha aperto la fotocamera. Con dataScatto delimita l'intervallo in cui è avvenuto lo scatto. (v1.2)"
         },
         "dataMostrataAVideo": {
           "type": "object",
@@ -211,7 +215,8 @@
       "allOf": [
         { "if": { "properties": { "stato": { "const": "annullata" } } }, "then": { "required": ["annullamento"] } },
         { "if": { "properties": { "tipo": { "enum": ["foto", "video", "vocale"] } } }, "then": { "required": ["origineDataScatto"] } },
-        { "if": { "required": ["origineDataScatto"], "properties": { "origineDataScatto": { "enum": ["metadati", "registrazione_app"] } } }, "then": { "required": ["dataScatto"] } },
+        { "if": { "required": ["origineDataScatto"], "properties": { "origineDataScatto": { "enum": ["metadati", "registrazione_app", "fotocamera_app"] } } }, "then": { "required": ["dataScatto"] } },
+        { "if": { "required": ["origineDataScatto"], "properties": { "origineDataScatto": { "const": "fotocamera_app" } } }, "then": { "required": ["aperturaFotocamera"] }, "else": { "not": { "required": ["aperturaFotocamera"] } } },
         { "if": { "required": ["origineDataScatto"], "properties": { "origineDataScatto": { "const": "assente" } } }, "then": { "not": { "required": ["dataScatto"] } } }
       ]
     },
