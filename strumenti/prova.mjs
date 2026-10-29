@@ -129,6 +129,27 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   rientro.manifesto.push({ idEvidenza: f.id, file: f.file, sha256: f.sha256, byte: 1234, dataAcquisizione: f.acquisitaIl, provenienza: 'perito', hash: 'C', marcaTemporale: { tipo: 'n/a' }, volume: 1 });
   const es2 = nuovoEsito();
   verifica('App: foto dalla fotocamera dell\'app (senza metadati) valida per lo schema 1.2', validaStruttura(rientro, reg, es2, 'rientro') || (console.log(es2.errori), false));
+
+  // Registri creati dall'app (F2.4): riscontro, dichiarazione con «Da acquisire», nota, bozza di azione
+  const R = await import('../app/js/registri.js');
+  const andataDemo = JSON.parse(readFileSync(join(cartella, 'andata', 'perizia40-andata.json'), 'utf8'));
+  const vuoti = R.perTipo([]);
+  verifica('App: codici dei registri senza collisioni con il fascicolo (DT-001 e A001–A003 già usati)',
+    R.prossimoId(andataDemo, vuoti, 'riscontro') === 'RD-001' && R.prossimoId(andataDemo, vuoti, 'dichiarazione') === 'DT-002' && R.prossimoId(andataDemo, vuoti, 'azione') === 'A004');
+  const frase = R.fraseRiscontro({ fatto: 'il programma P-17 risultava caricato', oggetto: 'HMI del CN', circostanza: 'osservato durante la lavorazione', bene: 'B01', ora: '10:42', data: '2026-10-15' });
+  verifica('App: frase verbalizzata con fatto, oggetto, circostanza, ora e data',
+    frase === 'Il programma P-17 risultava caricato (HMI del CN, bene B01), osservato durante la lavorazione, alle ore 10:42 del 15/10/2026.');
+  const app = JSON.parse(JSON.stringify(rientro));
+  app.riscontriDiretti = [R.riscontroPerRientro({ codicePratica: 'X', tipo: 'riscontro', id: 'RD-003', bene: 'B01', requisito: 'RO2', idSopralluogo: 'S01', dataVisita: '2026-10-15', ora: '10:42',
+    fatto: 'il programma P-17 risultava caricato', oggetto: 'HMI del CN', circostanza: 'osservato durante la lavorazione', frase, evidenze: ['B01-ID-009'], limiti: undefined, modificatoIl: 'x' })];
+  app.dichiarazioniTerzi = [R.dichiarazionePerRientro({ tipo: 'dichiarazione', id: 'DT-003', beni: ['B01'], persona: 'Mario Esempio', ruolo: 'Responsabile di produzione',
+    organizzazione: 'Officine Demo Fittizie S.r.l.', forma: 'verbale', data: '2026-10-15', contenuto: 'Il programma arriva ogni mattina dal MES.', requisito: 'RO2',
+    riscontroOggettivo: { esito: 'N', evidenze: [], nota: 'riscontro da acquisire: azione A008' }, daAcquisire: true, azioneGenerata: 'A008' })];
+  app.noteCampo = [R.notaPerRientro({ tipo: 'nota', id: 'NC-002', bene: 'B01', requisito: 'RO3', testo: 'collegamento al magazzino utensili da fotografare', ora: '2026-10-15T09:44:00Z', base: 'promemoria' })];
+  app.nuoveAzioni = [...app.nuoveAzioni, R.bozzaPerRientro({ tipo: 'azione', id: 'A008', categoria: 'evidenza', beni: ['B01'], requisito: 'RO2', cosaServe: 'Riscontro oggettivo della dichiarazione DT-003',
+    nota: 'dichiarazione verbale', generataDa: { tipo: 'dichiarazione', id: 'DT-003' }, stato: 'aperta', apertaIl: '2026-10-15' })];
+  const es3 = nuovoEsito();
+  verifica('App: riscontro, dichiarazione, nota e bozza dell\'app validi per lo schema 1.2', validaStruttura(app, reg, es3, 'rientro') || (console.log(es3.errori), false));
 }
 
 // App: elenco dei file offline e impronta della mappa di importazione aggiornati

@@ -657,6 +657,14 @@ export function controllaVolumeRientro(vol, andata, esitoFinale, dove, { soloFil
 
   const evidenze = controllaEvidenze(r.evidenze, beniNoti, esito, dove);
   for (const id of evidenze.keys()) if (esistenti.has(id)) esito.errore('EVIDENZA_ID_COLLISIONE', dove, `${id} è già usato nel fascicolo (evidenzeEsistenti dell'andata)`);
+  if (andata && andata.doc.idUsati) {
+    const u = andata.doc.idUsati;
+    const usati = (lista, gia) => { const s = new Set(gia || []); for (const x of lista) if (s.has(x.id)) esito.errore('ID_REGISTRO_COLLISIONE', dove, `${x.id} è già usato nel fascicolo (idUsati dell'andata)`); };
+    usati(r.riscontriDiretti, u.riscontri);
+    usati(r.dichiarazioniTerzi, u.dichiarazioni);
+    usati(r.noteCampo, u.note);
+    usati(r.nuoveAzioni, u.azioni);
+  }
   for (const e of evidenze.values()) {
     if (e.idSopralluogo && e.idSopralluogo !== r.sopralluogo.id) esito.errore('SOPRALLUOGO_INESISTENTE', dove, `${e.id}: sopralluogo ${e.idSopralluogo} diverso`);
     if (e.provenienza === 'perito' && e.acquisitaIl.slice(0, 10) !== r.sopralluogo.data && (e.dataScatto || e.acquisitaIl).slice(0, 10) !== r.sopralluogo.data) {

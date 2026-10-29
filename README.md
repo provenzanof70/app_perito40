@@ -19,7 +19,8 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | F2.1 | Base della PWA: installazione, offline, archivio sul telefono, importazione dell'andata, elenco pratiche, visita, promemoria di checkpoint | fatta |
 | F2.2 | Elenco beni, scheda bene con verifica riga per riga dei dati agli atti, censimento dei beni nuovi | fatta |
 | F2.3 | Rilievo: foto e video nativi, vocali, allegati, annotazione, galleria per gruppo, annullamento | fatta |
-| F2.4–F2.7 | Requisiti, azioni, pacchetto di rientro, prove | da fare |
+| F2.4 | Requisiti, riscontro diretto guidato, dichiarazione di terzi, note del perito | fatta |
+| F2.5–F2.7 | Azioni e cronologia, pacchetto di rientro, prove | da fare |
 | F2.8 | Pubblicazione su GitHub Pages | attiva: https://provenzanof70.github.io/app_perito40/app/ |
 
 ## Struttura
@@ -192,7 +193,7 @@ node strumenti/prova.mjs
 
 Requisiti sul telefono: **iPhone con iOS 16.4 o successivo**, Safari; l'app va aggiunta alla schermata Home (Condividi › Aggiungi alla schermata Home).
 
-Cosa fa oggi (F2.1–F2.3):
+Cosa fa oggi (F2.1–F2.4):
 - **Offline**: il service worker conserva sul telefono tutti i file dell'app; un aggiornamento si propone dal menu e non si installa mai durante una visita in corso.
 - **Archivio sul telefono** (IndexedDB) e **richiesta di archiviazione persistente** all'avvio; se il sistema non la concede, l'app lo dice.
 - **Importazione del pacchetto di andata** da File: impronta SHA-256 dei byte ricevuti e controllo con lo stesso validatore del PC. Un'andata non valida viene rifiutata con l'elenco degli errori; una pratica con dati già raccolti non si sovrascrive.
@@ -203,6 +204,10 @@ Cosa fa oggi (F2.1–F2.3):
 - **Data di scatto** letta dai metadati (EXIF per le foto, `mvhd` per i video), distinta dall'ora di acquisizione nell'app (§6.1). Safari su iPhone toglie i metadati alle foto della fotocamera aperta dall'app: in quel caso l'app registra l'intervallo tra apertura della fotocamera e rientro della foto (`fotocamera_app`, schema 1.2). «Dalla libreria» prende foto e video già scattati con la Fotocamera dell'iPhone. Senza alcuna informazione, la data si dichiara assente.
 - **Annotazione** (frecce, cerchi, testi, tre colori) sovrapposta alla foto in coordinate relative; nota breve obbligatoria; ora mostrata a schermo con segnalazione dell'orologio errato; «vale anche per» altri beni.
 - **Galleria per gruppo** dalle tessere della scheda bene; **annullamento** con motivo e data (il file resta); le evidenze si collegano alla verifica dei dati agli atti.
+- **Requisiti (F2.4)**: per ogni bene i requisiti del suo profilo (RO1–RO5 e RU dichiarati; voce e interconnessione nel profilo ridotto) con le tre basi raccolte (documento, anche agli atti; riscontro diretto; dichiarazione) e la nota del perito come promemoria. Nessun esito: la valutazione resta in studio.
+- **Riscontro diretto guidato**: fatto, oggetto, circostanza, ora; data della visita automatica; frase verbalizzata composta dall'app; foto o video scattati dal modulo e collegati.
+- **Dichiarazione di terzi**: persona dai referenti, forma (con foto del documento se scritta), data, contenuto, riscontro oggettivo Sì (con evidenza obbligatoria) / No / Da acquisire, che crea una bozza di azione collegata.
+- I codici dei registri (RD, DT, NC, A) non riusano quelli già nel fascicolo: l'andata li elenca in `idUsati` (schema 1.2).
 - **Promemoria di checkpoint**: ogni 2 ore o 30 evidenze dall'ultimo pacchetto (o dall'inizio visita); «Più tardi» lo sospende per 30 minuti.
 - **Sicurezza**: la policy dell'app permette di contattare solo il proprio indirizzo (nessun servizio esterno) e vieta il codice valutato al volo.
 

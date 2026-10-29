@@ -107,6 +107,17 @@
       "type": "array", "uniqueItems": true,
       "items": { "$ref": "comuni.v1.schema.json#/$defs/idEvidenza" },
       "description": "Identificativi già usati nel fascicolo, perché l'app continui la numerazione senza collisioni"
+    },
+    "idUsati": {
+      "type": "object",
+      "description": "Codici dei registri già usati nel fascicolo, perché l'app non li riusi (v1.2). Le azioni aperte dell'andata sono comunque considerate usate.",
+      "additionalProperties": false,
+      "properties": {
+        "riscontri": { "type": "array", "uniqueItems": true, "items": { "$ref": "comuni.v1.schema.json#/$defs/idRiscontro" } },
+        "dichiarazioni": { "type": "array", "uniqueItems": true, "items": { "$ref": "comuni.v1.schema.json#/$defs/idDichiarazione" } },
+        "note": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^NC-[0-9]{3}$" } },
+        "azioni": { "type": "array", "uniqueItems": true, "items": { "$ref": "comuni.v1.schema.json#/$defs/idAzione" } }
+      }
     }
   }
 }

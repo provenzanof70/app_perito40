@@ -10,7 +10,7 @@ import { perTipo } from './registri.js';
 import { Elenco } from './schermate/elenco.js';
 import { SchermataPratica } from './schermate/pratica.js';
 
-export const VERSIONE_APP = '0.3.4 · F2.3';
+export const VERSIONE_APP = '0.4.0 · F2.4';
 const NOME_PERITO = 'Perito Ing. Francesco Provenzano';
 
 function MenuApp({ sistema, nomePerito, alNome, visitaInCorso, alChiudi }) {
@@ -99,14 +99,14 @@ export function App({ sistema: sistemaIniziale }) {
   if (rotta.nome === 'pratica' && pratiche) {
     const p = pratiche.find(x => x.codicePratica === rotta.codice);
     if (!p) { vai('/'); return null; }
-    schermata = html`<${SchermataPratica} key=${p.codicePratica + rotta.scheda + (rotta.bene || '') + (rotta.gruppo || '') + (rotta.evidenza || '')} pratica=${p} evidenze=${evidenzePer[p.codicePratica] || []}
-      registri=${registriPer[p.codicePratica] || perTipo([])} scheda=${rotta.scheda} codiceBene=${rotta.bene} gruppo=${rotta.gruppo} idEvidenza=${rotta.evidenza} sistema=${sistema} aggiorna=${aggiorna} mostra=${mostra} alMenu=${() => setMenu(true)} />`;
+    schermata = html`<${SchermataPratica} key=${p.codicePratica + rotta.scheda + (rotta.bene || '') + (rotta.gruppo || '') + (rotta.evidenza || '') + (rotta.requisito || '') + (rotta.idRegistro || '')} pratica=${p} evidenze=${evidenzePer[p.codicePratica] || []}
+      registri=${registriPer[p.codicePratica] || perTipo([])} scheda=${rotta.scheda} codiceBene=${rotta.bene} gruppo=${rotta.gruppo} idEvidenza=${rotta.evidenza} requisito=${rotta.requisito} idRegistro=${rotta.idRegistro} sistema=${sistema} aggiorna=${aggiorna} mostra=${mostra} alMenu=${() => setMenu(true)} />`;
   } else {
     schermata = html`<${Elenco} pratiche=${pratiche} evidenzePer=${evidenzePer} sistema=${sistema} nomePerito=${nomePerito}
       alMenu=${() => setMenu(true)}
       alFile=${async f => importa(new Uint8Array(await f.arrayBuffer()), f.name)}
       alDemo=${async () => {
-        const r = await fetch('../demo/PRATICA_DEMO_2026_001/andata/perizia40-andata.json');
+        const r = await fetch('../demo/PRATICA_DEMO_2026_001/andata/perizia40-andata.json', { cache: 'no-cache' });
         importa(new Uint8Array(await r.arrayBuffer()), 'perizia40-andata.json');
       }} />`;
   }

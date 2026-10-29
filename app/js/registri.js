@@ -1,10 +1,16 @@
 // Registri raccolti in campo, nell'archivio «registri» con chiave [codicePratica, tipo, id].
-// Tipi usati finora:
-//   verifica    esito in campo di un dato agli atti (id = "<bene>|<campo>"), diventa verificheDati nel rientro
-//   beneNuovo   bene censito in campo e assente dall'andata (id = codice), diventa beniNuovi nel rientro
+// Tipi:
+//   verifica       esito in campo di un dato agli atti (id = "<bene>|<campo>")      → verificheDati
+//   beneNuovo      bene censito in campo e assente dall'andata (id = codice)         → beniNuovi
+//   riscontro      riscontro diretto del perito (RD-001)                             → riscontriDiretti
+//   dichiarazione  dichiarazione di terzi (DT-001)                                   → dichiarazioniTerzi
+//   nota           nota del perito per bene e requisito, promemoria (NC-001)         → noteCampo
+//   azione         bozza di azione nata in campo (A004)                               → nuoveAzioni
 
 import { transazione } from './archivio.js';
-import { oggi } from './ui.js';
+import { oggi } from './tempo.js';
+
+export const TIPI_REGISTRO = ['verifica', 'beneNuovo', 'riscontro', 'dichiarazione', 'nota', 'azione'];
 
 export function salvaRegistro(codicePratica, tipo, id, dati) {
   return transazione('registri', 'readwrite', s => {
@@ -12,9 +18,17 @@ export function salvaRegistro(codicePratica, tipo, id, dati) {
   });
 }
 
-// Raggruppa per tipo le righe di una pratica: { verifica: Map(id → riga), beneNuovo: Map … }
+// Più registri in un'unica transazione (es. dichiarazione con la sua bozza di azione)
+export function salvaRegistri(codicePratica, voci) {
+  return transazione('registri', 'readwrite', s => {
+    const ora = new Date().toISOString();
+    for (const { tipo, id, dati } of voci) s.put({ ...dati, codicePratica, tipo, id, modificatoIl: ora });
+  });
+}
+
+// Raggruppa per tipo le righe di una pratica: { verifica: Map(id → riga), … }
 export function perTipo(righe) {
-  const out = { verifica: new Map(), beneNuovo: new Map() };
+  const out = Object.fromEntries(TIPI_REGISTRO.map(t => [t, new Map()]));
   for (const r of righe) {
     if (!out[r.tipo]) out[r.tipo] = new Map();
     out[r.tipo].set(r.id, r);
@@ -36,4 +50,44 @@ export function prossimoCodiceBene(andata, beniNuovi) {
     if (!usati.has(c)) return c;
   }
   throw new Error('nessun codice bene libero');
+}
+
+// Primo progressivo libero per un registro, esclusi i codici già usati nel fascicolo (idUsati dell'andata)
+const PREFISSI = { riscontro: ['RD-', 'riscontri'], dichiarazione: ['DT-', 'dichiarazioni'], nota: ['NC-', 'note'], azione: ['A', 'azioni'] };
+
+export function prossimoId(andata, registri, tipo) {
+  const [prefisso, chiave] = PREFISSI[tipo];
+  const usati = new Set([...registri[tipo].keys(), ...((andata.idUsati || {})[chiave] || [])]);
+  if (tipo === 'azione') for (const a of andata.azioniAperte) usati.add(a.id);
+  for (let n = 1; n < 1000; n++) {
+    const id = `${prefisso}${String(n).padStart(3, '0')}`;
+    if (!usati.has(id)) return id;
+  }
+  throw new Error(`progressivo ${prefisso} esaurito`);
+}
+
+// Data della visita (giorno locale di inizio) usata da riscontri e verifiche
+export const dataVisita = pratica => pratica.visita ? oggi(new Date(pratica.visita.inizio)) : oggi();
+
+// Frase verbalizzata del riscontro: fatto + oggetto + circostanza, con bene, ora e data (§1.3)
+export function fraseRiscontro({ fatto, oggetto, circostanza, bene, ora, data }) {
+  const f = fatto.trim().replace(/[.\s]+$/, '');
+  const [a, m, g] = data.split('-');
+  return `${f.charAt(0).toUpperCase()}${f.slice(1)} (${oggetto.trim()}, bene ${bene}), ${circostanza.trim().replace(/[.\s]+$/, '')}, alle ore ${ora} del ${g}/${m}/${a}.`;
+}
+
+// ---------------------------------------------------------------------------
+// Conversione nel formato del pacchetto di rientro (schemi/v1): solo i campi previsti
+// ---------------------------------------------------------------------------
+
+const solo = (o, campi) => Object.fromEntries(campi.filter(k => o[k] !== undefined && o[k] !== null && o[k] !== '').map(k => [k, o[k]]));
+
+export const riscontroPerRientro = r => solo(r, ['id', 'bene', 'requisito', 'idSopralluogo', 'dataVisita', 'ora', 'fatto', 'oggetto', 'circostanza', 'frase', 'evidenze', 'limiti']);
+export const dichiarazionePerRientro = d => solo({ ...d, riscontroOggettivo: solo(d.riscontroOggettivo, ['esito', 'evidenze', 'nota']) },
+  ['id', 'beni', 'persona', 'ruolo', 'organizzazione', 'forma', 'data', 'contenuto', 'requisito', 'evidenzaDichiarazione', 'riscontroOggettivo']);
+export const notaPerRientro = n => solo(n, ['id', 'bene', 'requisito', 'testo', 'ora', 'base']);
+export const bozzaPerRientro = a => solo(a, ['id', 'categoria', 'beni', 'requisito', 'cosaServe', 'nota', 'percheServe', 'priorita', 'destinatario', 'esempioAccettabile', 'generataDa', 'stato', 'apertaIl']);
+
+export function cancellaRegistro(codicePratica, tipo, id) {
+  return transazione('registri', 'readwrite', s => { s.delete([codicePratica, tipo, id]); });
 }

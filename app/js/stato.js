@@ -74,3 +74,50 @@ export function contatoriTestata(r) {
     { n: r.evidenze, l: 'evidenze' }, { n: r.azioniAperte, l: 'azioni aperte' },
   ];
 }
+
+// Requisiti per bene: profilo completo RO1–RO5 + RU dichiarati; profilo ridotto voce + interconnessione;
+// bene nuovo solo identificazione. Il gruppo indica dove si scatta l'evidenza di un riscontro.
+export const REQUISITI_UI = {
+  RO1: { nome: 'Controllo CNC/PLC', gruppo: 3 },
+  RO2: { nome: 'Interconnessione ai sistemi di fabbrica', gruppo: 5 },
+  RO3: { nome: 'Integrazione automatizzata', gruppo: 6 },
+  RO4: { nome: 'Interfaccia uomo-macchina', gruppo: 4 },
+  RO5: { nome: 'Rispondenza a sicurezza e salute', gruppo: 2 },
+  RU1: { nome: 'Telemanutenzione e controllo remoto', gruppo: 7 },
+  RU2: { nome: 'Monitoraggio continuo', gruppo: 8 },
+  RU3: { nome: 'Sistema cyber-fisico', gruppo: 9 },
+  VOCE: { nome: 'Riconducibilità alla voce', gruppo: 1 },
+  ID: { nome: 'Identificazione del bene', gruppo: 1 },
+  DOC: { nome: 'Documentazione', gruppo: 'DOC' },
+};
+
+export function requisitiDelBene(bene) {
+  const c = bene.classificazione;
+  if (!c) return ['ID'];
+  if (c.profilo === 'completo') return ['RO1', 'RO2', 'RO3', 'RO4', 'RO5', ...(c.ruDichiarati || [])];
+  return ['VOCE', 'RO2'];
+}
+
+// Le tre basi raccolte in campo per un requisito di un bene (§1.3): nessun esito, solo cosa c'è
+// agliAtti: evidenze già nel fascicolo (evidenzeEsistenti dell'andata) con codice di questo bene e requisito
+export function basiRequisito(bene, requisito, evidenze, registri, andata) {
+  const del = e => e.beni.some(b => beneDi(b) === bene.codice);
+  return {
+    evidenze: evidenze.filter(e => e.stato === 'valida' && del(e) && e.requisiti.includes(requisito)),
+    agliAtti: ((andata && andata.evidenzeEsistenti) || []).filter(id => beneDi(id.split('-')[0]) === bene.codice && id.split('-')[1] === requisito),
+    riscontri: [...registri.riscontro.values()].filter(r => r.bene === bene.codice && r.requisito === requisito),
+    dichiarazioni: [...registri.dichiarazione.values()].filter(d => d.beni.includes(bene.codice) && d.requisito === requisito),
+    nota: [...registri.nota.values()].find(n => n.bene === bene.codice && n.requisito === requisito) || null,
+  };
+}
+
+export function requisitiSenzaBasi(pratica, evidenze, registri) {
+  let n = 0;
+  for (const b of [...pratica.andata.beni, ...registri.beneNuovo.values()]) {
+    for (const r of requisitiDelBene(b)) {
+      const x = basiRequisito(b, r, evidenze, registri, pratica.andata);
+      if (!x.evidenze.length && !x.agliAtti.length && !x.riscontri.length && !x.dichiarazioni.length) n++;
+    }
+  }
+  return n;
+}

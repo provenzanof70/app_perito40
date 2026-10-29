@@ -1,6 +1,6 @@
 {
   "formato": "perizia40.scheda_bene",
-  "versioneSchema": "1.1.0",
+  "versioneSchema": "1.2.0",
   "demo": true,
   "codicePratica": "DEMO-2026-001",
   "codice": "B01",

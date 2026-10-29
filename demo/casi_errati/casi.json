@@ -724,6 +724,32 @@
       "atteso": [
         "SCHEMA"
       ]
+    },
+    {
+      "nome": "dichiarazione del rientro con un codice già usato nel fascicolo",
+      "modifiche": [
+        {
+          "file": "{vol1}/perizia40-rientro.json",
+          "puntatore": "/dichiarazioniTerzi/0/id",
+          "valore": "DT-001"
+        }
+      ],
+      "atteso": [
+        "ID_REGISTRO_COLLISIONE"
+      ]
+    },
+    {
+      "nome": "bozza di azione con il codice di un'azione dell'andata",
+      "modifiche": [
+        {
+          "file": "{vol1}/perizia40-rientro.json",
+          "puntatore": "/nuoveAzioni/0/id",
+          "valore": "A001"
+        }
+      ],
+      "atteso": [
+        "ID_REGISTRO_COLLISIONE"
+      ]
     }
   ]
 }

@@ -10,7 +10,7 @@ let registro = null;
 async function registroSchemi() {
   if (!registro) {
     const schemi = await Promise.all(SCHEMI.map(async n => {
-      const r = await fetch(`../schemi/v1/${n}.v1.schema.json`);
+      const r = await fetch(`../schemi/v1/${n}.v1.schema.json`, { cache: 'no-cache' });
       if (!r.ok) throw new Error(`schema ${n} non disponibile`);
       return r.json();
     }));

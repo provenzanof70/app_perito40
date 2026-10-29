@@ -24,10 +24,7 @@ export function oraBreve(iso) {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-// Data di oggi nel fuso del dispositivo, AAAA-MM-GG
-export function oggi(ora = new Date()) {
-  return `${ora.getFullYear()}-${String(ora.getMonth() + 1).padStart(2, '0')}-${String(ora.getDate()).padStart(2, '0')}`;
-}
+export { oggi } from './tempo.js';
 
 export function megabyte(byte) {
   if (byte == null) return '—';
