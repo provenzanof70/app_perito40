@@ -1,9 +1,10 @@
 // Guida ai requisiti durante il sopralluogo: che cosa chiede ogni requisito e che cosa cercare in campo per dimostrarlo.
 // Testo generico, scritto a partire dai modelli ministeriali di perizia e di analisi tecnica (Allegati 1–3) e dalla
-// Circolare Agenzia delle Entrate / MiSE n. 4/E del 30 marzo 2017. Nessun dato di pratiche: quanto ricavato dalle perizie
-// precedenti arriva, per la singola pratica, nel pacchetto di andata (guidaRequisiti) preparato sul PC.
+// Circolare Agenzia delle Entrate / MiSE n. 4/E del 30 marzo 2017, con alcune indicazioni generali di metodo dello studio.
+// Nessun dato di pratiche: quanto ricavato dalle perizie precedenti arriva, per la singola pratica, nel pacchetto di
+// andata (guidaRequisiti) preparato sul PC.
 
-export const FONTE = 'Circ. AdE-MiSE 4/E del 30/03/2017 · modelli ministeriali di perizia e di analisi tecnica';
+export const FONTE = 'Circ. AdE-MiSE 4/E del 30/03/2017 · modelli ministeriali di perizia e di analisi tecnica · metodo dello studio';
 
 export const GUIDA_REQUISITI = {
   ID: {
@@ -11,6 +12,7 @@ export const GUIDA_REQUISITI = {
     cercare: [
       'Il bene per intero nel suo contesto di reparto, prima dei dettagli',
       'Targa CE leggibile, senza riflessi: costruttore, modello, matricola, anno',
+      'La stessa matricola mostrata a schermo dal controllo o dal portale del costruttore: lega il bene fisico alla sua identità digitale',
       'Matricola confrontata con fattura e dichiarazione CE di conformità',
       'Gruppi e componenti dichiarati presenti (nastri, robot, sistemi di visione…)',
     ],
@@ -23,6 +25,7 @@ export const GUIDA_REQUISITI = {
       'Lavorazione prima e dopo il passaggio sul bene (foto del prodotto)',
       'Brochure o scheda tecnica che descrive la funzione',
     ],
+    attenzione: ['Servono le prove delle parole specifiche della voce, non solo stati e ricette (es. filtri: segnalazione dell\'efficienza filtrante; etichettatura: legame tra etichetta e codice o lotto del prodotto)'],
   },
   DOC: {
     norma: 'La documentazione sostiene costo, identità e requisiti: fattura o contratto di leasing, dichiarazione CE di conformità, manuale, documentazione tecnica del fornitore.',
@@ -47,13 +50,15 @@ export const GUIDA_REQUISITI = {
     cercare: [
       'In ingresso: un ordine, una ricetta o un programma inviato dal sistema aziendale e visto arrivare sul bene',
       'In uscita: dati di produzione (pezzi, scarti, stati, allarmi) visti arrivare nel sistema aziendale',
-      'Entrambi i lati dello scambio, con lo stesso ordine o dato e l\'ora',
+      'Un codice di test (ordine o ricetta) messo a verbale, scritto dal sistema a monte in tua presenza e visto arrivare sull\'HMI senza reinserimento manuale',
+      'Lo stesso codice ritrovato a valle con quantità, esito e ora: entrambi i lati dello scambio',
       'Indirizzo IP del bene e protocollo usato (pagina di rete del CN o del PLC)',
       'Schema del collegamento, se disponibile',
     ],
     attenzione: [
       'Le «istruzioni» possono essere anche dati di pianificazione o avanzamento, senza avviare la macchina',
       'Per i beni dell\'Allegato A gruppi II–III e dell\'Allegato B è l\'unico requisito: scambio con sistemi interni e/o esterni, su specifiche documentate, pubbliche e riconosciute',
+      'Il ping e l\'indirizzo IP da soli non dimostrano l\'interconnessione: sono prove accessorie, la prova è il flusso di dati',
       'Una chiavetta USB o un collegamento solo in manutenzione non dimostrano l\'interconnessione',
     ],
   },
@@ -65,7 +70,10 @@ export const GUIDA_REQUISITI = {
       'Scambio di segnali o dati con la macchina a monte o a valle',
       'Videate del sistema logistico o del gestionale con movimenti o lotti del bene',
     ],
-    attenzione: ['Il carico manuale da parte dell\'operatore non è integrazione: serve un flusso automatico o un dato tracciato automaticamente'],
+    attenzione: [
+      'Il carico manuale da parte dell\'operatore non è integrazione: serve un flusso automatico o un dato tracciato automaticamente',
+      'L\'integrazione solo fisica (tubazioni, distribuzione) non basta: servono dati o segnali scambiati',
+    ],
   },
   RO4: {
     norma: 'Interfaccia uomo-macchina semplice e intuitiva, a bordo macchina o in remoto, per monitorare e/o controllare il bene, leggibile anche con i DPI indossati e nelle condizioni del reparto (luce, posizione, sporco).',
@@ -80,7 +88,7 @@ export const GUIDA_REQUISITI = {
     norma: 'Rispondenza ai più recenti parametri di sicurezza, salute e igiene del lavoro: il bene risponde alle norme in vigore, di regola con marcatura CE, dichiarazione CE di conformità e manuale di istruzioni.',
     cercare: [
       'Targa con marcatura CE applicata sul bene',
-      'Dichiarazione CE di conformità con il modello (e la matricola) del bene',
+      'Dichiarazione CE di conformità con il modello (e la matricola) del bene, che citi la Direttiva Macchine e non solo la compatibilità elettromagnetica',
       'Ripari, barriere e dispositivi di sicurezza presenti e funzionanti',
     ],
     attenzione: ['Per gli insiemi di macchine: dichiarazione CE dell\'insieme, non solo delle singole parti'],
@@ -93,7 +101,10 @@ export const GUIDA_REQUISITI = {
       'Procedura aziendale che regola l\'accesso dei fornitori',
       'Contratto di assistenza che prevede il servizio, se esiste',
     ],
-    attenzione: ['Nessuna password o credenziale nelle foto'],
+    attenzione: [
+      'Un software generico di desktop remoto è solo un supporto: meglio il servizio del costruttore con il dispositivo registrato e una sessione reale o il registro degli accessi',
+      'Nessuna password o credenziale nelle foto',
+    ],
   },
   RU2: {
     norma: 'Monitoraggio continuo delle condizioni di lavoro e dei parametri di processo con sensori, e adattività alle derive: anche solo monitoraggio con arresto del processo quando compaiono anomalie (es. grezzo errato o mancante).',
@@ -102,6 +113,7 @@ export const GUIDA_REQUISITI = {
       'Una deriva o un allarme e la reazione del bene (correzione, arresto)',
       'Rapporti di produzione con fermi e loro cause',
     ],
+    attenzione: ['Gli arresti di sicurezza non sono adattività alle derive di processo: serve una reazione del bene a un parametro di processo'],
   },
   RU3: {
     norma: 'Sistema cyberfisico: modello digitale o simulazione del comportamento del bene nel processo (digital twin), anche fuori macchina o basato su machine learning, usato per analisi, previsione o ottimizzazione.',
