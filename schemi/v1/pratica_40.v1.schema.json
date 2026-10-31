@@ -18,7 +18,25 @@
       "type": "object", "required": ["ragioneSociale", "sedeIntervento"], "additionalProperties": false,
       "properties": {
         "ragioneSociale": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
-        "sedeIntervento": { "$ref": "comuni.v1.schema.json#/$defs/testo" }
+        "sedeIntervento": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+        "partitaIva": { "type": "string", "pattern": "^[0-9]{11}$", "description": "(v1.4)" },
+        "sedeLegale": { "$ref": "comuni.v1.schema.json#/$defs/testo", "description": "(v1.4)" },
+        "logo": { "type": "string", "description": "Logo dell'impresa per le copertine, percorso relativo alla cartella della pratica (v1.4)" },
+        "legaleRappresentante": {
+          "type": "object", "required": ["nome"], "additionalProperties": false,
+          "description": "Firmatario di NDA e DSAN. I dati personali restano nella cartella privata della pratica, mai nel repository (v1.4)",
+          "properties": {
+            "nome": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+            "carica": { "type": "string" },
+            "luogoNascita": { "type": "string" },
+            "dataNascita": { "$ref": "comuni.v1.schema.json#/$defs/dataGiorno" },
+            "codiceFiscale": { "type": "string", "pattern": "^[A-Z0-9]{16}$" }
+          }
+        },
+        "rspp": {
+          "type": "object", "required": ["nome"], "additionalProperties": false, "description": "Presa visione della DSAN 2 (v1.4)",
+          "properties": { "nome": { "$ref": "comuni.v1.schema.json#/$defs/testo" } }
+        }
       }
     },
     "perito": {
@@ -30,7 +48,7 @@
       "items": { "$ref": "comuni.v1.schema.json#/$defs/persona" }
     },
     "beni": {
-      "type": "array", "minItems": 1,
+      "type": "array", "description": "Vuoto solo nella pratica appena creata, prima dell'analisi dei documenti (v1.4)",
       "items": {
         "type": "object", "required": ["codice", "denominazione", "scheda"], "additionalProperties": false,
         "properties": {

@@ -1,12 +1,25 @@
 {
   "formato": "perizia40.scheda_bene",
-  "versioneSchema": "1.3.0",
+  "versioneSchema": "1.4.0",
   "demo": true,
   "codicePratica": "DEMO-2026-001",
   "codice": "B01",
   "denominazione": "Centro di lavoro CNC CDX-500",
   "funzione": "Fresatura e foratura a controllo numerico di componenti metallici",
   "ubicazione": "Reparto lavorazioni, campata 2",
+  "reparto": "Lavorazioni meccaniche",
+  "fornitore": {
+    "nome": "Costruttore Demo S.p.A.",
+    "ruolo": "costruttore",
+    "fonti": [
+      {
+        "idEvidenza": "B01-DOC-001",
+        "file": "fattura_FT-DEMO-0042.pdf",
+        "posizione": "p.1",
+        "fattoLetto": "fornitore Costruttore Demo S.p.A."
+      }
+    ]
+  },
   "componenti": [
     {
       "codice": "B01.1",
@@ -34,6 +47,7 @@
       "RU2"
     ],
     "sostenibilita": "solida",
+    "codiceVoce": "A11_01",
     "motivazione": "Asportazione di truciolo con controllo numerico su pezzi metallici, come da fattura",
     "fonti": [
       {
@@ -43,6 +57,46 @@
         "fattoLetto": "riga 1: centro di lavoro CDX-500"
       }
     ]
+  },
+  "costi": {
+    "valoreComplessivo": 250000,
+    "documenti": [
+      {
+        "tipo": "fattura",
+        "numero": "FT-DEMO-0042",
+        "data": "2025-04-02",
+        "descrizione": "Centro di lavoro CDX-500 con cambio pallet (riga 1)",
+        "imponibile": 250000,
+        "emittente": "Costruttore Demo S.p.A.",
+        "fonte": {
+          "idEvidenza": "B01-DOC-001",
+          "file": "fattura_FT-DEMO-0042.pdf",
+          "posizione": "p.1",
+          "fattoLetto": "riga 1: imponibile 250.000,00"
+        }
+      }
+    ],
+    "acconti": [
+      {
+        "data": "2025-01-20",
+        "importo": 50000,
+        "documento": "bonifico di acconto (DEMO)"
+      }
+    ],
+    "dicituraLegge": {
+      "presente": true,
+      "testo": "Bene agevolabile ai sensi dell'art. 1, commi 1051-1063, L. 178/2020",
+      "fonte": {
+        "idEvidenza": "B01-DOC-001",
+        "file": "fattura_FT-DEMO-0042.pdf",
+        "posizione": "p.1",
+        "fattoLetto": "nota in calce"
+      }
+    }
+  },
+  "elaborato": {
+    "revisione": 0,
+    "stato": "bozza"
   },
   "datiAgliAtti": {
     "identita": {

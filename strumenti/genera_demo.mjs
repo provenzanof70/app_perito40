@@ -17,7 +17,7 @@ const PRATICA = 'DEMO-2026-001';
 const VISITA = '2026-10-15';
 const ID_ANDATA = '5f0c2a1e-1d2b-4c3a-9e00-00000000a001';
 const ID_RIENTRO = '7b1e9c40-2f3a-4d5b-8c00-00000000b001';
-const VERSIONE = '1.3.0';
+const VERSIONE = '1.4.0';
 const ora = (data, hhmm, ss = '00') => `${data}T${hhmm}:${ss}+02:00`;
 
 // ---------------------------------------------------------------------------
@@ -306,14 +306,24 @@ const schede = {
   B01: {
     formato: 'perizia40.scheda_bene', versioneSchema: VERSIONE, demo: true, codicePratica: PRATICA, codice: 'B01',
     denominazione: 'Centro di lavoro CNC CDX-500', funzione: 'Fresatura e foratura a controllo numerico di componenti metallici', ubicazione: 'Reparto lavorazioni, campata 2',
+    reparto: 'Lavorazioni meccaniche', fornitore: { nome: 'Costruttore Demo S.p.A.', ruolo: 'costruttore', fonti: [FATTURA('fornitore Costruttore Demo S.p.A.')] },
     componenti: [
       { codice: 'B01.1', denominazione: 'Cambio pallet automatico', tipo: 'ACC', costruttore: 'Costruttore Demo S.p.A.', funzione: 'Scambio automatico dei pallet portapezzo' },
       { codice: 'B01.2', denominazione: 'Sistema di aspirazione nebbie oleose', tipo: 'M', costruttore: 'Aspirazione Demo S.r.l.', funzione: 'Aspirazione delle nebbie dalla cabina' },
     ],
     classificazione: {
       regime: 'CRI_4.0', allegato: 'A', gruppo: 1, voce: 'Macchine utensili per asportazione (voce abbreviata, DEMO)', profilo: 'completo', ruDichiarati: ['RU1', 'RU2'],
-      sostenibilita: 'solida', motivazione: 'Asportazione di truciolo con controllo numerico su pezzi metallici, come da fattura', fonti: [FATTURA('riga 1: centro di lavoro CDX-500')],
+      sostenibilita: 'solida', codiceVoce: 'A11_01', motivazione: 'Asportazione di truciolo con controllo numerico su pezzi metallici, come da fattura', fonti: [FATTURA('riga 1: centro di lavoro CDX-500')],
     },
+    // v1.4: costi e stato dell'elaborato (B02 li lascia vuoti: nello scheletro della perizia diventano segnaposto)
+    costi: {
+      valoreComplessivo: 250000,
+      documenti: [{ tipo: 'fattura', numero: 'FT-DEMO-0042', data: '2025-04-02', descrizione: 'Centro di lavoro CDX-500 con cambio pallet (riga 1)', imponibile: 250000,
+        emittente: 'Costruttore Demo S.p.A.', fonte: FATTURA('riga 1: imponibile 250.000,00') }],
+      acconti: [{ data: '2025-01-20', importo: 50000, documento: 'bonifico di acconto (DEMO)' }],
+      dicituraLegge: { presente: true, testo: "Bene agevolabile ai sensi dell'art. 1, commi 1051-1063, L. 178/2020", fonte: FATTURA('nota in calce') },
+    },
+    elaborato: { revisione: 0, stato: 'bozza' },
     datiAgliAtti: {
       identita: {
         costruttore: voce('Costruttore Demo S.p.A.', 'documentato', [FATTURA('fornitore Costruttore Demo S.p.A.'), DDC1('costruttore Costruttore Demo S.p.A.')]),
@@ -628,7 +638,8 @@ const azioniPratica = [
 
 const pratica = {
   formato: 'perizia40.pratica', versioneSchema: VERSIONE, demo: true, codicePratica: PRATICA, regime: 'CRI_4.0', annualita: 2025, aggiornataIl: '2026-10-20T12:00:00+02:00',
-  cliente: CLIENTE, perito: { nome: 'Perito DEMO' }, persone: PERSONE,
+  cliente: { ...CLIENTE, sedeLegale: "Via dell'Esempio 1, 00000 Citta Fittizia (XX)", legaleRappresentante: { nome: 'Rappresentante Demo', carica: 'Amministratore unico' }, rspp: { nome: 'Responsabile Sicurezza Demo' } },
+  perito: { nome: 'Perito DEMO' }, persone: PERSONE,
   beni: Object.values(schede).map(sc => ({ codice: sc.codice, denominazione: sc.denominazione, scheda: `beni/${sc.codice}.json` })),
   sopralluoghi: [{ id: 'S01', data: VISITA, stato: 'eseguito', presenti: ['P01', 'P02', 'P03'] }],
   beniNuovi: BENI_NUOVI, evidenze: evidenzePratica, timeline: TIMELINE, azioni: azioniPratica, riscontriDiretti: RISCONTRI,

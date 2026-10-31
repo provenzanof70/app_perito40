@@ -11,7 +11,7 @@ import { oggi } from './tempo.js';
 import { scriviZipBlob } from '../../strumenti/lib/zip.mjs';
 import { nuovoEsito, validaStruttura, controllaRiservatezza, controllaVolumeRientro, controllaVolumi } from '../../strumenti/lib/validatore.mjs';
 
-export const VERSIONE_SCHEMA = '1.3.0';
+export const VERSIONE_SCHEMA = '1.4.0';
 export const SOGLIA_VOLUME = 250e6;
 
 const due = n => String(n).padStart(2, '0');

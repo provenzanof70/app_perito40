@@ -1,0 +1,73 @@
+{
+  "regime": "CRI_4.0",
+  "avvertenza": "Testi del regime CRI 4.0 (L. 178/2020) per lo scheletro di perizia e analisi tecnica. L'elenco VISTI e le diciture di legge dipendono da regime e annualità: vanno verificati a ogni pratica prima dell'uso.",
+  "riferimentoAnalisi": "art. 1, comma 1062, della Legge 30 dicembre 2020, n. 178",
+  "visti": [
+    "la Legge 11 dicembre 2016, n. 232 e i relativi Allegati A e B",
+    "la Circolare n. 4/E del 30 marzo 2017 dell'Agenzia delle Entrate e del Ministero dello Sviluppo Economico",
+    "la Circolare MiSE n. 547750 del 15 dicembre 2017 e la Circolare MiSE n. 177355 del 23 maggio 2018",
+    "la Legge 30 dicembre 2020, n. 178, art. 1, commi 1051–1063",
+    "la Legge 30 dicembre 2024, n. 207 (Legge di Bilancio 2025)",
+    "il D.L. 29 marzo 2024, n. 39, convertito dalla L. 23 maggio 2024, n. 67, art. 6",
+    "il D.D. MIMIT del 24 aprile 2024 (modelli di comunicazione)",
+    "la Circolare n. 9/E del 23 luglio 2021 dell'Agenzia delle Entrate",
+    "la documentazione tecnica e di costo elencata nell'Analisi tecnica allegata"
+  ],
+  "premesso": [
+    "di aver effettuato investimenti ammessi al credito d'imposta di cui all'art. 1, comma 1057-bis, della L. 178/2020",
+    "che i costi di tali investimenti sono imputabili ai sensi dell'art. 109, commi 1 e 2, del TUIR",
+    "che i beni oggetto della presente perizia sono nuovi",
+    "di essere consapevole delle sanzioni previste dal D.P.R. 445/2000 per le dichiarazioni mendaci"
+  ],
+  "obbligatori": {
+    "RO1": "controllo per mezzo di CNC (Computer Numerical Control) e/o PLC (Programmable Logic Controller)",
+    "RO2": "interconnessione ai sistemi informatici di fabbrica con caricamento da remoto di istruzioni e/o part program",
+    "RO3": "integrazione automatizzata con il sistema logistico della fabbrica o con la rete di fornitura e/o con altre macchine del ciclo produttivo",
+    "RO4": "interfaccia tra uomo e macchina semplici e intuitive",
+    "RO5": "rispondenza ai più recenti parametri di sicurezza, salute e igiene del lavoro"
+  },
+  "ulteriori": {
+    "RU1": "sistemi di telemanutenzione e/o telediagnosi e/o controllo in remoto",
+    "RU2": "monitoraggio continuo delle condizioni di lavoro e dei parametri di processo mediante opportuni set di sensori e adattività alle derive di processo",
+    "RU3": "caratteristiche di integrazione tra macchina fisica e/o impianto con la modellizzazione e/o la simulazione del proprio comportamento nello svolgimento del processo (sistema cyberfisico)"
+  },
+  "interconnessioneRidotto": "il bene è interconnesso perché scambia informazioni con sistemi interni e/o esterni attraverso un collegamento basato su specifiche documentate, disponibili pubblicamente e internazionalmente riconosciute",
+  "vociGruppo1": {
+    "A11_01": "macchine utensili per asportazione",
+    "A11_02": "macchine utensili operanti con laser e altri processi a flusso di energia, elettroerosione, processi elettrochimici",
+    "A11_03": "macchine e impianti per la realizzazione di prodotti mediante la trasformazione dei materiali e delle materie prime",
+    "A11_04": "macchine utensili per la deformazione plastica dei metalli e altri materiali",
+    "A11_05": "macchine utensili per l'assemblaggio, la giunzione e la saldatura",
+    "A11_06": "macchine per il confezionamento e l'imballaggio",
+    "A11_07": "macchine utensili di de-produzione e riconfezionamento per recuperare materiali e funzioni da scarti industriali e prodotti di ritorno a fine vita",
+    "A11_08": "robot, robot collaborativi e sistemi multi-robot",
+    "A11_09": "macchine utensili e sistemi per il conferimento o la modifica delle caratteristiche superficiali dei prodotti o la funzionalizzazione delle superfici",
+    "A11_10": "macchine per la manifattura additiva utilizzate in ambito industriale",
+    "A11_11": "macchine, strumenti e dispositivi per il carico e lo scarico, la movimentazione, la pesatura e la cernita automatica dei pezzi, dispositivi di sollevamento e manipolazione automatizzati, AGV e sistemi di convogliamento e movimentazione flessibili e/o dotati di riconoscimento dei pezzi",
+    "A11_12": "magazzini automatizzati interconnessi ai sistemi gestionali di fabbrica",
+    "A11_13": "dispositivi, strumentazione e componentistica intelligente per l'integrazione, la sensorizzazione e/o l'interconnessione e il controllo automatico dei processi, anche nell'ammodernamento o nel revamping dei sistemi di produzione esistenti"
+  },
+  "notaAccessori": "La risoluzione dell'Agenzia delle Entrate n. 152 del 15 dicembre 2017 ha fissato nel 5% del costo del bene principale il limite forfetario entro il quale attrezzature e accessori strettamente necessari al funzionamento costituiscono «normale dotazione» del bene; oltre tale limite occorre dimostrarne la congruità.",
+  "dichiaraInoltre": [
+    "che l'Analisi tecnica allegata, che costituisce parte integrante della presente perizia, è rispondente al vero",
+    "di non avere rapporti di dipendenza o di collaborazione con i produttori e i fornitori dei beni oggetto della perizia (terzietà)"
+  ],
+  "nda": [
+    "La Committente è proprietaria esclusiva di disegni, dati, esperienze tecniche e altre informazioni che il Perito ha dovuto acquisire per redigere la presente perizia (Informazioni Riservate), rivelate al solo scopo di consentire l'analisi tecnica necessaria alla perizia asseverata per il credito d'imposta sui beni strumentali 4.0.",
+    "Il Perito non utilizzerà le Informazioni Riservate, senza il consenso scritto della Committente, per scopi diversi da quello indicato e non le divulgherà a terzi.",
+    "La Committente adotta le misure necessarie perché dipendenti e collaboratori che accedono alle Informazioni Riservate le mantengano riservate.",
+    "Disegni, dati e documenti forniti restano di proprietà della Committente e sono affidati al Perito per il solo scopo indicato; al termine dell'incarico sono restituiti o conservati secondo le istruzioni della Committente.",
+    "Come previsto dalla Circolare 4/E, a tutela della proprietà intellettuale e della riservatezza, l'analisi tecnica è realizzata in modo confidenziale ed è custodita presso la sede del beneficiario; le informazioni possono essere rese disponibili solo su richiesta degli organi di controllo o su mandato dell'autorità giudiziaria."
+  ],
+  "formulaGiuramento": "Giuro di avere svolto l'incarico affidatomi bene e fedelmente al solo scopo di far conoscere la verità",
+  "allegati": [
+    "All_1 Conferma d'ordine / offerta accettata",
+    "All_2 Fatture di acconto e saldo con distinte di bonifico",
+    "All_3 Documenti di trasporto",
+    "All_4 Dichiarazione di consegna e collaudo",
+    "All_5 Dichiarazioni CE di conformità (comprese quelle dell'insieme)",
+    "All_6 Evidenze di interconnessione",
+    "All_7 Documento d'identità del perito"
+  ],
+  "sogliaAcconto": 0.2
+}

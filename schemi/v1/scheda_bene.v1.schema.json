@@ -18,6 +18,17 @@
     "denominazione": { "$ref": "comuni.v1.schema.json#/$defs/testo", "description": "Nome riconoscibile in campo" },
     "funzione": { "$ref": "comuni.v1.schema.json#/$defs/testo", "description": "Funzione produttiva effettiva, sintetica" },
     "ubicazione": { "type": "string" },
+    "reparto": { "type": "string", "description": "(v1.4)" },
+    "unitaLocale": { "$ref": "comuni.v1.schema.json#/$defs/testo", "description": "Sito di messa in funzione, se diverso dalla sede dell'intervento (v1.4)" },
+    "fornitore": {
+      "type": "object", "required": ["nome", "ruolo"], "additionalProperties": false,
+      "description": "Chi ha venduto o integrato il bene, distinto dal costruttore (v1.4)",
+      "properties": {
+        "nome": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+        "ruolo": { "enum": ["costruttore", "rivenditore", "integratore", "locatore"] },
+        "fonti": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/refEv" } }
+      }
+    },
     "componenti": {
       "type": "array",
       "description": "Componenti o sottomacchine B01.1, B01.2… Il raggruppamento organizza le evidenze ma non decide perimetro né classificazione (§2.7).",
@@ -51,6 +62,7 @@
           "description": "Requisiti ulteriori dichiarati per il profilo completo"
         },
         "sostenibilita": { "enum": ["solida", "da_motivare", "debole"] },
+        "codiceVoce": { "type": "string", "pattern": "^[AB][0-9]{0,2}_[0-9]{2}$", "description": "Voce numerata delle check list della Circ. 4/E, es. A11_01 (v1.4)" },
         "motivazione": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
         "fonti": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/refEv" } }
       },
@@ -133,6 +145,77 @@
           "motivoVariazione": { "type": "string", "description": "Obbligatorio se l'attesa differisce da quella standard del profilo" },
           "evidenzeRaccolte": { "type": "integer", "minimum": 0 },
           "nota": { "type": "string" }
+        }
+      }
+    },
+    "costi": {
+      "type": "object", "additionalProperties": false,
+      "description": "Costo del bene come risulta dai documenti: importi in euro, imponibili (v1.4)",
+      "properties": {
+        "valoreComplessivo": { "type": "number", "minimum": 0 },
+        "documenti": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["tipo", "numero", "data", "descrizione", "imponibile"], "additionalProperties": false,
+            "properties": {
+              "tipo": { "enum": ["ordine", "offerta", "fattura", "fattura_acconto", "nota_credito", "contratto_leasing", "altro"] },
+              "numero": { "type": "string" },
+              "data": { "$ref": "comuni.v1.schema.json#/$defs/dataGiorno" },
+              "descrizione": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+              "imponibile": { "type": "number" },
+              "emittente": { "type": "string" },
+              "fonte": { "$ref": "comuni.v1.schema.json#/$defs/refEv" }
+            }
+          }
+        },
+        "acconti": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["data", "importo"], "additionalProperties": false,
+            "properties": {
+              "data": { "$ref": "comuni.v1.schema.json#/$defs/dataGiorno" },
+              "importo": { "type": "number", "minimum": 0 },
+              "documento": { "type": "string" },
+              "fonte": { "$ref": "comuni.v1.schema.json#/$defs/refEv" }
+            }
+          }
+        },
+        "accessori": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["descrizione", "importo"], "additionalProperties": false,
+            "properties": {
+              "descrizione": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+              "importo": { "type": "number", "minimum": 0 },
+              "fonte": { "$ref": "comuni.v1.schema.json#/$defs/refEv" }
+            }
+          }
+        },
+        "dicituraLegge": {
+          "type": "object", "required": ["presente"], "additionalProperties": false, "description": "Riferimento normativo indicato in fattura",
+          "properties": {
+            "presente": { "type": "boolean" },
+            "testo": { "type": "string" },
+            "fonte": { "$ref": "comuni.v1.schema.json#/$defs/refEv" }
+          }
+        }
+      }
+    },
+    "elaborato": {
+      "type": "object", "required": ["revisione", "stato"], "additionalProperties": false,
+      "description": "Stato della perizia e dell'analisi tecnica del bene (v1.4)",
+      "properties": {
+        "revisione": { "type": "integer", "minimum": 0 },
+        "stato": { "enum": ["bozza", "bozza_sospesa", "per_la_firma", "giurata"] },
+        "data": { "$ref": "comuni.v1.schema.json#/$defs/dataGiorno" },
+        "giuramento": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "data": { "$ref": "comuni.v1.schema.json#/$defs/dataGiorno" },
+            "tribunale": { "type": "string" },
+            "rgvg": { "type": "string" },
+            "cronologico": { "type": "string" }
+          }
         }
       }
     }

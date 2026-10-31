@@ -24,6 +24,8 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | F2.6 | Pacchetto di rientro: checkpoint e finale, volumi, controllo, «Salva in File», sola lettura dopo il finale | fatta |
 | F2.7 | Prove: visita completa riletta dal PC, protocollo sull'iPhone ([docs/F2_7_prove_iphone.md](docs/F2_7_prove_iphone.md)), «Ricomincia la DEMO» | fatta |
 | F2.8 | Pubblicazione su GitHub Pages | attiva: https://provenzanof70.github.io/app_perito40/app/ |
+| F3.1 | PC: nuova pratica, nuovo bene, registrazione dei documenti, scheletro Word di perizia e analisi tecnica; schemi 1.4 | fatta |
+| F3.2–F3.3 | PC: pacchetto di andata dal fascicolo; importazione del rientro | da fare |
 
 ## Struttura
 
@@ -43,6 +45,11 @@ strumenti/
   valida.mjs                   validatore da riga di comando
   prova.mjs                    prova del validatore sulla DEMO e sui casi errati
   genera_demo.mjs              rigenera la pratica DEMO
+  crea_pratica.mjs             crea la cartella di una nuova pratica con il fascicolo iniziale
+  nuovo_bene.mjs               aggiunge un bene: scheda valida con i dati agli atti da compilare
+  registra_documento.mjs       registra un documento del cliente come evidenza (copia, codice, impronta, manifesto)
+  word/scheletro_perizia.py    scheletro Word di perizia giurata e analisi tecnica dal fascicolo
+  word/regime_CRI_4.0.json     testi del regime (VISTI, requisiti, check list, NDA): da verificare per annualità
   aggiorna_app.mjs             aggiorna l'elenco dei file offline dell'app e la policy di sicurezza
   genera_icone.mjs             genera le icone dell'app dal logo
   lib/validatore.mjs           nucleo dei controlli, senza dipendenze né accesso al disco (riusabile nella PWA)
@@ -234,6 +241,32 @@ node strumenti/aggiorna_app.mjs
 ```
 
 (la prova `node strumenti/prova.mjs` fallisce se ce ne si dimentica).
+
+## Sul PC: dalla cartella dei documenti allo scheletro di perizia (F3.1)
+
+Sul PC l'applicazione è Claude: si apre la cartella delle pratiche (OneDrive) in Claude e una skill privata guida il lavoro,
+usando questi script. Gli script non usano servizi esterni e funzionano su qualsiasi cartella di pratica.
+
+```bash
+node strumenti/crea_pratica.mjs "<cartella delle pratiche>" PROVA-2026-001 --cliente "Ragione sociale" --sede "Sede dell'intervento"
+```
+
+```bash
+node strumenti/nuovo_bene.mjs "<cartella pratica>" --denominazione "Centro di lavoro" --funzione "Fresatura a CN" --allegato A --gruppo 1 --voce "Macchine utensili per asportazione" --codice-voce A11_01 --ru RU1,RU2
+```
+
+```bash
+node strumenti/registra_documento.mjs "<cartella pratica>" "<cartella pratica>/documenti_cliente/fattura.pdf" --beni B01 --descrizione "Fattura n. … del …"
+```
+
+```bash
+python strumenti/word/scheletro_perizia.py "<cartella pratica>" --perito "<file privato del perito>.json"
+```
+
+- La nuova pratica ha `documenti_cliente/` (originali, mai modificati), `beni/`, `evidenze/`, `andata/`, `rientro/`, `perizia/` e `pratica_40.json`.
+- Il nome della cartella perde punti e spazi finali (es. «S.r.l.»): Windows non apre cartelle che finiscono con un punto.
+- Lo scheletro scrive per ogni bene perizia giurata (copertina, VISTI, PREMESSO, tabella del bene, DICHIARA con caselle vuote, NDA, verbale di asseverazione) e analisi tecnica (requisiti, dati identificativi, classificazione, costi, esame dei requisiti con evidenze, riscontri, dichiarazioni e lacune, check list, appendice istruttoria). Ciò che il fascicolo non contiene resta `[PLACEHOLDER: …]` in rosso, le istruzioni `[NOTA: …]` in grigio; caselle e conclusioni le decide il perito. Richiede Python 3 con `python-docx`.
+- Schema 1.4 (tutto facoltativo): dati dell'impresa (partita IVA, sede legale, legale rappresentante, RSPP, logo), del bene (fornitore, reparto, unità locale, voce numerata), costi (documenti, acconti, accessori, dicitura di legge) e stato dell'elaborato (revisione, bozza/per la firma, giuramento). I dati personali stanno solo nelle cartelle private delle pratiche.
 
 ## Pratica DEMO
 

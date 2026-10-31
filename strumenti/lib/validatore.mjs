@@ -520,6 +520,7 @@ function beniDaSchede(schede) {
 export function controllaPratica(ctx, esito, dove = 'pratica_40.json') {
   const { pratica, schede } = ctx;
   const schedePerCodice = new Map();
+  if (!pratica.beni.length) esito.avviso('PRATICA_SENZA_BENI', dove, 'pratica appena creata: nessun bene ancora censito dai documenti');
   pratica.beni.forEach((b, i) => {
     const sc = schede.get(b.scheda);
     if (!sc) { esito.errore('SCHEDA_MANCANTE', `${dove}#/beni/${i}`, `scheda ${b.scheda} assente`); return; }

@@ -309,6 +309,46 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   }
 }
 
+// PC (F3.1): nuova pratica, nuovo bene, scheletro di perizia e analisi in Word
+{
+  const { mkdtempSync, rmSync, existsSync, readdirSync: elenca } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { spawnSync } = await import('node:child_process');
+  const { creaPratica } = await import('./crea_pratica.mjs');
+  const { nuovoBene } = await import('./nuovo_bene.mjs');
+  const radice = mkdtempSync(join(tmpdir(), 'p40-'));
+  try {
+    const { cartella, esito } = creaPratica(radice, 'PROVA-2026-001', { cliente: 'Officine Prova S.r.l.', sede: 'Via Prova 1', demo: true });
+    verifica('Nuova pratica: cartelle e fascicolo valido, nome senza punto finale (Windows)',
+      esito.errori.length === 0 && cartella.endsWith('PROVA-2026-001 - Officine Prova S.r.l') && ['documenti_cliente', 'beni', 'evidenze', 'andata', 'rientro', 'perizia'].every(c => existsSync(join(cartella, c))));
+    let doppia = '';
+    try { creaPratica(radice, 'PROVA-2026-001', { cliente: 'Altro', sede: 'X' }); } catch (e) { doppia = e.message; }
+    verifica('Nuova pratica: una pratica esistente non si sovrascrive', /esiste già/.test(doppia));
+    const b1 = nuovoBene(cartella, { denominazione: 'Pressa', funzione: 'Piegatura a CN', allegato: 'A', gruppo: 1, voce: 'deformazione plastica', codiceVoce: 'A11_04', ru: ['RU1', 'RU2'] });
+    const b2 = nuovoBene(cartella, { denominazione: 'Software MES', funzione: 'Gestione ordini', allegato: 'B', voce: 'software di produzione' });
+    verifica('Nuovo bene: schede B01 (profilo completo) e B02 (ridotto) valide, dati agli atti «da verificare»',
+      b1.codice === 'B01' && b2.codice === 'B02' && b2.esito.errori.length === 0 && b2.esito.avvisi.some(a => a.codice === 'CLASSIFICAZIONE_DA_MOTIVARE'));
+    const { registraDocumento } = await import('./registra_documento.mjs');
+    const { writeFileSync: scrivi } = await import('node:fs');
+    scrivi(join(cartella, 'documenti_cliente', 'fattura.pdf'), 'FATTURA DI PROVA');
+    const d1 = registraDocumento(cartella, join(cartella, 'documenti_cliente', 'fattura.pdf'), { beni: ['B01', 'B02'], descrizione: 'Fattura di prova' });
+    let doppio = '';
+    try { registraDocumento(cartella, join(cartella, 'documenti_cliente', 'fattura.pdf'), { beni: ['B01'], descrizione: 'x' }); } catch (e) { doppio = e.message; }
+    verifica('Registra documento: copia identica in evidenze/documenti con codice, impronta e manifesto; doppione rifiutato',
+      d1.id === 'B01-DOC-001' && d1.esito.errori.length === 0 && existsSync(join(cartella, 'documenti_cliente', 'fattura.pdf')) && /già registrato/.test(doppio));
+    const py = spawnSync('python', ['-c', 'import docx'], { encoding: 'utf-8' });
+    if (py.status === 0) {
+      const r = spawnSync('python', ['-I', join(RADICE, 'strumenti', 'word', 'scheletro_perizia.py'), join(RADICE, 'demo', 'PRATICA_DEMO_2026_001'),
+        '--uscita', join(radice, 'w'), '--data', '2026-10-31'], { encoding: 'utf-8' });
+      const file = existsSync(join(radice, 'w')) ? elenca(join(radice, 'w')) : [];
+      verifica('Scheletro Word: perizia e analisi per ogni bene della DEMO, con segnaposto in chiaro',
+        (r.status === 0 || (console.log(r.stderr), false)) && file.length === 4 && /segnaposto/.test(r.stdout) && file.some(f => /^Perizia 4\.0 .* - BOZZA rev\.0 31\.10\.2026\.docx$/.test(f)));
+    } else console.log('saltata  Scheletro Word: Python con python-docx non disponibile');
+  } finally {
+    rmSync(radice, { recursive: true, force: true });
+  }
+}
+
 // App: elenco dei file offline e impronta della mappa di importazione aggiornati
 {
   const { calcola } = await import('./aggiorna_app.mjs');
