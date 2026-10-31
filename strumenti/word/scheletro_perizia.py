@@ -528,7 +528,7 @@ def analisi(pr, codice, perito, regime, guida, oggi):
 def nome_file(tipo, k):
     stato = {'bozza': 'BOZZA', 'bozza_sospesa': 'BOZZA SOSPESA'}.get(k['stato'], '')
     # caratteri non ammessi da Windows; nomi lunghi accorciati per restare sotto il limite dei percorsi
-    sicuro = lambda s, n: ''.join(ch for ch in s if ch not in '<>:"/\\|?*').strip()[:n].strip()
+    sicuro = lambda s, n: ' '.join(''.join(ch for ch in s if ch not in '<>:"/\\|?*').split())[:n].strip()
     return f"{tipo} {sicuro(k['cliente'], 40)} - {sicuro(k['bene'], 50)}{' - ' + stato if stato else ''} rev.{k['rev']} {k['data'].replace('/', '.')}.docx"
 
 

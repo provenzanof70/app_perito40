@@ -324,6 +324,11 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
     let doppia = '';
     try { creaPratica(radice, 'PROVA-2026-001', { cliente: 'Altro', sede: 'X' }); } catch (e) { doppia = e.message; }
     verifica('Nuova pratica: una pratica esistente non si sovrascrive', /esiste già/.test(doppia));
+    const libera = creaPratica(radice, 'PROVA-2026-002', { cliente: 'Prova SRL', sede: 'X', nome: 'Prova SRL - macchine ALFA/BETA', demo: true });
+    let stessoCodice = '';
+    try { creaPratica(radice, 'PROVA-2026-002', { cliente: 'Prova SRL', sede: 'X', nome: 'Altro nome' }); } catch (e) { stessoCodice = e.message; }
+    verifica('Nuova pratica: nome della cartella libero («cliente - bene»), codice unico anche con nomi diversi',
+      libera.cartella.endsWith('Prova SRL - macchine ALFABETA') && /esiste già/.test(stessoCodice));
     const b1 = nuovoBene(cartella, { denominazione: 'Pressa', funzione: 'Piegatura a CN', allegato: 'A', gruppo: 1, voce: 'deformazione plastica', codiceVoce: 'A11_04', ru: ['RU1', 'RU2'] });
     const b2 = nuovoBene(cartella, { denominazione: 'Software MES', funzione: 'Gestione ordini', allegato: 'B', voce: 'software di produzione' });
     verifica('Nuovo bene: schede B01 (profilo completo) e B02 (ridotto) valide, dati agli atti «da verificare»',

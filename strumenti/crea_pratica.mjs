@@ -3,10 +3,10 @@
 // I beni, le schede e i dati agli atti li compila poi Claude dall'analisi dei documenti (skill «preparazione pratica»).
 //
 // Uso: node strumenti/crea_pratica.mjs <cartella delle pratiche> <CODICE> --cliente "Ragione sociale" --sede "Sede dell'intervento"
-//        [--annualita 2026] [--perito "Nome"] [--demo]
-// Crea <cartella delle pratiche>/<CODICE> - <Ragione sociale>/ e non sovrascrive mai una pratica esistente.
+//        [--nome "Cliente - bene"] [--annualita 2026] [--perito "Nome"] [--demo]
+// Crea <cartella delle pratiche>/<--nome> (oppure <CODICE> - <Ragione sociale>) e non sovrascrive mai una pratica esistente.
 
-import { existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { caricaSchemi, caricaCartella, validaCaricata } from './lib/disco.mjs';
 
@@ -23,10 +23,15 @@ export function creaPratica(radice, codice, o) {
   if (!/^[A-Z0-9][A-Z0-9_-]{2,40}$/.test(codice)) throw new Error(`codice pratica non valido: ${codice} (maiuscole, cifre, - e _)`);
   if (!o.cliente || !o.sede) throw new Error('servono --cliente e --sede');
   if (!existsSync(radice)) throw new Error(`cartella delle pratiche non trovata: ${radice}`);
-  const esistente = readdirSync(radice).find(n => n === codice || n.startsWith(`${codice} - `));
+  // stesso codice in qualsiasi cartella (anche con nome libero): si legge il codice dal fascicolo
+  const codiceDi = n => { try { return JSON.parse(readFileSync(join(radice, n, 'pratica_40.json'), 'utf8')).codicePratica; } catch { return null; } };
+  const esistente = readdirSync(radice).find(n => n === codice || n.startsWith(`${codice} - `) || codiceDi(n) === codice);
   if (esistente) throw new Error(`esiste già una pratica ${codice}: ${join(radice, esistente)}`);
+  // Nome della cartella: libero (--nome, es. «Cliente - bene») o «CODICE - Cliente».
   // Windows non apre le cartelle che finiscono con punto o spazio (es. «S.r.l.»): si tolgono
-  const nome = `${codice} - ${o.cliente.replace(/[<>:"/\\|?*]/g, '').trim().replace(/[. ]+$/, '')}`;
+  const pulito = s => s.replace(/[<>:"/\\|?*]/g, '').trim().replace(/[. ]+$/, '');
+  const nome = o.nome ? pulito(o.nome) : `${codice} - ${pulito(o.cliente)}`;
+  if (existsSync(join(radice, nome))) throw new Error(`la cartella esiste già: ${join(radice, nome)}`);
   const cartella = join(radice, nome);
   mkdirSync(cartella);
   for (const c of Object.keys(CARTELLE)) mkdirSync(join(cartella, c));
@@ -53,11 +58,11 @@ if (process.argv[1] && process.argv[1].endsWith('crea_pratica.mjs')) {
   const opz = n => { const i = a.indexOf(`--${n}`); return i >= 0 ? a[i + 1] : undefined; };
   const [radice, codice] = a.filter((x, i) => !x.startsWith('--') && !(i > 0 && a[i - 1].startsWith('--') && a[i - 1] !== '--demo'));
   if (!radice || !codice) {
-    console.error('Uso: node strumenti/crea_pratica.mjs <cartella delle pratiche> <CODICE> --cliente "Ragione sociale" --sede "Sede" [--annualita 2026] [--perito "Nome"] [--demo]');
+    console.error('Uso: node strumenti/crea_pratica.mjs <cartella delle pratiche> <CODICE> --cliente "Ragione sociale" --sede "Sede" [--nome "Cliente - bene"] [--annualita 2026] [--perito "Nome"] [--demo]');
     process.exit(2);
   }
   try {
-    const { cartella, esito } = creaPratica(radice, codice, { cliente: opz('cliente'), sede: opz('sede'), perito: opz('perito'), annualita: opz('annualita') && Number(opz('annualita')), demo: a.includes('--demo') });
+    const { cartella, esito } = creaPratica(radice, codice, { cliente: opz('cliente'), sede: opz('sede'), nome: opz('nome'), perito: opz('perito'), annualita: opz('annualita') && Number(opz('annualita')), demo: a.includes('--demo') });
     console.log(`Pratica creata: ${cartella}`);
     for (const e of [...esito.errori, ...esito.avvisi]) console.log(`  ${e.livello === 'errore' ? 'ERRORE' : 'avviso'} ${e.codice}: ${e.messaggio}`);
     process.exit(esito.errori.length ? 1 : 0);
