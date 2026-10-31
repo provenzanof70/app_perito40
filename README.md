@@ -196,7 +196,7 @@ node strumenti/prova.mjs
 Requisiti sul telefono: **iPhone con iOS 16.4 o successivo**, Safari; l'app va aggiunta alla schermata Home (Condividi › Aggiungi alla schermata Home).
 
 Cosa fa oggi (F2.1–F2.6):
-- **Offline**: il service worker conserva sul telefono tutti i file dell'app; un aggiornamento si propone dal menu e non si installa mai durante una visita in corso.
+- **Offline**: il service worker conserva sul telefono tutti i file dell'app; l'app cerca una versione nuova all'avvio e quando torna in primo piano; l'aggiornamento si propone dal menu e, a visita in corso, si installa solo con «Aggiorna comunque» (i dati restano sul telefono).
 - **Archivio sul telefono** (IndexedDB) e **richiesta di archiviazione persistente** all'avvio; se il sistema non la concede, l'app lo dice.
 - **Importazione del pacchetto di andata** da File: impronta SHA-256 dei byte ricevuti e controllo con lo stesso validatore del PC. Un'andata non valida viene rifiutata con l'elenco degli errori; una pratica con dati già raccolti non si sovrascrive.
 - **Elenco pratiche** (mockup 1a), testata e barra in basso dei mockup, modalità chiara e scura.

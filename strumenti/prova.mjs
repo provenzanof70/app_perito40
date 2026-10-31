@@ -226,10 +226,10 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
 // App: elenco dei file offline e impronta della mappa di importazione aggiornati
 {
   const { calcola } = await import('./aggiorna_app.mjs');
-  const { indice, precache } = calcola();
+  const { indice, precache, sw } = calcola();
   const app = join(RADICE, 'app');
   verifica('App: precache.js e policy di sicurezza aggiornati (node strumenti/aggiorna_app.mjs)',
-    readFileSync(join(app, 'index.html'), 'utf8') === indice && readFileSync(join(app, 'precache.js'), 'utf8') === precache);
+    readFileSync(join(app, 'index.html'), 'utf8') === indice && readFileSync(join(app, 'precache.js'), 'utf8') === precache && readFileSync(join(app, 'sw.js'), 'utf8') === sw);
 }
 
 const esitoDemo = validaCaricata(base, registro, { repoPubblico: true });

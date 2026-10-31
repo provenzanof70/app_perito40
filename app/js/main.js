@@ -7,10 +7,12 @@ import { richiediPersistenza } from './archivio.js';
 
 const installata = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
-// Il service worker nuovo resta in attesa: lo si attiva solo su richiesta, mai durante una visita
+// Il service worker nuovo resta in attesa: lo si attiva solo su richiesta (a visita in corso, con conferma).
+// Si cerca una versione nuova all'avvio e ogni volta che l'app torna in primo piano, senza cache HTTP.
 function registraServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
-  navigator.serviceWorker.register('./sw.js').then(reg => {
+  navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
+    addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
     const segnala = w => dispatchEvent(new CustomEvent('perito40:aggiornamento', { detail: () => w.postMessage('attiva') }));
     if (reg.waiting && navigator.serviceWorker.controller) segnala(reg.waiting);
     reg.addEventListener('updatefound', () => {

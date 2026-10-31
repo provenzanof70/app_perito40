@@ -10,7 +10,7 @@ import { perTipo } from './registri.js';
 import { Elenco } from './schermate/elenco.js';
 import { SchermataPratica } from './schermate/pratica.js';
 
-export const VERSIONE_APP = '0.6.0 · F2.6';
+export const VERSIONE_APP = '0.6.1 · F2.6';
 const NOME_PERITO = 'Perito Ing. Francesco Provenzano';
 
 function MenuApp({ sistema, nomePerito, alNome, visitaInCorso, alChiudi }) {
@@ -20,7 +20,7 @@ function MenuApp({ sistema, nomePerito, alNome, visitaInCorso, alChiudi }) {
     <div class="sezione">Nome mostrato nell'elenco pratiche</div>
     <input class="campo-testo" value=${nome} onInput=${e => setNome(e.target.value)} />
     ${sistema.aggiornamento && (visitaInCorso
-      ? html`<${Avviso} tipo="info" titolo="Nuova versione disponibile">Si potrà installare a visita chiusa, per non interrompere la raccolta.</${Avviso}>`
+      ? html`<${Avviso} tipo="info" titolo="Nuova versione disponibile" tasti=${[['Aggiorna comunque', sistema.applicaAggiornamento]]}>C'è una visita in corso: conviene aggiornare a visita chiusa. Se aggiorni ora l'app si ricarica; evidenze, registri e visita restano sul telefono.</${Avviso}>`
       : html`<${Avviso} tipo="info" titolo="Nuova versione disponibile" tasti=${[['Aggiorna ora', sistema.applicaAggiornamento]]}>L'app si ricarica; i dati restano sul telefono.</${Avviso}>`)}
     <div class="sezione">App</div>
     <div class="elenco">
