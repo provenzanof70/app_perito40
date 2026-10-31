@@ -5,6 +5,7 @@ import { useState, useEffect } from 'preact/hooks';
 import { html, dataBreve, oraBreve, megabyte } from '../ui.js';
 import { Testata, Barra, Foglio, Avviso } from '../componenti.js';
 import { vai, rottaPratica } from '../rotte.js';
+import { eliminaPratica } from '../archivio.js';
 import { ElencoBeni, SchedaBene, GalleriaGruppo } from './beni.js';
 import { Rilievo } from './rilievo.js';
 import { DettaglioEvidenza } from './evidenza.js';
@@ -60,7 +61,7 @@ function Segnaposto({ scheda }) {
   return html`<div class="vuoto">Questa schermata arriva nella fase ${FASE[scheda]}.</div>`;
 }
 
-function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita }) {
+function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita, alRicominciaDemo }) {
   const a = pratica.andata;
   const v = pratica.visita;
   const nomi = v ? a.sopralluogo.referenti.filter(r => v.presenti.includes(r.id)).map(r => r.nome).join(', ') : '';
@@ -100,6 +101,12 @@ function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita }) {
       <div class="voce"><span class="etichetta">Controlli all'importazione</span><span class="valore">${pratica.avvisiImportazione.length ? `${pratica.avvisiImportazione.length} avvisi` : 'nessun avviso'}</span></div>
       ${pratica.avvisiImportazione.map(x => html`<div class="voce"><span class="etichetta"><span class="sotto">${x.messaggio} (${x.codice})</span></span></div>`)}
     </div>
+
+    ${a.demo === true && html`<div class="sezione">Pratica DEMO</div>
+      <div class="scheda">
+        <div class="meta">Per rifare le prove da capo: toglie dal telefono la DEMO con foto, registri e pacchetti; poi la si importa di nuovo dall'elenco. Le pratiche reali non hanno questo tasto.</div>
+        <button class="secondario rosso" style=${{ alignSelf: 'flex-start' }} onClick=${alRicominciaDemo}>Ricomincia la DEMO</button>
+      </div>`}
 
     <div class="sezione">Archivio sul telefono</div>
     <div class="elenco">
@@ -177,11 +184,15 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
         : scheda === 'rilievo' ? html`<${Rilievo} key=${(codiceBene || '') + gruppo} pratica=${pratica} evidenze=${evidenze} registri=${registri} beneIniziale=${codiceBene} gruppoIniziale=${gruppo} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
         : beneScelto ? html`<${SchedaBene} pratica=${vista} bene=${bene} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
         : scheda === 'beni' ? html`<${ElencoBeni} pratica=${vista} evidenze=${evidenze} registri=${registri} alVisitaNecessaria=${serveVisita} />`
-        : scheda === 'pratica' ? html`<${SchedaPraticaDettagli} pratica=${pratica} sistema=${sistema} cp=${cp} alIniziaVisita=${() => setFoglio('scheda')} />`
+        : scheda === 'pratica' ? html`<${SchedaPraticaDettagli} pratica=${pratica} sistema=${sistema} cp=${cp} alIniziaVisita=${() => setFoglio('scheda')} alRicominciaDemo=${() => setFoglio('demo')} />`
         : html`<${Segnaposto} scheda=${scheda} />`}
     </div>
     <${Barra} codicePratica=${codice} attiva=${modulo ? 'requisiti' : scheda === 'azione' ? 'azioni' : scheda === 'cronologia' || scheda === 'data' || scheda === 'pacchetto' ? 'pratica' : scheda} distintivi=${{ azioni: azioniAperte(pratica, registri).length, requisiti: requisitiSenzaBasi(pratica, evidenze, registri) }} />
-    ${foglio && html`<${FoglioIniziaVisita} pratica=${pratica} annulla=${foglio === 'apertura' ? 'Più tardi' : 'Annulla'}
+    ${foglio === 'demo' && html`<${Foglio} titolo="Ricomincia la DEMO" annulla="Annulla" conferma="Ricomincia" alChiudi=${() => setFoglio(null)}
+        alConferma=${async () => { await eliminaPratica(codice); dispatchEvent(new Event('perito40:ricarica')); vai('/'); mostra('DEMO tolta dal telefono: importala di nuovo con «Prova con la pratica DEMO»'); }}>
+      <div class="meta">Si tolgono dal telefono la pratica DEMO, ${evidenze.length === 1 ? 'la sua evidenza' : `le sue ${evidenze.length} evidenze`} con i file e tutti i registri. I pacchetti già salvati in File restano dove sono.</div>
+    </${Foglio}>`}
+    ${foglio && foglio !== 'demo' && html`<${FoglioIniziaVisita} pratica=${pratica} annulla=${foglio === 'apertura' ? 'Più tardi' : 'Annulla'}
       perAzione=${foglio === 'azione'} alChiudi=${chiudiFoglio} alConferma=${iniziaVisita} />`}
   </div>`;
 }

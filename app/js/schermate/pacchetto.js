@@ -11,10 +11,10 @@ import { VERSIONE_APP } from '../app.js';
 
 const mono = { wordBreak: 'break-all', fontFamily: 'ui-monospace, Menlo, monospace' };
 
+// Safari dichiara una versione di iOS fissa: si riporta solo il tipo di dispositivo
 function piattaforma() {
   const ua = navigator.userAgent;
-  const ios = /iPhone OS ([\d_]+)/.exec(ua);
-  return ios ? `iOS ${ios[1].replace(/_/g, '.')} Safari` : /Android/.test(ua) ? 'Android' : 'browser';
+  return /iPhone/.test(ua) ? 'iPhone Safari' : /iPad|Macintosh/.test(ua) && navigator.maxTouchPoints > 1 ? 'iPad Safari' : /Android/.test(ua) ? 'Android' : 'browser';
 }
 
 // Condivisione di sistema (su iPhone: «Salva in File», AirDrop, Mail…); senza, scaricamento del file.

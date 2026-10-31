@@ -63,6 +63,14 @@ export async function conta(archivio, indice, valore) {
   return attesa(db.transaction(archivio).objectStore(archivio).index(indice).count(valore));
 }
 
+// Toglie dal telefono una pratica con evidenze, file e registri. Usata solo per la pratica DEMO (prove).
+export function eliminaPratica(codice) {
+  const intervallo = IDBKeyRange.bound([codice], [codice, []]);
+  return transazione(['pratiche', 'evidenze', 'media', 'registri'], 'readwrite', (p, e, m, r) => {
+    p.delete(codice); e.delete(intervallo); m.delete(intervallo); r.delete(intervallo);
+  });
+}
+
 export function scrivi(archivio, valore) {
   return transazione(archivio, 'readwrite', s => { s.put(valore); });
 }

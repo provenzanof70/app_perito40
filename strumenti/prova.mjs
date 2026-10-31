@@ -223,6 +223,92 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   verifica('Pacchetto: dopo il finale la pratica è rientrata e la visita chiusa', pratica.stato === 'rientrata' && !!pratica.visita.chiusaIl && pratica.esportazioni.pacchetti.length === 2);
 }
 
+// App (F2.7): visita completa con ogni tipo di registro → finale in 2 volumi → validazione come sul PC (valida.mjs sui soli ZIP)
+{
+  const { createHash } = await import('node:crypto');
+  const { mkdtempSync, writeFileSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { caricaZip } = await import('./lib/disco.mjs');
+  const P = await import('../app/js/pacchetto.js');
+  const R = await import('../app/js/registri.js');
+  const fileAndata = join(cartella, 'andata', 'perizia40-andata.json');
+  const byteAndata = readFileSync(fileAndata);
+  const andata = JSON.parse(byteAndata.toString('utf8'));
+  const pratica = { codicePratica: andata.codicePratica, andata, andataSha256: createHash('sha256').update(byteAndata).digest('hex'), stato: 'in_corso',
+    visita: { id: 'S01', inizio: '2026-10-15T09:00:00+02:00', presenti: ['P01', 'P02', 'P03'] }, esportazioni: {} };
+  const contenuti = new Map();
+  let n = 0;
+  // come registraEvidenza: nome fissato all'acquisizione, impronta dei byte, data di scatto secondo l'origine
+  const ev = (id, tipo, mime, est, byte, extra = {}) => {
+    n++;
+    const dati = new Uint8Array(byte).fill(n);
+    contenuti.set(id, dati);
+    const nomeFile = `DEMO-2026-001_20261015_${id}.${est}`;
+    const acq = `2026-10-15T${String(9 + Math.floor(n / 6)).padStart(2, '0')}:${String((n * 7) % 60).padStart(2, '0')}:00+02:00`;
+    return { codicePratica: 'DEMO-2026-001', id, beni: [id.replace(/-.*$/, '')], gruppo: 1, requisiti: ['ID'], tipo, file: `evidenze/${nomeFile}`, nomeFile, mime,
+      sha256: createHash('sha256').update(dati).digest('hex'), byte, provenienza: 'perito', idSopralluogo: 'S01', acquisitaIl: acq,
+      origineDataScatto: 'fotocamera_app', aperturaFotocamera: acq.replace(/:00\+/, ':00+').replace(/T(\d\d):(\d\d)/, (m, h, mi) => `T${h}:${String(Math.max(0, mi - 1)).padStart(2, '0')}`), dataScatto: acq,
+      descrizione: `Evidenza ${id}`, annotazioni: [], stato: 'valida', ...extra };
+  };
+  const evidenze = [
+    ev('B01-ID-001', 'foto', 'image/jpeg', 'jpg', 4000, { annotazioni: [{ tipo: 'freccia', colore: '#FF453A', x: 0.2, y: 0.8, x2: 0.5, y2: 0.5 }] }),
+    ev('B01-ID-002', 'foto', 'image/jpeg', 'jpg', 3000, { stato: 'annullata', annullamento: { motivo: 'targa con riflesso, rifatta', data: '2026-10-15T09:20:00+02:00', sostituitaDa: 'B01-ID-003' } }),
+    ev('B01-ID-003', 'foto', 'image/jpeg', 'jpg', 3500, { origineDataScatto: 'metadati', aperturaFotocamera: undefined, dataScatto: '2026-10-15T09:21:00+02:00' }),
+    ev('B01.1-ID-001', 'foto', 'image/jpeg', 'jpg', 2500),
+    ev('B01-RO2-002', 'video', 'video/quicktime', 'mov', 6000, { gruppo: 5, requisiti: ['RO2'], durataSecondi: 42 }),
+    ev('B01-RO3-001', 'vocale', 'audio/mp4', 'm4a', 1500, { gruppo: 6, requisiti: ['RO3'], origineDataScatto: 'registrazione_app', aperturaFotocamera: undefined, durataSecondi: 25 }),
+    ev('B02-DOC-001', 'documento', 'application/pdf', 'pdf', 2000, { gruppo: 'DOC', requisiti: ['DOC'], origineDataScatto: undefined, aperturaFotocamera: undefined, dataScatto: undefined }),
+    ev('B03-ID-001', 'foto', 'image/jpeg', 'jpg', 3000),
+  ].map(e => Object.fromEntries(Object.entries(e).filter(([, v]) => v !== undefined)));
+  const d = campo => andata.beni[0].datiDaVerificare.find(x => x.campo === campo);
+  const reg = R.perTipo([
+    { tipo: 'verifica', id: 'B01|identita.costruttore', bene: 'B01', campo: 'identita.costruttore', valoreAgliAtti: d('identita.costruttore').valoreAgliAtti, esito: 'confermato', evidenze: ['B01-ID-003'], data: '2026-10-15' },
+    { tipo: 'verifica', id: 'B01|identita.matricola', bene: 'B01', campo: 'identita.matricola', valoreAgliAtti: 'DEMO-0001', esito: 'corretto', valoreRilevato: 'DEMO-0001/A', evidenze: ['B01-ID-003'], data: '2026-10-15' },
+    { tipo: 'verifica', id: 'B01|controllore.firmware', bene: 'B01', campo: 'controllore.firmware', valoreAgliAtti: 'V4.2.1', esito: 'non_verificabile', evidenze: [], data: '2026-10-15', nota: 'pagina di sistema protetta da password' },
+    { tipo: 'beneNuovo', id: 'B03', codice: 'B03', denominazione: 'Lavatrice industriale pezzi', funzione: 'lavaggio dei pezzi dopo la lavorazione', ubicazione: 'Reparto 2',
+      matricolaTarga: { stato: 'letta', valore: 'LV-DEMO-77' }, componenti: [] },
+    { tipo: 'riscontro', id: 'RD-001', bene: 'B01', requisito: 'RO2', idSopralluogo: 'S01', dataVisita: '2026-10-15', ora: '10:42',
+      fatto: 'il programma P-17 risultava caricato', oggetto: 'HMI del CN', circostanza: 'osservato durante la lavorazione',
+      frase: 'Il programma P-17 risultava caricato (HMI del CN, bene B01), osservato durante la lavorazione, alle ore 10:42 del 15/10/2026.', evidenze: ['B01-RO2-002'] },
+    { tipo: 'dichiarazione', id: 'DT-002', beni: ['B01'], persona: 'Mario Esempio', ruolo: 'Responsabile di produzione', organizzazione: 'Officine Demo Fittizie S.r.l.', forma: 'verbale',
+      data: '2026-10-15', contenuto: 'Gli utensili arrivano dal magazzino automatico.', requisito: 'RO3', evidenzaDichiarazione: 'B01-RO3-001',
+      riscontroOggettivo: { esito: 'N', evidenze: [], nota: 'riscontro da acquisire: azione A004' }, daAcquisire: true, azioneGenerata: 'A004' },
+    { tipo: 'azione', id: 'A004', categoria: 'evidenza', beni: ['B01'], requisito: 'RO3', cosaServe: 'Riscontro oggettivo della dichiarazione DT-002',
+      generataDa: { tipo: 'dichiarazione', id: 'DT-002' }, stato: 'aperta', apertaIl: '2026-10-15' },
+    { tipo: 'nota', id: 'NC-001', bene: 'B02', requisito: 'RO2', testo: 'cartella condivisa da fotografare dal PC qualità', ora: '2026-10-15T10:50:00Z', base: 'promemoria' },
+    { tipo: 'data', id: 'T001', evento: 'installazione', beni: ['B01'], data: { valore: '2025-04-14', precisione: 'giorno' }, tipoData: 'documento', origine: 'verbale',
+      stato: R.statoData(['B01-ID-003'], 'verbale'), prove: [{ idEvidenza: 'B01-ID-003', file: 'evidenze/DEMO-2026-001_20261015_B01-ID-003.jpg', fattoLetto: 'verbale del 14/04/2025' }],
+      coerenza: 'S', rifTimeline: 'T005', esitoRif: 'precisata' },
+    { tipo: 'aggiornamento', id: 'A003', idAzione: 'A003', esitoCampo: 'proposta_chiusura', motivoProposto: 'riscontro_diretto', riscontro: 'RD-001', evidenze: ['B01-RO2-002'] },
+    { tipo: 'aggiornamento', id: 'A001', idAzione: 'A001', esitoCampo: 'parziale', nota: 'fattura vista, copia da inviare' },
+  ]);
+  const leggiFile = async e => new Blob([contenuti.get(e.id)]);
+  const fin = P.costruisciRientro({ pratica, evidenze, registri: reg, tipo: 'finale', ora: new Date('2026-10-15T17:30:00+02:00'), versioneApp: '0.7.0', piattaforma: 'iPhone Safari', installata: true, soglia: 15000 });
+  const { esito: es, preparati } = await P.preparaEControlla(fin, pratica, registro);
+  const cartellaZip = mkdtempSync(join(tmpdir(), 'perito40-'));
+  const percorsi = [];
+  try {
+    for (const p of preparati) {
+      const z = await P.creaZip(p, fin.dataOraZip, leggiFile);
+      const percorso = join(cartellaZip, p.nome);
+      writeFileSync(percorso, new Uint8Array(await z.blob.arrayBuffer()));
+      percorsi.push(percorso);
+    }
+    const esitoPC = validaCaricata(caricaZip(percorsi, fileAndata), registro, { soloRientro: true, repoPubblico: true });
+    const doc = fin.doc;
+    verifica('Visita completa: finale in 2 volumi con ogni tipo di evidenza e registro, controllo del telefono senza errori',
+      preparati.length === 2 && doc.evidenze.length === 8 && doc.beniNuovi.length === 1 && doc.verificheDati.length === 3 && doc.riscontriDiretti.length === 1
+      && doc.dichiarazioniTerzi.length === 1 && doc.nuoveAzioni.length === 1 && doc.noteCampo.length === 1 && doc.dateRilevate.length === 1 && doc.aggiornamentiAzioni.length === 2
+      && (es.errori.length === 0 || (console.log(es.errori), false)));
+    verifica('Visita completa: gli ZIP del telefono superano valida.mjs sul PC (andata, volumi, impronte, registri)',
+      esitoPC.errori.length === 0 || (console.log(esitoPC.errori), false));
+    verifica('Visita completa: evidenza annullata nel pacchetto con motivo e sostituta, file conservato',
+      doc.evidenze.find(e => e.id === 'B01-ID-002').annullamento.sostituitaDa === 'B01-ID-003' && fin.volumi.some(v => v.evidenze.some(e => e.id === 'B01-ID-002')));
+  } finally {
+    rmSync(cartellaZip, { recursive: true, force: true });
+  }
+}
+
 // App: elenco dei file offline e impronta della mappa di importazione aggiornati
 {
   const { calcola } = await import('./aggiorna_app.mjs');

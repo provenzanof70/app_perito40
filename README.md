@@ -22,7 +22,7 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | F2.4 | Requisiti, riscontro diretto guidato, dichiarazione di terzi, note del perito | fatta |
 | F2.5 | Azioni (bozze e proposte di chiusura), cronologia con date rilevate, registro della visita | fatta |
 | F2.6 | Pacchetto di rientro: checkpoint e finale, volumi, controllo, «Salva in File», sola lettura dopo il finale | fatta |
-| F2.7 | Prove | da fare |
+| F2.7 | Prove: visita completa riletta dal PC, protocollo sull'iPhone ([docs/F2_7_prove_iphone.md](docs/F2_7_prove_iphone.md)), «Ricomincia la DEMO» | fatta |
 | F2.8 | Pubblicazione su GitHub Pages | attiva: https://provenzanof70.github.io/app_perito40/app/ |
 
 ## Struttura
@@ -195,7 +195,7 @@ node strumenti/prova.mjs
 
 Requisiti sul telefono: **iPhone con iOS 16.4 o successivo**, Safari; l'app va aggiunta alla schermata Home (Condividi › Aggiungi alla schermata Home).
 
-Cosa fa oggi (F2.1–F2.6):
+Cosa fa oggi (F2.1–F2.7):
 - **Offline**: il service worker conserva sul telefono tutti i file dell'app; l'app cerca una versione nuova all'avvio e quando torna in primo piano; l'aggiornamento si propone dal menu e, a visita in corso, si installa solo con «Aggiorna comunque» (i dati restano sul telefono).
 - **Archivio sul telefono** (IndexedDB) e **richiesta di archiviazione persistente** all'avvio; se il sistema non la concede, l'app lo dice.
 - **Importazione del pacchetto di andata** da File: impronta SHA-256 dei byte ricevuti e controllo con lo stesso validatore del PC. Un'andata non valida viene rifiutata con l'elenco degli errori; una pratica con dati già raccolti non si sovrascrive.
@@ -215,6 +215,7 @@ Cosa fa oggi (F2.1–F2.6):
 - **Registro della visita** ricavato da inizio visita, evidenze, riscontri, dichiarazioni, beni nuovi e date, senza dati nuovi.
 - **Promemoria di checkpoint**: ogni 2 ore o 30 evidenze dall'ultimo pacchetto (o dall'inizio visita); «Più tardi» lo sospende per 30 minuti.
 - **Pacchetto di rientro (F2.6)**: dalla scheda Pratica o dal promemoria. **Checkpoint** numerati: stato completo della visita e solo i file non ancora consegnati (gli altri restano nel manifesto con il rimando al checkpoint). **Finale**: tutti i file e tutti gli esiti, ora di fine visita. Volumi da al massimo 250 MB (`…_v1di2.zip`), ciascuno con `perizia40-rientro.json`, `hash.sha256` ed `evidenze/`. Prima dell'esportazione il pacchetto passa dallo stesso validatore del PC; mentre si crea lo ZIP ogni file viene riletto e confrontato con l'impronta registrata all'acquisizione. «Salva in File» apre la condivisione dell'iPhone; il pacchetto conta come consegnato solo quando confermi di aver salvato tutti i volumi. Dopo il finale la visita è chiusa e la pratica resta consultabile in sola lettura; il finale si può ricreare identico.
+- **Prove (F2.7)**: «Ricomincia la DEMO» (solo per la pratica DEMO) toglie dal telefono pratica, file e registri per rifare le prove da capo. Il protocollo di prova sull'iPhone è in [docs/F2_7_prove_iphone.md](docs/F2_7_prove_iphone.md); le prove automatiche costruiscono una visita completa e ne rileggono il pacchetto finale con `valida.mjs`, come sul PC.
 - **Sicurezza**: la policy dell'app permette di contattare solo il proprio indirizzo (nessun servizio esterno) e vieta il codice valutato al volo.
 
 Per provarla sul PC, dalla radice del repository:
