@@ -84,7 +84,7 @@ export function DettaglioEvidenza({ pratica, evidenza: e, evidenze, registri, mo
   const [colore, setColore] = useState(COLORI[0]);
   const [testoIn, setTestoIn] = useState(null);
   const [annulla, setAnnulla] = useState(null);
-  const sola = e.stato === 'annullata';
+  const sola = e.stato === 'annullata' || pratica.stato === 'rientrata';
   const stessi = evidenze.filter(x => x.beni[0] === e.beni[0] && x.gruppo === e.gruppo);
   const n = stessi.findIndex(x => x.id === e.id) + 1;
   const altriBeni = [...pratica.andata.beni.flatMap(b => [b.codice, ...b.componenti.map(c => c.codice)]), ...registri.beneNuovo.keys()].filter(c => c !== e.beni[0]);

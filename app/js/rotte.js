@@ -12,6 +12,7 @@
 //   #/p/<codice>/cronologia[/<B01>]      cronologia e registro della visita
 //   #/p/<codice>/data/verifica/<T005>    verifica in campo di una data agli atti
 //   #/p/<codice>/data/nuova/<B01>        nuova data rilevata · #/p/<codice>/data/<T001> modifica
+//   #/p/<codice>/pacchetto               pacchetto di rientro (checkpoint o finale)
 
 export function vai(rotta) {
   location.hash = `#${rotta}`;

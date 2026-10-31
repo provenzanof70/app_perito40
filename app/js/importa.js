@@ -7,7 +7,7 @@ import { leggi, scrivi, conta } from './archivio.js';
 const SCHEMI = ['comuni', 'pratica_40', 'scheda_bene', 'perizia40-andata', 'perizia40-rientro'];
 let registro = null;
 
-async function registroSchemi() {
+export async function registroSchemi() {
   if (!registro) {
     const schemi = await Promise.all(SCHEMI.map(async n => {
       const r = await fetch(`../schemi/v1/${n}.v1.schema.json`, { cache: 'no-cache' });

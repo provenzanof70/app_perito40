@@ -60,6 +60,40 @@ export function scriviZip(voci, dataOra) {
   return out;
 }
 
+// Come scriviZip, ma restituisce un Blob costruito per pezzi: i file grandi restano Blob (non copiati in memoria)
+// e se ne leggono i byte uno alla volta solo per CRC e impronta. voci: [{ nome, dati: Uint8Array | Blob }]
+// suFile(nome, bytes) viene chiamata per ogni file letto (es. per ricalcolare e confrontare lo SHA-256).
+export async function scriviZipBlob(voci, dataOra, suFile = null) {
+  const enc = new TextEncoder();
+  const t = dos(dataOra);
+  const locali = [], centrali = [];
+  let posizione = 0;
+  for (const v of voci) {
+    const nome = enc.encode(v.nome);
+    const bytes = v.dati instanceof Uint8Array ? v.dati : new Uint8Array(await v.dati.arrayBuffer());
+    if (suFile) await suFile(v.nome, bytes);
+    const crc = crc32(bytes);
+    const n = bytes.length;
+    if (n >= 0xffffffff) throw new Error(`${v.nome}: file troppo grande per un volume`);
+    const l = new DataView(new ArrayBuffer(30));
+    l.setUint32(0, 0x04034b50, true); l.setUint16(4, 20, true); l.setUint16(6, 0x0800, true);
+    l.setUint16(10, t.ora, true); l.setUint16(12, t.data, true); l.setUint32(14, crc, true);
+    l.setUint32(18, n, true); l.setUint32(22, n, true); l.setUint16(26, nome.length, true);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true);
+    c.setUint16(12, t.ora, true); c.setUint16(14, t.data, true); c.setUint32(16, crc, true);
+    c.setUint32(20, n, true); c.setUint32(24, n, true); c.setUint16(28, nome.length, true); c.setUint32(42, posizione, true);
+    locali.push(new Uint8Array(l.buffer), nome, v.dati instanceof Uint8Array ? v.dati : v.dati);
+    centrali.push(new Uint8Array(c.buffer), nome);
+    posizione += 30 + nome.length + n;
+  }
+  const lunghezzaCentrale = centrali.reduce((s, b) => s + b.length, 0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, voci.length, true); e.setUint16(10, voci.length, true);
+  e.setUint32(12, lunghezzaCentrale, true); e.setUint32(16, posizione, true);
+  return new Blob([...locali, ...centrali, new Uint8Array(e.buffer)], { type: 'application/zip' });
+}
+
 // Restituisce Map nome → Uint8Array. Lancia un errore se l'archivio è danneggiato o non supportato.
 export function leggiZip(buf, inflateRaw) {
   const b = buf instanceof Uint8Array ? buf : new Uint8Array(buf);

@@ -159,6 +159,70 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   verifica('App: riscontro, dichiarazione, nota, bozza, proposta di chiusura e data rilevata dell\'app validi per lo schema 1.2', validaStruttura(app, reg, es3, 'rientro') || (console.log(es3.errori), false));
 }
 
+// App (F2.6): pacchetto di rientro costruito dal telefono, diviso in volumi, controllato e riletto
+{
+  const { createHash } = await import('node:crypto');
+  const P = await import('../app/js/pacchetto.js');
+  const R = await import('../app/js/registri.js');
+  const { creaRegistroSchemi, nuovoEsito, controllaVolumeRientro, controllaVolumi } = await import('./lib/validatore.mjs');
+  const reg = creaRegistroSchemi(readdirSync(join(RADICE, 'schemi', 'v1')).map(f => JSON.parse(readFileSync(join(RADICE, 'schemi', 'v1', f), 'utf8'))));
+  const byteAndata = readFileSync(join(cartella, 'andata', 'perizia40-andata.json'));
+  const andata = JSON.parse(byteAndata.toString('utf8'));
+  const pratica = { codicePratica: andata.codicePratica, andata, andataSha256: createHash('sha256').update(byteAndata).digest('hex'),
+    visita: { id: 'S01', inizio: '2026-10-15T09:00:00+02:00', presenti: ['P01', 'P02'] }, stato: 'in_corso' };
+  const contenuti = new Map();
+  const ev = (n, byte) => {
+    const id = `B01-ID-0${10 + n}`, nomeFile = `DEMO-2026-001_20261015_${id}.jpg`;
+    const dati = new Uint8Array(byte).fill(n);
+    contenuti.set(id, dati);
+    return { codicePratica: 'DEMO-2026-001', id, beni: ['B01'], gruppo: 2, requisiti: ['ID'], tipo: 'foto', file: `evidenze/${nomeFile}`, nomeFile, mime: 'image/jpeg',
+      sha256: createHash('sha256').update(dati).digest('hex'), byte, provenienza: 'perito', idSopralluogo: 'S01', acquisitaIl: `2026-10-15T10:0${n}:00+02:00`,
+      origineDataScatto: 'registrazione_app', dataScatto: `2026-10-15T10:0${n}:00+02:00`, descrizione: `Targa ${n}`, stato: 'valida' };
+  };
+  const evidenze = [ev(1, 3000), ev(2, 4000), ev(3, 2500)];
+  const d = andata.beni[0].datiDaVerificare[0];
+  const registri = R.perTipo([{ tipo: 'verifica', id: `B01|${d.campo}`, bene: 'B01', campo: d.campo, valoreAgliAtti: d.valoreAgliAtti, esito: 'confermato', evidenze: ['B01-ID-011'], data: '2026-10-15' }]);
+  const leggiFile = async e => new Blob([contenuti.get(e.id)]);
+  const comune = { pratica, registri, versioneApp: '0.6.0', piattaforma: 'prova', installata: false, soglia: 5000 };
+
+  const c1 = P.costruisciRientro({ ...comune, evidenze: evidenze.slice(0, 2), tipo: 'checkpoint', ora: new Date('2026-10-15T10:30:00+02:00') });
+  const { esito: es1, preparati: p1 } = await P.preparaEControlla(c1, pratica, reg);
+  verifica('Pacchetto: checkpoint 1 diviso in 2 volumi oltre la soglia e senza errori del validatore',
+    c1.volumi.length === 2 && c1.volumi[0].nome === 'DEMO-2026-001_rientro_CHK1_20261015-1030_v1di2.zip' && (es1.errori.length === 0 || (console.log(es1.errori), false)));
+  const zip1 = [];
+  for (const p of p1) zip1.push({ nome: p.nome, ...(await P.creaZip(p, c1.dataOraZip, leggiFile)) });
+  const letti = await Promise.all(zip1.map(async z => leggiZip(new Uint8Array(await z.blob.arrayBuffer()), inflateRawSync)));
+  const es1b = nuovoEsito();
+  const voli = letti.map((m, i) => {
+    const doc = JSON.parse(new TextDecoder().decode(m.get('perizia40-rientro.json')));
+    const file = new Map([...m].map(([k, b]) => [k, { sha256: createHash('sha256').update(b).digest('hex'), byte: b.length }]));
+    controllaVolumeRientro({ doc, file, hashSha256: new TextDecoder().decode(m.get('hash.sha256')) }, { doc: andata, sha256: pratica.andataSha256 }, es1b, zip1[i].nome, { soloFile: i > 0 });
+    return { doc, dove: zip1[i].nome };
+  });
+  controllaVolumi(voli, es1b);
+  verifica('Pacchetto: ZIP riletti come farà il PC, impronte e volumi coerenti', es1b.errori.length === 0 || (console.log(es1b.errori), false));
+
+  P.registraEsportazione(pratica, c1, 'checkpoint', new Date('2026-10-15T10:31:00+02:00'), zip1, 2);
+  const c2 = P.costruisciRientro({ ...comune, evidenze, tipo: 'checkpoint', ora: new Date('2026-10-15T11:30:00+02:00') });
+  const { esito: es2 } = await P.preparaEControlla(c2, pratica, reg);
+  const m2 = c2.doc.manifesto;
+  verifica('Pacchetto: checkpoint 2 porta solo il file nuovo, gli altri rimandano al checkpoint 1',
+    c2.numero === 2 && c2.volumi.length === 1 && c2.volumi[0].evidenze.length === 1 && m2.filter(m => m.trasmessaInCheckpoint === 1).length === 2 && (es2.errori.length === 0 || (console.log(es2.errori), false)));
+
+  let errore = '';
+  const alterato = { ...(await P.preparaEControlla(c2, pratica, reg)).preparati[0] };
+  try { await P.creaZip(alterato, c2.dataOraZip, async () => new Blob([new Uint8Array(2500).fill(7)])); } catch (e) { errore = e.message; }
+  verifica('Pacchetto: file cambiato dopo l\'acquisizione → ZIP non creato', /impronta/.test(errore));
+
+  const fin = P.costruisciRientro({ ...comune, evidenze, tipo: 'finale', ora: new Date('2026-10-15T12:45:00+02:00'), soglia: P.SOGLIA_VOLUME });
+  const { esito: es3 } = await P.preparaEControlla(fin, pratica, reg);
+  verifica('Pacchetto: finale con tutti i file, ora di fine e nessun rimando ai checkpoint',
+    fin.volumi.length === 1 && fin.volumi[0].evidenze.length === 3 && fin.doc.sopralluogo.fine === '12:45' && !fin.doc.manifesto.some(m => m.trasmessaInCheckpoint)
+    && fin.volumi[0].nome === 'DEMO-2026-001_rientro_FIN_20261015-1245.zip' && (es3.errori.length === 0 || (console.log(es3.errori), false)));
+  P.registraEsportazione(pratica, fin, 'finale', new Date('2026-10-15T12:46:00+02:00'), [], 3);
+  verifica('Pacchetto: dopo il finale la pratica è rientrata e la visita chiusa', pratica.stato === 'rientrata' && !!pratica.visita.chiusaIl && pratica.esportazioni.pacchetti.length === 2);
+}
+
 // App: elenco dei file offline e impronta della mappa di importazione aggiornati
 {
   const { calcola } = await import('./aggiorna_app.mjs');

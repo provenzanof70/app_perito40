@@ -1,5 +1,5 @@
 // Schermate di una pratica: testata, barra in basso, promemoria di checkpoint, schede Beni e Pratica.
-// Il pacchetto di rientro arriva nella fase F2.6.
+// Dopo il pacchetto finale la pratica è in sola lettura.
 
 import { useState, useEffect } from 'preact/hooks';
 import { html, dataBreve, oraBreve, megabyte } from '../ui.js';
@@ -11,11 +11,14 @@ import { DettaglioEvidenza } from './evidenza.js';
 import { Requisiti, FormRiscontro, FormDichiarazione } from './requisiti.js';
 import { Azioni, FormAzione, azioniAperte } from './azioni.js';
 import { Cronologia, FormData } from './cronologia.js';
+import { Pacchetto } from './pacchetto.js';
 import { GRUPPI_UI, requisitiSenzaBasi } from '../stato.js';
 import { riepilogo, contatoriTestata } from '../stato.js';
 import { statoCheckpoint, testoPromemoria, rinviaFino, SOGLIA_ORE, SOGLIA_EVIDENZE } from '../promemoria.js';
 
 const TITOLI = { rilievo: 'Rilievo', beni: 'Beni', requisiti: 'Requisiti', azioni: 'Azioni', pratica: 'Pratica' };
+// Schermate che modificano la raccolta: chiuse dopo il pacchetto finale
+const MODIFICA = new Set(['rilievo', 'riscontro', 'dichiarazione', 'azione', 'data']);
 const FASE = {};
 
 function Spunta({ si }) {
@@ -67,7 +70,7 @@ function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita }) {
     <div class="sezione">Visita</div>
     ${v
       ? html`<div class="elenco">
-          <div class="voce"><span class="etichetta">In corso</span><span class="valore">dalle ${oraBreve(v.inizio)} del ${dataBreve(v.inizio)}</span></div>
+          <div class="voce"><span class="etichetta">${v.chiusaIl ? 'Chiusa' : 'In corso'}</span><span class="valore">${v.chiusaIl ? `${oraBreve(v.inizio)}–${oraBreve(v.chiusaIl)} del ${dataBreve(v.inizio)}` : `dalle ${oraBreve(v.inizio)} del ${dataBreve(v.inizio)}`}</span></div>
           <div class="voce"><span class="etichetta">Presenti<span class="sotto">${nomi || 'nessuno indicato'}</span></span></div>
         </div>`
       : html`<div class="scheda">
@@ -79,8 +82,8 @@ function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita }) {
     <div class="elenco">
       <div class="voce"><span class="etichetta">Ultimo pacchetto</span><span class="valore">${ultimo ? `${ultimo.tipo} · ${oraBreve(ultimo.data)} del ${dataBreve(ultimo.data)}` : 'nessuno'}</span></div>
       <div class="voce"><span class="etichetta">Promemoria di checkpoint<span class="sotto">ogni ${SOGLIA_ORE} ore o ${SOGLIA_EVIDENZE} evidenze dall'ultimo pacchetto</span></span>
-        <span class="valore">${!v ? 'a visita iniziata' : cp.dovuto ? 'dovuto ora' : `${cp.nuove} evidenze, ${Math.floor(cp.ore)} h ${String(Math.round((cp.ore % 1) * 60)).padStart(2, '0')} min`}</span></div>
-      <div class="voce disattiva"><span class="etichetta">Crea pacchetto ZIP<span class="sotto">fase F2.6</span></span></div>
+        <span class="valore">${!v ? 'a visita iniziata' : v.chiusaIl ? 'visita chiusa' : cp.dovuto ? 'dovuto ora' : `${cp.nuove} evidenze, ${Math.floor(cp.ore)} h ${String(Math.round((cp.ore % 1) * 60)).padStart(2, '0')} min`}</span></div>
+      <button class="voce collega" onClick=${() => vai(rottaPratica(pratica.codicePratica, 'pacchetto'))}><span class="etichetta">${pratica.stato === 'rientrata' ? 'Pacchetti salvati' : 'Crea pacchetto ZIP'}<span class="sotto">checkpoint o finale, «Salva in File»</span></span><span class="valore">›</span></button>
     </div>
 
     <div class="sezione">Cronologia e date</div>
@@ -115,12 +118,16 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
   const r = riepilogo(pratica, evidenze, registri);
   const bene = codiceBene && (pratica.andata.beni.find(b => b.codice === codiceBene) || registri.beneNuovo.get(codiceBene));
   // Chiamata da scatto, verifica o bene nuovo senza visita avviata: apre «Inizia visita» e poi prosegue l'azione
-  const serveVisita = continua => { setDopo(() => continua || null); setFoglio('azione'); };
+  const rientrata = pratica.stato === 'rientrata';
+  const serveVisita = continua => rientrata ? mostra('Raccolta chiusa con il pacchetto finale: pratica in sola lettura') : (setDopo(() => continua || null), setFoglio('azione'));
+  // Alle schede che offrono modifiche arriva la pratica senza visita: ogni modifica passa da serveVisita
+  const vista = rientrata ? { ...pratica, visita: null } : pratica;
   const galleria = scheda === 'beni' && bene && gruppo != null && GRUPPI_UI[gruppo];
   const beneScelto = scheda === 'beni' && bene;
   const modulo = (scheda === 'riscontro' || scheda === 'dichiarazione') && bene && requisito;
   const titoli = { riscontro: 'Riscontro diretto', dichiarazione: 'Dichiarazione di terzi' };
   const altre = { azione: ['Azione', 'Azioni', rottaPratica(pratica.codicePratica, 'azioni')], cronologia: ['Cronologia e date', 'Pratica', rottaPratica(pratica.codicePratica, 'pratica')],
+    pacchetto: ['Pacchetto di rientro', 'Pratica', rottaPratica(pratica.codicePratica, 'pratica')],
     data: [modo === 'verifica' ? 'Verifica data' : 'Data rilevata', 'Cronologia', rottaPratica(pratica.codicePratica, 'cronologia')] }[scheda];
   const cp = statoCheckpoint(pratica, r.evidenze);
   const codice = pratica.codicePratica;
@@ -155,23 +162,25 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
       contatori=${!beneScelto && (scheda === 'beni' || scheda === 'pratica') ? contatoriTestata(r) : null} alMenu=${alMenu} />
     <div class="contenuto">
       ${cp.dovuto && html`<${Avviso} tipo="att" titolo="Crea un checkpoint" tasti=${[
-        ['Crea checkpoint', () => { vai(rottaPratica(codice, 'pratica')); mostra('La creazione del pacchetto arriva nella fase F2.6'); }],
+        ['Crea checkpoint', () => vai(rottaPratica(codice, 'pacchetto'))],
         ['Più tardi', rinvia]]}>${testoPromemoria(cp)}</${Avviso}>`}
-      ${scheda === 'azioni' ? html`<${Azioni} pratica=${pratica} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
+      ${rientrata && MODIFICA.has(scheda) ? html`<div class="vuoto">Raccolta chiusa con il pacchetto finale: la pratica è in sola lettura.</div>`
+        : scheda === 'pacchetto' ? html`<${Pacchetto} pratica=${pratica} evidenze=${evidenze} registri=${registri} sistema=${sistema} aggiorna=${aggiorna} mostra=${mostra} />`
+        : scheda === 'azioni' ? html`<${Azioni} pratica=${vista} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
         : scheda === 'azione' ? html`<${FormAzione} pratica=${pratica} registri=${registri} idAzione=${idRegistro} mostra=${mostra} />`
         : scheda === 'cronologia' ? html`<${Cronologia} pratica=${pratica} evidenze=${evidenze} registri=${registri} codiceBene=${codiceBene} alVisitaNecessaria=${serveVisita} />`
         : scheda === 'data' ? html`<${FormData} pratica=${pratica} evidenze=${evidenze} registri=${registri} modo=${modo === 'verifica' || modo === 'nuova' ? modo : modo} codice=${idRegistro} codiceBene=${codiceBene} mostra=${mostra} />`
         : modulo && scheda === 'riscontro' ? html`<${FormRiscontro} pratica=${pratica} evidenze=${evidenze} registri=${registri} codiceBene=${bene.codice} requisito=${requisito} idRegistro=${idRegistro} mostra=${mostra} />`
         : modulo ? html`<${FormDichiarazione} pratica=${pratica} evidenze=${evidenze} registri=${registri} codiceBene=${bene.codice} requisito=${requisito} idRegistro=${idRegistro} mostra=${mostra} />`
-        : scheda === 'requisiti' ? html`<${Requisiti} pratica=${pratica} evidenze=${evidenze} registri=${registri} codiceBene=${codiceBene} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
+        : scheda === 'requisiti' ? html`<${Requisiti} pratica=${vista} evidenze=${evidenze} registri=${registri} codiceBene=${codiceBene} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
         : galleria ? html`<${GalleriaGruppo} pratica=${pratica} bene=${bene} gruppo=${gruppo} evidenze=${evidenze} />`
         : scheda === 'rilievo' ? html`<${Rilievo} key=${(codiceBene || '') + gruppo} pratica=${pratica} evidenze=${evidenze} registri=${registri} beneIniziale=${codiceBene} gruppoIniziale=${gruppo} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
-        : beneScelto ? html`<${SchedaBene} pratica=${pratica} bene=${bene} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
-        : scheda === 'beni' ? html`<${ElencoBeni} pratica=${pratica} evidenze=${evidenze} registri=${registri} alVisitaNecessaria=${serveVisita} />`
+        : beneScelto ? html`<${SchedaBene} pratica=${vista} bene=${bene} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
+        : scheda === 'beni' ? html`<${ElencoBeni} pratica=${vista} evidenze=${evidenze} registri=${registri} alVisitaNecessaria=${serveVisita} />`
         : scheda === 'pratica' ? html`<${SchedaPraticaDettagli} pratica=${pratica} sistema=${sistema} cp=${cp} alIniziaVisita=${() => setFoglio('scheda')} />`
         : html`<${Segnaposto} scheda=${scheda} />`}
     </div>
-    <${Barra} codicePratica=${codice} attiva=${modulo ? 'requisiti' : scheda === 'azione' ? 'azioni' : scheda === 'cronologia' || scheda === 'data' ? 'pratica' : scheda} distintivi=${{ azioni: azioniAperte(pratica, registri).length, requisiti: requisitiSenzaBasi(pratica, evidenze, registri) }} />
+    <${Barra} codicePratica=${codice} attiva=${modulo ? 'requisiti' : scheda === 'azione' ? 'azioni' : scheda === 'cronologia' || scheda === 'data' || scheda === 'pacchetto' ? 'pratica' : scheda} distintivi=${{ azioni: azioniAperte(pratica, registri).length, requisiti: requisitiSenzaBasi(pratica, evidenze, registri) }} />
     ${foglio && html`<${FoglioIniziaVisita} pratica=${pratica} annulla=${foglio === 'apertura' ? 'Più tardi' : 'Annulla'}
       perAzione=${foglio === 'azione'} alChiudi=${chiudiFoglio} alConferma=${iniziaVisita} />`}
   </div>`;

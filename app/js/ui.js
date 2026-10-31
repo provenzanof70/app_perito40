@@ -28,5 +28,6 @@ export { oggi } from './tempo.js';
 
 export function megabyte(byte) {
   if (byte == null) return '—';
+  if (byte < 1e5) return `${Math.max(byte ? 1 : 0, Math.round(byte / 1e3))} kB`;
   return byte < 1e9 ? `${(byte / 1e6).toFixed(byte < 1e7 ? 1 : 0)} MB` : `${(byte / 1e9).toFixed(1)} GB`;
 }
