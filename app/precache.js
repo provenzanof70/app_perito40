@@ -1,5 +1,5 @@
 // Generato da strumenti/aggiorna_app.mjs: non modificare a mano.
-self.VERSIONE = 'c27ef4dc4c387d57';
+self.VERSIONE = 'd92455339e851e53';
 self.FILE_APP = [
   "./img/icona-180.png",
   "./img/icona-192.png",
@@ -11,6 +11,7 @@ self.FILE_APP = [
   "./js/archivio.js",
   "./js/componenti.js",
   "./js/evidenze.js",
+  "./js/guida.js",
   "./js/icone.js",
   "./js/importa.js",
   "./js/main.js",

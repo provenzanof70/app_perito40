@@ -660,6 +660,19 @@
       ]
     },
     {
+      "nome": "indicazione di studio per un bene inesistente",
+      "modifiche": [
+        {
+          "file": "andata/perizia40-andata.json",
+          "puntatore": "/guidaRequisiti/1/beni/0",
+          "valore": "B09"
+        }
+      ],
+      "atteso": [
+        "BENE_INESISTENTE"
+      ]
+    },
+    {
       "nome": "andata senza timeline",
       "modifiche": [
         {

@@ -17,7 +17,7 @@ const PRATICA = 'DEMO-2026-001';
 const VISITA = '2026-10-15';
 const ID_ANDATA = '5f0c2a1e-1d2b-4c3a-9e00-00000000a001';
 const ID_RIENTRO = '7b1e9c40-2f3a-4d5b-8c00-00000000b001';
-const VERSIONE = '1.2.0';
+const VERSIONE = '1.3.0';
 const ora = (data, hhmm, ss = '00') => `${data}T${hhmm}:${ss}+02:00`;
 
 // ---------------------------------------------------------------------------
@@ -453,6 +453,12 @@ const andata = {
   azioniAperte: AZIONI_INIZIALI,
   evidenzeEsistenti: DOCUMENTI.map(d => d.id),
   idUsati: { dichiarazioni: ['DT-001'], azioni: AZIONI_INIZIALI.map(a => a.id) },
+  // indicazioni di studio (fittizie): nelle pratiche reali le prepara il PC a partire dalle perizie precedenti
+  guidaRequisiti: [
+    { requisito: 'RO2', testo: "Su centri di lavoro simili lo scambio con il MES si è dimostrato meglio con lo stesso numero di ordine fotografato sul MES e sull'HMI, con l'ora visibile." },
+    { requisito: 'RO2', beni: ['B02'], testo: "Per la macchina di misura chiedere il percorso della cartella condivisa e fotografare un report con data e matricola dello strumento." },
+    { requisito: 'RO5', beni: ['B01'], testo: "Con un aspiratore di altro costruttore montato sulla cabina, cercare la dichiarazione CE dell'insieme o la valutazione dei rischi dell'integratore." },
+  ],
 };
 const fAndata = scrivi('andata/perizia40-andata.json', json(andata));
 

@@ -609,6 +609,9 @@ export function controllaAndata(andata, esito, dove, pratica) {
     if (a.stato !== 'aperta') esito.errore('ANDATA_AZIONE_CHIUSA', dove, `${a.id} non è aperta`);
     for (const b of a.beni) if (!beniNoti.has(b)) esito.errore('BENE_INESISTENTE', dove, `azione ${a.id}: bene ${b} non nell'andata`);
   }
+  (andata.guidaRequisiti || []).forEach((g, i) => {
+    for (const b of g.beni || []) if (!beniNoti.has(b)) esito.errore('BENE_INESISTENTE', `${dove}#/guidaRequisiti/${i}`, `indicazione per ${g.requisito}: bene ${b} non nell'andata`);
+  });
   if (pratica) {
     if (andata.codicePratica !== pratica.codicePratica) esito.errore('CODICE_PRATICA', dove, 'codice pratica diverso');
     if (andata.demo !== pratica.demo) esito.errore('DEMO_INCOERENTE', dove, 'flag demo diverso dalla pratica');

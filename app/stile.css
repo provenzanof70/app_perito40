@@ -310,6 +310,11 @@ button.scheda { border: none; text-align: left; width: 100%; color: var(--testo)
 .base.si { background: var(--okT); color: var(--ok); }
 .voce-registro { display: flex; gap: 8px; align-items: flex-start; border: none; background: var(--sfondo); border-radius: 10px; padding: 8px 10px; text-align: left; font-size: 13px; color: var(--testo); line-height: 1.35; }
 .chip-mini { flex: none; font-size: 11px; font-weight: 700; color: var(--accento); background: var(--accentoT); padding: 2px 6px; border-radius: 6px; }
+.cosa-serve { align-self: flex-start; padding: 0; font-size: 14px; }
+.guida-req { background: var(--campo); border-radius: 12px; padding: 10px 12px; font-size: 14px; line-height: 1.45; display: flex; flex-direction: column; gap: 6px; }
+.guida-req p { margin: 0; }
+.guida-req ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; }
+.guida-req ul.studio li::marker { color: var(--accento); }
 .nota-req { border: none; background: none; text-align: left; padding: 0; font-size: 13px; color: var(--testo3); line-height: 1.4; }
 .etichetta-nota { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--testo2); margin-bottom: 2px; }
 .req-piede { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 0.5px solid var(--linea2); padding-top: 10px; }

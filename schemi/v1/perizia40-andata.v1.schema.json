@@ -118,6 +118,18 @@
         "note": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^NC-[0-9]{3}$" } },
         "azioni": { "type": "array", "uniqueItems": true, "items": { "$ref": "comuni.v1.schema.json#/$defs/idAzione" } }
       }
+    },
+    "guidaRequisiti": {
+      "type": "array",
+      "description": "Indicazioni per il sopralluogo ricavate in studio (anche da perizie precedenti), mostrate nell'app accanto alla guida generica del requisito. Senza beni valgono per tutti i beni della pratica. (v1.3)",
+      "items": {
+        "type": "object", "required": ["requisito", "testo"], "additionalProperties": false,
+        "properties": {
+          "requisito": { "$ref": "comuni.v1.schema.json#/$defs/requisito" },
+          "beni": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "comuni.v1.schema.json#/$defs/codiceBene" } },
+          "testo": { "$ref": "comuni.v1.schema.json#/$defs/testo" }
+        }
+      }
     }
   }
 }

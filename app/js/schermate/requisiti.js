@@ -10,6 +10,7 @@ import { REQUISITI_UI, GRUPPI_UI, requisitiDelBene, basiRequisito } from '../sta
 import { salvaRegistro, salvaRegistri, cancellaRegistro, prossimoId, dataVisita, fraseRiscontro } from '../registri.js';
 import { registraEvidenza, beneDi } from '../evidenze.js';
 import { useUrlFile } from '../media.js';
+import { GUIDA_REQUISITI, FONTE } from '../guida.js';
 
 const PROFILO = b => !b.classificazione ? 'Bene nuovo · solo identificazione'
   : b.classificazione.profilo === 'completo' ? 'Profilo completo 5+2' : `Profilo ridotto · All. ${b.classificazione.allegato}${b.classificazione.gruppo ? ` Gr. ${b.classificazione.gruppo}` : ''}`;
@@ -24,10 +25,26 @@ export function tuttiIBeni(pratica, registri) {
 // 1h · Requisiti
 // ---------------------------------------------------------------------------
 
+// «Cosa serve»: guida generica del requisito e indicazioni di studio della pratica (andata.guidaRequisiti)
+function GuidaRequisito({ req, bene, andata }) {
+  const g = GUIDA_REQUISITI[req];
+  const studio = (andata.guidaRequisiti || []).filter(x => x.requisito === req && (!x.beni || x.beni.includes(bene.codice)));
+  if (!g && !studio.length) return null;
+  return html`<div class="guida-req">
+    ${g && html`<p>${g.norma}</p>
+      <div class="etichetta-nota">Cosa cercare in campo</div>
+      <ul>${g.cercare.map(t => html`<li>${t}</li>`)}</ul>
+      ${g.attenzione && html`<div class="etichetta-nota">Attenzione</div><ul>${g.attenzione.map(t => html`<li>${t}</li>`)}</ul>`}`}
+    ${studio.length ? html`<div class="etichetta-nota">Dallo studio, per questa pratica</div><ul class="studio">${studio.map(x => html`<li>${x.testo}</li>`)}</ul>` : null}
+    ${g && html`<div class="meta">${FONTE}</div>`}
+  </div>`;
+}
+
 export function Requisiti({ pratica, evidenze, registri, codiceBene, mostra, alVisitaNecessaria }) {
   const beni = tuttiIBeni(pratica, registri);
   const bene = beni.find(b => b.codice === codiceBene) || beni[0];
   const [nota, setNota] = useState(null);
+  const [guida, setGuida] = useState(null);
   const conVisita = fn => () => pratica.visita ? fn() : alVisitaNecessaria(fn);
   const cod = pratica.codicePratica;
 
@@ -40,6 +57,8 @@ export function Requisiti({ pratica, evidenze, registri, codiceBene, mostra, alV
       const basi = [['Documento', b.evidenze.length + b.agliAtti.length], ['Riscontro diretto', b.riscontri.length], ['Dichiarazione', b.dichiarazioni.length]];
       return html`<div class="scheda requisito" key=${req}>
         <div class="req-testa"><span class="chip-codice">${req}</span><b>${REQUISITI_UI[req].nome}</b><span class="meta">${b.evidenze.length} evidenze${b.agliAtti.length ? ` · ${b.agliAtti.length} agli atti` : ''}</span></div>
+        <button class="collegamento cosa-serve" aria-expanded=${guida === req} onClick=${() => setGuida(guida === req ? null : req)}>${guida === req ? 'Chiudi la guida' : 'Cosa serve per dimostrarlo ›'}</button>
+        ${guida === req && html`<${GuidaRequisito} req=${req} bene=${bene} andata=${pratica.andata} />`}
         <div class="basi">${basi.map(([l, n]) => html`<div class=${`base ${n ? 'si' : ''}`}><span class="segno">${n ? '✓' : '—'}</span><span>${l}${n > 1 ? ` (${n})` : ''}</span></div>`)}</div>
         ${b.riscontri.map(r => html`<button class="voce-registro" onClick=${() => vai(rottaPratica(cod, 'riscontro', bene.codice, req, r.id))}>
           <span class="chip-mini">${r.id}</span><span>${tronca(r.frase, 110)}</span></button>`)}
