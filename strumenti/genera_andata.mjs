@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // F3.2 · Genera il pacchetto di andata per l'app di sopralluogo dal fascicolo della pratica.
-// Scrive andata/perizia40-andata.json (la revisione precedente resta come perizia40-andata_revNNN.json),
+// Scrive andata/<nome pratica> - perizia40-andata.json (la revisione precedente resta come …_revNNN.json),
 // registra il sopralluogo previsto e il pacchetto in pratica_40.json, poi valida la pratica.
 //
 // Uso: node strumenti/genera_andata.mjs <cartella pratica> --data AAAA-MM-GG [--sopralluogo S02] [--avvertenza "testo"]…
 // Le indicazioni di studio per il campo si leggono, se presente, da andata/guida_requisiti.json ([{requisito, beni?, testo}]).
 
 import { existsSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, basename, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { caricaSchemi, caricaCartella, validaCaricata, sha256 } from './lib/disco.mjs';
 import { costruisciAndata } from './lib/andata.mjs';
@@ -18,6 +18,9 @@ const isoLocale = d => {
   const o = -d.getTimezoneOffset();
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}${o >= 0 ? '+' : '-'}${p(Math.floor(Math.abs(o) / 60))}:${p(Math.abs(o) % 60)}`;
 };
+
+// «<nome della cartella pratica> - perizia40-andata», senza i caratteri vietati nei nomi di file
+export const nomeFileAndata = cartella => `${basename(resolve(cartella)).replace(/[\\/:*?"<>|]/g, '-')} - perizia40-andata`;
 
 // o: { data, sopralluogo?, avvertenze?, ora? }
 export function generaAndata(cartella, o) {
@@ -47,17 +50,21 @@ export function generaAndata(cartella, o) {
     guidaRequisiti: existsSync(guida) ? JSON.parse(readFileSync(guida, 'utf8')) : undefined,
   });
 
-  // La revisione precedente resta nella cartella con il suo nome: i rientri che ne derivano si controllano ancora
-  const file = join(cartella, 'andata', 'perizia40-andata.json');
-  if (existsSync(file)) {
-    const vecchia = JSON.parse(readFileSync(file, 'utf8'));
-    const nome = `andata/perizia40-andata_${vecchia.revisione}.json`;
-    renameSync(file, join(cartella, nome));
-    for (const p of precedenti) if (p.file === 'andata/perizia40-andata.json') p.file = nome;
+  // Il nome del file porta quello della pratica: sul telefono le andate di pratiche diverse non si confondono
+  const base = `andata/${nomeFileAndata(cartella)}`;
+  // La revisione precedente resta nella cartella con il suo numero: i rientri che ne derivano si controllano ancora
+  for (const p of precedenti) {
+    if (/_rev\d{3}\.json$/.test(p.file) || !existsSync(join(cartella, p.file))) continue;
+    const vecchia = JSON.parse(readFileSync(join(cartella, p.file), 'utf8'));
+    const nome = `${base}_${vecchia.revisione}.json`;
+    renameSync(join(cartella, p.file), join(cartella, nome));
+    p.file = nome;
   }
+  const relativo = `${base}.json`;
+  const file = join(cartella, relativo);
   const testo = JSON.stringify(andata, null, 2) + '\n';
   writeFileSync(file, testo);
-  pratica.pacchetti.push({ tipo: 'andata', id: andata.idAndata, file: 'andata/perizia40-andata.json', sha256: sha256(Buffer.from(testo, 'utf8')), data: andata.creatoIl });
+  pratica.pacchetti.push({ tipo: 'andata', id: andata.idAndata, file: relativo, sha256: sha256(Buffer.from(testo, 'utf8')), data: andata.creatoIl });
   pratica.aggiornataIl = andata.creatoIl;
   writeFileSync(fp, JSON.stringify(pratica, null, 2) + '\n');
 

@@ -391,16 +391,17 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
     verifica('Registra documento: copia identica in evidenze/documenti con codice, impronta e manifesto; doppione rifiutato',
       d1.id === 'B01-DOC-001' && d1.esito.errori.length === 0 && existsSync(join(cartella, 'documenti_cliente', 'fattura.pdf')) && /già registrato/.test(doppio));
     // F3.2: andata dal fascicolo, poi una seconda revisione per la stessa visita
-    const { generaAndata } = await import('./genera_andata.mjs');
+    const { generaAndata, nomeFileAndata } = await import('./genera_andata.mjs');
     const g1 = generaAndata(cartella, { data: '2026-11-10' });
     const g2 = generaAndata(cartella, { data: '2026-11-12', avvertenze: ['Accesso al reparto solo con il capo turno'] });
     const pr2 = JSON.parse(readFileSync(join(cartella, 'pratica_40.json'), 'utf8'));
     verifica('F3.2 Andata dal fascicolo: valida, sopralluogo S01 previsto, dati agli atti da verificare, azioni e documenti già usati',
       g1.esito.errori.length === 0 && g1.andata.sopralluogo.id === 'S01' && g1.andata.beni.length === 2
       && g1.andata.beni[0].datiDaVerificare.length === 13 && g1.andata.evidenzeEsistenti.includes('B01-DOC-001'));
-    verifica('F3.2 Nuova revisione per la stessa visita: rev002, la rev001 resta come file a parte, pratica valida',
+    verifica('F3.2 Nuova revisione per la stessa visita: rev002 con il nome della pratica, la rev001 resta come file a parte, pratica valida',
       g2.esito.errori.length === 0 && g2.andata.revisione === 'rev002' && g2.andata.sopralluogo.id === 'S01' && pr2.sopralluoghi.length === 1
-      && pr2.sopralluoghi[0].data === '2026-11-12' && existsSync(join(cartella, 'andata', 'perizia40-andata_rev001.json'))
+      && pr2.sopralluoghi[0].data === '2026-11-12' && existsSync(join(cartella, 'andata', `${nomeFileAndata(cartella)}_rev001.json`))
+      && pr2.pacchetti.at(-1).file === 'andata/PROVA-2026-001 - Officine Prova S.r.l - perizia40-andata.json'
       && pr2.pacchetti.filter(p => p.tipo === 'andata').length === 2 && g2.andata.sopralluogo.avvertenze[0].startsWith('Accesso'));
     // F3.3: rientro finale sintetico nato dall'andata rev002, importato due volte
     {

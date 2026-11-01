@@ -15,7 +15,7 @@ const CARTELLE = {
   documenti_cliente: 'Documenti ricevuti dal cliente, come arrivano: non si modificano, non si rinominano.',
   beni: 'Una scheda per bene (B01.json, B02.json…), compilata dall\'analisi dei documenti.',
   evidenze: 'Copie codificate (B01-DOC-001…) dei documenti e delle foto usati come prova, con impronta SHA-256 nel manifesto.',
-  andata: 'Pacchetto di andata per l\'app di sopralluogo (perizia40-andata.json).',
+  andata: 'Pacchetto di andata per l\'app di sopralluogo (<nome pratica> - perizia40-andata.json).',
   rientro: 'ZIP di rientro salvati dall\'app con «Salva in File».',
   perizia: 'Bozze Word di perizia giurata e analisi tecnica generate dal fascicolo.',
 };

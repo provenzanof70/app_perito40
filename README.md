@@ -100,7 +100,7 @@ La cartella di una pratica sul PC:
 PRATICA_xxx/
   pratica_40.json
   beni/B01.json, B02.json …
-  andata/perizia40-andata.json
+  andata/<nome pratica> - perizia40-andata.json
   rientro/<codice>_rientro_FIN_…_v1di2.zip …
   evidenze/documenti/ …        documenti ricevuti
   evidenze/sopralluogo_S01/ …  evidenze di campo importate
