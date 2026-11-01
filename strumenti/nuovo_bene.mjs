@@ -33,7 +33,7 @@ export function nuovoBene(cartella, o) {
   const codice = `B${String(n).padStart(2, '0')}`;
   const vuota = () => ({ valore: null, fonti: [], stato: 'da_verificare' });
   const scheda = {
-    formato: 'perizia40.scheda_bene', versioneSchema: '1.4.0', demo: pratica.demo, codicePratica: pratica.codicePratica, codice,
+    formato: 'perizia40.scheda_bene', versioneSchema: '1.5.0', demo: pratica.demo, codicePratica: pratica.codicePratica, codice,
     denominazione: o.denominazione, funzione: o.funzione, ...(o.ubicazione ? { ubicazione: o.ubicazione } : {}), componenti: [],
     classificazione: {
       regime: 'CRI_4.0', allegato: o.allegato, ...(o.allegato === 'A' ? { gruppo: o.gruppo } : {}), voce: o.voce, profilo,

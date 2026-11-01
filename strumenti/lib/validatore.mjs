@@ -152,6 +152,7 @@ export const GRUPPI = [
   { gruppo: 8, titolo: 'Monitoraggio', requisiti: ['RU2'], completo: 'se_dichiarato', ridotto: 'non_applicabile' },
   { gruppo: 9, titolo: 'Modello digitale', requisiti: ['RU3'], completo: 'se_dichiarato', ridotto: 'non_applicabile' },
   { gruppo: 10, titolo: 'Dati in uscita', requisiti: ['RO2'], completo: 'supporto', ridotto: 'si' },
+  { gruppo: 11, titolo: 'Sicurezza', requisiti: ['RO5'], completo: 'si', ridotto: 'su_richiesta' },
   { gruppo: 'DOC', titolo: 'Documenti', requisiti: ['DOC'], completo: 'si', ridotto: 'si' },
 ];
 
@@ -280,10 +281,14 @@ export function controllaScheda(scheda, esito, dove) {
   }
   if (scheda.datiAgliAtti.esitoGateC.esito === 'rosso') esito.avviso('ALERT_GATE_C', `${dove}#/datiAgliAtti/esitoGateC`, 'GATE C rosso: nessuna conclusione positiva senza risoluzione');
 
-  controllaGruppi(scheda.gruppiEvidenze, c, esito, `${dove}#/gruppiEvidenze`);
+  controllaGruppi(scheda.gruppiEvidenze, c, esito, `${dove}#/gruppiEvidenze`, scheda.versioneSchema);
 }
 
-export function controllaGruppi(gruppi, classificazione, esito, dove) {
+// Gruppi introdotti dopo la prima versione dello schema: nei fascicoli più vecchi la loro assenza è solo un avviso
+const GRUPPI_DAL = { 11: [1, 5] };
+const versioneAlmeno = (v, [ma, mi]) => { const [a, b] = String(v || '1.0.0').split('.').map(Number); return a > ma || (a === ma && b >= mi); };
+
+export function controllaGruppi(gruppi, classificazione, esito, dove, versione) {
   const visti = new Set();
   for (const g of gruppi) {
     const rif = GRUPPO.get(g.gruppo);
@@ -297,7 +302,11 @@ export function controllaGruppi(gruppi, classificazione, esito, dove) {
     if (!ammessa && !g.motivoVariazione) esito.avviso('GRUPPO_ATTESA', dove, `gruppo ${g.gruppo}: attesa "${g.attesa}" diversa da "${standard}" del profilo ${classificazione.profilo}, senza motivoVariazione`);
     if (standard === 'se_dichiarato' && ruDichiarato && g.attesa !== 'si') esito.avviso('GRUPPO_RU_NON_RACCOLTO', dove, `gruppo ${g.gruppo}: ${rif.requisiti[0]} dichiarato ma attesa "${g.attesa}"`);
   }
-  for (const rif of GRUPPI) if (!visti.has(rif.gruppo)) esito.errore('GRUPPO_MANCANTE', dove, `manca il gruppo ${rif.gruppo} (${rif.titolo})`);
+  for (const rif of GRUPPI) {
+    if (visti.has(rif.gruppo)) continue;
+    if (GRUPPI_DAL[rif.gruppo] && !versioneAlmeno(versione, GRUPPI_DAL[rif.gruppo])) esito.avviso('GRUPPO_DA_AGGIUNGERE', dove, `manca il gruppo ${rif.gruppo} (${rif.titolo}), introdotto con lo schema ${GRUPPI_DAL[rif.gruppo].join('.')}: aggiungerlo alla scheda`);
+    else esito.errore('GRUPPO_MANCANTE', dove, `manca il gruppo ${rif.gruppo} (${rif.titolo})`);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -595,7 +604,7 @@ export function controllaAndata(andata, esito, dove, pratica) {
     const cl = b.classificazione;
     const atteso = cl.allegato === 'A' && cl.gruppo === 1 ? 'completo' : 'ridotto';
     if (cl.profilo !== atteso) esito.errore('PROFILO_INCOERENTE', p, `Allegato ${cl.allegato}${cl.gruppo ? ' Gruppo ' + cl.gruppo : ''} richiede il profilo ${atteso}`);
-    controllaGruppi(b.gruppiEvidenze, cl, esito, `${p}/gruppiEvidenze`);
+    controllaGruppi(b.gruppiEvidenze, cl, esito, `${p}/gruppiEvidenze`, andata.versioneSchema);
     const campi = new Set();
     for (const d of b.datiDaVerificare) {
       if (campi.has(d.campo)) esito.errore('DATO_DUPLICATO', p, `${d.campo} ripetuto`);

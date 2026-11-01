@@ -5,7 +5,7 @@
 import { transazione, leggi } from './archivio.js';
 import { sha256 } from './importa.js';
 import { dataScatto, isoLocale } from './metadati.js';
-import { GRUPPI_UI, GRUPPI_BENE_NUOVO } from './stato.js';
+import { GRUPPI_UI, GRUPPI_BENE_NUOVO, inOrdine } from './stato.js';
 
 const ESTENSIONI = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/heic': 'heic', 'video/quicktime': 'mov', 'video/mp4': 'mp4',
   'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'application/pdf': 'pdf' };
@@ -15,7 +15,7 @@ export const beneDi = codice => codice.split('.')[0];
 // Gruppi del bene (o del bene padre, per un componente B01.1)
 export function gruppiPer(pratica, registri, codice) {
   const b = pratica.andata.beni.find(x => x.codice === beneDi(codice));
-  if (b) return b.gruppiEvidenze;
+  if (b) return inOrdine(b.gruppiEvidenze);
   return GRUPPI_BENE_NUOVO;
 }
 

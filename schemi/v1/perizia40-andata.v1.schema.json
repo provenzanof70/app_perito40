@@ -67,7 +67,7 @@
             }
           },
           "gruppiEvidenze": {
-            "type": "array", "minItems": 11, "maxItems": 11,
+            "type": "array", "minItems": 11, "maxItems": 12,
             "items": {
               "type": "object", "required": ["gruppo", "titolo", "requisiti", "attesa"], "additionalProperties": false,
               "properties": {

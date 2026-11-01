@@ -12,6 +12,7 @@ export const GRUPPI_UI = {
   8: { nome: 'Monitoraggio', icona: 'chart_line', requisito: 'RU2' },
   9: { nome: 'Modello digitale', icona: 'cube_transparent', requisito: 'RU3' },
   10: { nome: 'Dati in uscita', icona: 'export', requisito: 'RO2' },
+  11: { nome: 'Sicurezza', icona: 'shield_check', requisito: 'RO5' },
   DOC: { nome: 'Documenti', icona: 'file_text', requisito: 'DOC' },
 };
 
@@ -30,8 +31,12 @@ export function evidenzeDelBene(evidenze, codice) {
   return evidenze.filter(e => e.stato === 'valida' && e.beni.map(beneDi).includes(codice));
 }
 
+// Ordine di presentazione: per requisito (ID, RO1…RO5, RU1…RU3, DOC), non per numero di gruppo
+export const ORDINE_GRUPPI = [1, 2, 3, 5, 10, 6, 4, 11, 7, 8, 9, 'DOC'];
+export const inOrdine = gruppi => [...gruppi].sort((a, b) => ORDINE_GRUPPI.indexOf(a.gruppo) - ORDINE_GRUPPI.indexOf(b.gruppo));
+
 export function gruppiDelBene(bene) {
-  return bene.gruppiEvidenze || GRUPPI_BENE_NUOVO;
+  return inOrdine(bene.gruppiEvidenze || GRUPPI_BENE_NUOVO);
 }
 
 // Stato della raccolta di un bene: gruppi attesi, coperti, verifiche fatte

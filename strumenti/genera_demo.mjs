@@ -17,7 +17,7 @@ const PRATICA = 'DEMO-2026-001';
 const VISITA = '2026-10-15';
 const ID_ANDATA = '5f0c2a1e-1d2b-4c3a-9e00-00000000a001';
 const ID_RIENTRO = '7b1e9c40-2f3a-4d5b-8c00-00000000b001';
-const VERSIONE = '1.4.0';
+const VERSIONE = '1.5.0';
 const ora = (data, hhmm, ss = '00') => `${data}T${hhmm}:${ss}+02:00`;
 
 // ---------------------------------------------------------------------------
@@ -408,7 +408,8 @@ const COSA_CERCARE = {
   1: 'contesto prima del dettaglio', 2: 'targa leggibile, senza riflessi; confrontare con fattura e DdC', 3: 'targa e pagina di sistema del controllore',
   4: 'pagine operative e livelli utente', 5: 'entrambi i lati dello scambio: bene e sistema aziendale, stesso ordine o dato', 6: 'flusso logistico o M2M effettivo',
   7: 'configurazione o sessione di telemanutenzione, senza credenziali', 8: 'variabili monitorate e reazione alle derive', 9: 'modello di comportamento e suo aggiornamento',
-  10: 'percorso, file riferibili al bene, contenuto di almeno un report', DOC: 'originali in risoluzione nativa',
+  10: 'percorso, file riferibili al bene, contenuto di almeno un report',
+  11: 'ripari, pulsanti di emergenza, barriere e marcatura CE sul bene', DOC: 'originali in risoluzione nativa',
 };
 const valore = (sc, campo) => campo === 'esitoGateC' ? sc.datiAgliAtti.esitoGateC : sc.datiAgliAtti[campo.split('.')[0]][campo.split('.')[1]];
 

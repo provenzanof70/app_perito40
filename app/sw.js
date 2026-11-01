@@ -2,7 +2,7 @@
 // (elenco e versione in precache.js, generato da strumenti/aggiorna_app.mjs) e li serve dalla cache.
 // Nessuna richiesta verso altri siti. Il nuovo service worker si attiva solo quando l'app lo chiede.
 
-// Versione dei file: 5b05317024d01dcd (scritta da strumenti/aggiorna_app.mjs: cambia sw.js a ogni versione, così Safari la vede sempre)
+// Versione dei file: 31255d0348545ce1 (scritta da strumenti/aggiorna_app.mjs: cambia sw.js a ogni versione, così Safari la vede sempre)
 importScripts('./precache.js');
 
 const CACHE = `perito40-${self.VERSIONE}`;

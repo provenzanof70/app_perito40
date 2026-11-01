@@ -132,7 +132,7 @@
     "gruppiEvidenze": {
       "type": "array",
       "description": "Gruppi 1-10 e DOC con l'attesa derivata dal profilo (§2.7). Il conteggio indica presenza di materiale, non sufficienza.",
-      "minItems": 11, "maxItems": 11,
+      "minItems": 11, "maxItems": 12,
       "items": {
         "type": "object",
         "required": ["gruppo", "titolo", "requisiti", "attesa"],

@@ -50,9 +50,9 @@
     },
     "provenienza": { "enum": ["perito", "cliente", "fornitore", "integratore"] },
     "gruppoEvidenza": {
-      "description": "Gruppi 1-10 della raccolta per profilo (§2.7) più DOC per i documenti",
+      "description": "Gruppi 1-10 della raccolta per profilo (§2.7), 11 Sicurezza (RO5, dallo schema 1.5) e DOC per i documenti",
       "oneOf": [
-        { "type": "integer", "minimum": 1, "maximum": 10 },
+        { "type": "integer", "minimum": 1, "maximum": 11 },
         { "const": "DOC" }
       ]
     },

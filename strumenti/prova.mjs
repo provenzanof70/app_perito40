@@ -335,6 +335,18 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
       b1.codice === 'B01' && b2.codice === 'B02' && b2.esito.errori.length === 0 && b2.esito.avvisi.some(a => a.codice === 'CLASSIFICAZIONE_DA_MOTIVARE'));
     const { registraDocumento } = await import('./registra_documento.mjs');
     const { writeFileSync: scrivi } = await import('node:fs');
+    // Una scheda dello schema 1.4 (prima del gruppo 11 Sicurezza) resta valida: il gruppo mancante è solo un avviso
+    const fileB1 = join(cartella, 'beni', 'B01.json');
+    const originaleB1 = readFileSync(fileB1, 'utf8');
+    const vecchia = JSON.parse(originaleB1);
+    vecchia.versioneSchema = '1.4.0';
+    vecchia.gruppiEvidenze = vecchia.gruppiEvidenze.filter(g => g.gruppo !== 11);
+    scrivi(fileB1, JSON.stringify(vecchia, null, 2));
+    const esitoVecchia = validaCaricata(caricaCartella(cartella), registro, {});
+    scrivi(fileB1, originaleB1);
+    verifica('Gruppo 11 Sicurezza (RO5): nuovo bene con 12 gruppi; scheda 1.4 senza Sicurezza con solo avviso GRUPPO_DA_AGGIUNGERE',
+      JSON.parse(originaleB1).gruppiEvidenze.some(g => g.gruppo === 11 && g.attesa === 'si' && g.requisiti[0] === 'RO5')
+      && !esitoVecchia.errori.some(e => e.codice === 'GRUPPO_MANCANTE') && esitoVecchia.avvisi.some(a => a.codice === 'GRUPPO_DA_AGGIUNGERE'));
     scrivi(join(cartella, 'documenti_cliente', 'fattura.pdf'), 'FATTURA DI PROVA');
     const d1 = registraDocumento(cartella, join(cartella, 'documenti_cliente', 'fattura.pdf'), { beni: ['B01', 'B02'], descrizione: 'Fattura di prova' });
     let doppio = '';
