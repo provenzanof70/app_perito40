@@ -463,6 +463,13 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
       verifica('Scheletro Word: perizia e analisi per ogni bene della DEMO, con segnaposto in chiaro',
         (r.status === 0 || (console.log(r.stderr), false)) && file.length === 4 && /segnaposto/.test(r.stdout) && file.some(f => /^Perizia 4\.0 .* - BOZZA rev\.0 31\.10\.2026\.docx$/.test(f)));
     } else console.log('saltata  Scheletro Word: Python con python-docx non disponibile');
+    if (spawnSync('python', ['-c', 'import docx, PIL'], { encoding: 'utf-8' }).status === 0) {
+      const r = spawnSync('python', ['-I', join(RADICE, 'strumenti', 'word', 'fascicolo_fotografico.py'), join(RADICE, 'demo', 'PRATICA_DEMO_2026_001'),
+        '--uscita', join(radice, 'f'), '--data', '2026-11-01'], { encoding: 'utf-8' });
+      const file = existsSync(join(radice, 'f')) ? elenca(join(radice, 'f')) : [];
+      verifica('Fascicolo fotografico Word: un file per bene della DEMO, foto con annotazioni disegnate su copia',
+        (r.status === 0 || (console.log(r.stderr), false)) && file.length === 2 && /B01: 11 foto/.test(r.stdout) && file.every(f => /^Fascicolo fotografico .* 01\.11\.2026\.docx$/.test(f)));
+    } else console.log('saltata  Fascicolo fotografico: Python con python-docx e Pillow non disponibile');
   } finally {
     rmSync(radice, { recursive: true, force: true });
   }
