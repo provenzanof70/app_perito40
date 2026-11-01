@@ -27,6 +27,7 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | F3.1 | PC: nuova pratica, nuovo bene, registrazione dei documenti, scheletro Word di perizia e analisi tecnica; schemi 1.4 | fatta |
 | F3.2 | PC: pacchetto di andata generato dal fascicolo (revisioni, sopralluogo previsto, indicazioni di studio) | fatta |
 | F3.3 | PC: importazione dei rientri nel fascicolo (checkpoint e finale, volumi, senza doppioni); fascicolo fotografico Word | fatta |
+| F3.4 | PC: emissione e chiusura (per la firma, giuramento, documenti finali firmati PAdES/CAdES e marcati, sola lettura); schema 1.7 | fatta |
 | 0.9–0.10 | Gruppo Sicurezza (RO5), riquadri per requisito, nota breve facoltativa in campo, dati del documento; schemi 1.5–1.6 | fatta |
 
 ## Struttura
@@ -52,6 +53,7 @@ strumenti/
   registra_documento.mjs       registra un documento del cliente come evidenza (copia, codice, impronta, manifesto)
   genera_andata.mjs            pacchetto di andata per l'app dal fascicolo (F3.2)
   importa_rientro.mjs          importa gli ZIP di rientro dell'app nel fascicolo (F3.3)
+  emissione.mjs                per la firma, giuramento, documenti finali firmati e marcati, chiusura (F3.4)
   word/scheletro_perizia.py    scheletro Word di perizia giurata e analisi tecnica dal fascicolo
   word/fascicolo_fotografico.py  fascicolo fotografico Word: foto per requisito con le annotazioni del campo
   word/regime_CRI_4.0.json     testi del credito d'imposta 4.0 (VISTI, PREMESSO, requisiti, check list, conclusioni): da verificare per annualità
@@ -62,6 +64,8 @@ strumenti/
   lib/zip.mjs                  lettura e scrittura ZIP senza dipendenze (riusabile nella PWA)
   lib/disco.mjs                lettura di cartelle e ZIP, calcolo delle impronte (Node)
   lib/andata.mjs               costruzione dell'andata dal fascicolo (usata anche per la DEMO)
+  lib/firme.mjs                riconoscimento di firme PAdES/CAdES e marche (PDF, .p7m, .tsr, .tsd, .m7m), integrità con openssl
+  lib/prova_firme.mjs          documenti firmati e marcati di prova (certificato di test usa e getta)
 demo/
   PRATICA_DEMO_2026_001/       pratica fittizia completa (dopo l'importazione del rientro)
   casi_errati/casi.json        modifiche che il validatore deve rifiutare
@@ -295,6 +299,28 @@ python strumenti/word/fascicolo_fotografico.py "<cartella pratica>"
 - Il rapporto dell'import elenca le targhe da leggere e confrontare con gli atti e le evidenze ancora «da descrivere»: si completano sul PC.
 - Il fascicolo fotografico è un documento di lavoro: le annotazioni sono disegnate su una copia, l'originale resta invariato.
 - Schema 1.6 (tutto facoltativo): modalità di acquisizione del bene (diretto, leasing, appalto, in economia), periodo d'imposta non solare, interconnessione tardiva (causa, caratteristiche al primo utilizzo, prove datate per classe), dati del documento acquisito in campo.
+
+## Sul PC: emissione e chiusura (F3.4)
+
+```bash
+node strumenti/emissione.mjs per-la-firma "<cartella pratica>" --bene B01
+```
+
+```bash
+node strumenti/emissione.mjs giuramento "<cartella pratica>" --bene B01 --data 2026-11-25 --tribunale "…" --rgvg "…" --cronologico "…"
+```
+
+```bash
+node strumenti/emissione.mjs registra "<cartella pratica>" --bene B01 --tipo perizia_giurata_scansione "<file.pdf.p7m>" --marca "<file.tsr>"
+```
+
+```bash
+node strumenti/emissione.mjs chiudi "<cartella pratica>" --bene B01
+```
+
+- Dopo il giuramento la perizia non si rigenera più: lo scheletro produce solo l'analisi tecnica, con data, tribunale, R.G.V.G. e cronologico.
+- Firma PAdES (nel PDF) o CAdES (`.p7m`), marca nel PDF, nella busta o a parte (`.tsr`, `.tsd`, `.m7m`). Lo script verifica con openssl che la firma corrisponda al contenuto e che la marca riporti l'impronta del documento; firmatario e ora della marca si leggono dal file. Catena e validità dei certificati restano al software di firma.
+- La chiusura richiede perizia giurata scansionata e analisi tecnica firmate e marcate, con impronte invariate. Dopo, il bene è in sola lettura e il validatore segnala ogni documento finale cambiato.
 
 ## Pratica DEMO
 

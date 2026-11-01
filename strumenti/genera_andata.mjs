@@ -12,7 +12,7 @@ import { randomUUID } from 'node:crypto';
 import { caricaSchemi, caricaCartella, validaCaricata, sha256 } from './lib/disco.mjs';
 import { costruisciAndata } from './lib/andata.mjs';
 
-const VERSIONE = '1.6.0';
+const VERSIONE = '1.7.0';
 const isoLocale = d => {
   const p = n => String(n).padStart(2, '0');
   const o = -d.getTimezoneOffset();
@@ -26,6 +26,7 @@ export function generaAndata(cartella, o) {
   const pratica = JSON.parse(readFileSync(fp, 'utf8'));
   if (!pratica.beni.length) throw new Error('la pratica non ha beni: censirli prima con nuovo_bene.mjs');
   const schede = new Map(pratica.beni.map(b => [b.codice, JSON.parse(readFileSync(join(cartella, b.scheda), 'utf8'))]));
+  if ([...schede.values()].every(sc => sc.elaborato && sc.elaborato.chiusoIl)) throw new Error('tutti i beni della pratica sono chiusi: niente nuovo sopralluogo');
 
   // Sopralluogo: quello indicato, oppure l'ultimo ancora previsto (nuova revisione della stessa visita), oppure il successivo
   const ultimo = pratica.sopralluoghi[pratica.sopralluoghi.length - 1];

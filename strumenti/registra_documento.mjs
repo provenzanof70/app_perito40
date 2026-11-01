@@ -29,6 +29,10 @@ export function registraDocumento(cartella, file, o) {
   if (!beni.length) throw new Error('serve --beni (es. B01 oppure B01,B02)');
   const noti = new Set(pratica.beni.map(b => b.codice));
   for (const b of beni) if (!noti.has(b.split('.')[0])) throw new Error(`bene ${b} non nel fascicolo`);
+  for (const b of new Set(beni.map(x => x.split('.')[0]))) {
+    const sc = JSON.parse(readFileSync(join(cartella, pratica.beni.find(x => x.codice === b).scheda), 'utf8'));
+    if (sc.elaborato && sc.elaborato.chiusoIl) throw new Error(`il bene ${b} è chiuso dal ${sc.elaborato.chiusoIl}: in sola lettura`);
+  }
   if (!o.descrizione) throw new Error('serve --descrizione');
   const gruppo = o.gruppo || 'DOC';
   const requisiti = o.requisiti && o.requisiti.length ? o.requisiti : ['DOC'];

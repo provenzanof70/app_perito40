@@ -44,6 +44,8 @@ export function importaRientro(cartella, zips) {
   if (r.codicePratica !== pratica.codicePratica) throw new Error(`il pacchetto è della pratica ${r.codicePratica}, non di ${pratica.codicePratica}`);
   const pAndata = pratica.pacchetti.find(p => p.tipo === 'andata' && p.id === r.andata.idAndata);
   if (!pAndata) throw new Error(`l'andata ${r.andata.revisione} da cui nasce il pacchetto non è registrata in questa pratica`);
+  const chiusi = pratica.beni.filter(b => (JSON.parse(readFileSync(join(cartella, b.scheda), 'utf8')).elaborato || {}).chiusoIl).map(b => b.codice);
+  if (chiusi.length) throw new Error(`beni chiusi, in sola lettura: ${chiusi.join(', ')}. Il rientro non si importa in una pratica con perizie già chiuse`);
 
   // 1. Controllo dei volumi contro la loro andata, prima di toccare il fascicolo
   const pre = validaCaricata(caricaZip(volumi.map(v => v.percorso), join(cartella, pAndata.file)), registro, { soloRientro: true });

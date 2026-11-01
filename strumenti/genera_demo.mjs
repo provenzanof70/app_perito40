@@ -18,7 +18,7 @@ const PRATICA = 'DEMO-2026-001';
 const VISITA = '2026-10-15';
 const ID_ANDATA = '5f0c2a1e-1d2b-4c3a-9e00-00000000a001';
 const ID_RIENTRO = '7b1e9c40-2f3a-4d5b-8c00-00000000b001';
-const VERSIONE = '1.6.0';
+const VERSIONE = '1.7.0';
 const ora = (data, hhmm, ss = '00') => `${data}T${hhmm}:${ss}+02:00`;
 
 // ---------------------------------------------------------------------------

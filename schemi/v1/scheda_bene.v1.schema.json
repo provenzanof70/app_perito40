@@ -250,7 +250,47 @@
             "rgvg": { "type": "string" },
             "cronologico": { "type": "string" }
           }
-        }
+        },
+        "documentiFinali": {
+          "type": "array",
+          "description": "Documenti emessi: perizia stampata e scansione della giurata, analisi tecnica, fascicolo fotografico, con firma e marche (v1.7). Impronta registrata alla consegna: il file non deve più cambiare.",
+          "items": {
+            "type": "object", "required": ["tipo", "file", "sha256", "registratoIl", "firma", "marche"], "additionalProperties": false,
+            "properties": {
+              "tipo": { "enum": ["perizia_definitiva", "perizia_giurata_scansione", "analisi_tecnica", "fascicolo_fotografico", "allegato"] },
+              "file": { "$ref": "comuni.v1.schema.json#/$defs/testo", "description": "Percorso relativo nella cartella della pratica" },
+              "sha256": { "$ref": "comuni.v1.schema.json#/$defs/sha256" },
+              "registratoIl": { "$ref": "comuni.v1.schema.json#/$defs/dataOra" },
+              "firma": {
+                "type": "object", "required": ["formato"], "additionalProperties": false,
+                "properties": {
+                  "formato": { "enum": ["nessuna", "pades", "cades"], "description": "pades = firma dentro il PDF; cades = busta .p7m" },
+                  "firme": { "type": "integer", "minimum": 0 },
+                  "firmatario": { "type": "string" },
+                  "dataFirma": { "type": "string", "description": "Ora di firma dichiarata nella firma (signingTime), non attestata" },
+                  "integrita": { "enum": ["verificata", "non_verificata", "errata"], "description": "Corrispondenza crittografica tra firma e contenuto; la validità del certificato si controlla con il software di firma" },
+                  "contenutoSha256": { "$ref": "comuni.v1.schema.json#/$defs/sha256", "description": "Per una busta .p7m: impronta del documento contenuto" }
+                }
+              },
+              "marche": {
+                "type": "array",
+                "items": {
+                  "type": "object", "required": ["formato"], "additionalProperties": false,
+                  "properties": {
+                    "formato": { "enum": ["pades", "cades", "tsd", "m7m", "tsr"], "description": "pades = marca dentro il PDF (della firma o del documento); cades = marca della firma dentro la busta .p7m; tsd, m7m, tsr = file a parte" },
+                    "file": { "type": "string" },
+                    "sha256": { "$ref": "comuni.v1.schema.json#/$defs/sha256" },
+                    "data": { "type": "string", "description": "Ora attestata dalla marca (genTime), in UTC" },
+                    "riferita": { "enum": ["si", "no", "non_verificabile"], "description": "Se la marca riporta l'impronta del documento a cui è associata" }
+                  }
+                }
+              },
+              "nota": { "type": "string" }
+            }
+          }
+        },
+        "chiusoIl": { "$ref": "comuni.v1.schema.json#/$defs/dataOra", "description": "Pratica del bene chiusa: perizia giurata, documenti firmati e marcati registrati; da qui in sola lettura (v1.7)" },
+        "chiusuraForzata": { "type": "string", "description": "Motivo, se la chiusura è avvenuta senza firma o marca su un documento richiesto (v1.7)" }
       }
     }
   },

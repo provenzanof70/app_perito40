@@ -298,6 +298,39 @@ export function controllaScheda(scheda, esito, dove) {
   controllaGruppi(scheda.gruppiEvidenze, c, esito, `${dove}#/gruppiEvidenze`, scheda.versioneSchema);
 }
 
+// Emissione: giuramento, documenti finali registrati con impronta (non devono più cambiare), chiusura
+const RICHIESTI_CHIUSURA = ['perizia_giurata_scansione', 'analisi_tecnica'];
+function controllaEmissione(el, file, esito, dove) {
+  const g = el.giuramento || {};
+  if (el.stato === 'giurata' && ['data', 'tribunale', 'rgvg', 'cronologico'].some(k => !g[k])) esito.avviso('GIURAMENTO_INCOMPLETO', dove, 'perizia giurata senza tutti i dati del verbale (data, tribunale, R.G.V.G., cronologico)');
+  if (el.chiusoIl && el.stato !== 'giurata') esito.errore('CHIUSURA_INCOERENTE', dove, `bene chiuso con la perizia in stato ${el.stato}`);
+  for (const d of el.documentiFinali || []) {
+    if (file) {
+      const f = file.get(d.file);
+      if (!f) esito.errore('DOCUMENTO_FINALE_MANCANTE', dove, `${d.file} non è più nella cartella`);
+      else if (f.sha256 !== d.sha256) esito.errore('DOCUMENTO_FINALE_MODIFICATO', dove, `${d.file} è cambiato dopo la registrazione`);
+      for (const m of d.marche) {
+        if (m.file && m.sha256) {
+          const x = file.get(m.file);
+          if (!x || x.sha256 !== m.sha256) esito.errore('MARCA_MODIFICATA', dove, `${m.file}: marca mancante o cambiata dopo la registrazione`);
+        }
+      }
+    }
+    if (d.firma.integrita === 'errata') esito.errore('FIRMA_ERRATA', dove, `${d.file}: la firma non corrisponde al contenuto`);
+    if (d.marche.some(m => m.riferita === 'no')) esito.errore('MARCA_NON_RIFERITA', dove, `${d.file}: una marca non riporta l'impronta del documento`);
+  }
+  if (el.chiusoIl && !el.chiusuraForzata) {
+    const docs = el.documentiFinali || [];
+    for (const t of RICHIESTI_CHIUSURA) {
+      const d = docs.filter(x => x.tipo === t);
+      if (!d.length || !d.some(x => x.firma.formato !== 'nessuna') || !d.some(x => x.marche.length)) {
+        esito.errore('CHIUSURA_INCOMPLETA', dove, `${t.replace(/_/g, ' ')}: per la chiusura serve firmato e marcato`);
+      }
+    }
+  }
+  if (el.stato === 'giurata' && !el.chiusoIl) esito.avviso('PERIZIA_DA_CHIUDERE', dove, 'perizia giurata: registrare documenti firmati e marcati e chiudere (emissione.mjs)');
+}
+
 // Fine del periodo d'imposta dell'annualità: quello dichiarato, altrimenti l'anno solare
 export const finePeriodo = pratica => (pratica.periodoImposta ? pratica.periodoImposta.fine : `${pratica.annualita}-12-31`);
 
@@ -612,6 +645,7 @@ export function controllaPratica(ctx, esito, dove = 'pratica_40.json') {
     });
   }
 
+  for (const [codice, sc] of schedePerCodice) controllaEmissione(sc.elaborato || {}, ctx.file, esito, `beni/${codice}.json#/elaborato`);
   controllaTardiva(pratica, schedePerCodice, esito, dove);
   for (const a of pratica.azioni) {
     if (a.stato === 'aperta' && [a.percheServe, a.esempioAccettabile].includes('[da completare sul PC]')) esito.avviso('AZIONE_DA_COMPLETARE', `${dove}#/azioni`, `${a.id} nata in campo: perché serve, esempio accettabile, priorità e destinatario da completare`);

@@ -206,6 +206,8 @@ def main():
     ap.add_argument('--uscita')
     ap.add_argument('--data')
     a = ap.parse_args()
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # console di Windows: lettere accentate
     with open(os.path.join(a.pratica, 'pratica_40.json'), encoding='utf-8') as f:
         pratica = json.load(f)
     data = dt.date.fromisoformat(a.data) if a.data else dt.date.today()

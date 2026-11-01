@@ -613,7 +613,11 @@ def analisi(pr, codice, perito, regime, guida, oggi):
     doc.p(f"Allegato {cl['allegato']} {regime['allegatiLegge']}", centro=True)
     doc.p('*** *** ***', centro=True)
     perito_giurato = f"{nome_perito(perito).upper()} – {perito.get('albo') or ph('ordine e numero di iscrizione')}" if perito.get('nome') else k['perito']
-    doc.tabella([['Perito giurato:', perito_giurato], ['Data giuramento:', k['giuramento']], ['Ente asseveratore:', k['tribunale']]],
+    giur = (sc.get('elaborato') or {}).get('giuramento') or {}
+    righe = [['Perito giurato:', perito_giurato], ['Data giuramento:', k['giuramento']], ['Ente asseveratore:', giur.get('tribunale') or k['tribunale']]]
+    if giur.get('rgvg') or giur.get('cronologico'):
+        righe.append(['Verbale di giuramento:', f"R.G. V.G. N° {giur.get('rgvg') or ph('R.G. V.G.')} – Cron. N° {giur.get('cronologico') or ph('cronologico')}"])
+    doc.tabella(righe,
                 larghezze=[4.5, 12.5], bordi=False, grassetto_prima=True)
     riquadro_bozza(doc, k)
     doc.salto()
@@ -835,6 +839,8 @@ def main(argv=None):
     a.add_argument('--uscita')
     a.add_argument('--data', help='data dell’elaborato se il fascicolo non la indica (AAAA-MM-GG)')
     o = a.parse_args(argv)
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # console di Windows: lettere accentate
     pr = Pratica(o.pratica)
     regime = testi_regime(pr.p['regime'])
     perito = leggi_json(o.perito) if o.perito else {}
@@ -846,7 +852,16 @@ def main(argv=None):
     for codice in beni:
         if codice not in pr.schede:
             sys.exit(f'{codice}: bene non presente nel fascicolo')
-        for fn, tipo in ((perizia, 'Perizia 4.0'), (analisi, 'Analisi Tecnica')):
+        el = pr.schede[codice].get('elaborato') or {}
+        if el.get('chiusoIl'):
+            print(f"{codice}: chiuso il {el['chiusoIl']}, in sola lettura: nessun documento generato")
+            continue
+        documenti = ((perizia, 'Perizia 4.0'), (analisi, 'Analisi Tecnica'))
+        if el.get('stato') == 'giurata':
+            # la perizia giurata non si rigenera: solo l'analisi tecnica, che riporta i dati del giuramento
+            print(f"{codice}: perizia già giurata, si genera solo l'analisi tecnica")
+            documenti = documenti[1:]
+        for fn, tipo in documenti:
             doc, k = fn(pr, codice, perito, regime, guida, oggi) if fn is analisi else fn(pr, codice, perito, regime, oggi)
             percorso = uscita / nome_file(tipo, k)
             if len(str(percorso.resolve())) > 255:

@@ -37,7 +37,7 @@ export function creaPratica(radice, codice, o) {
   for (const c of Object.keys(CARTELLE)) mkdirSync(join(cartella, c));
   const ora = o.ora || new Date();
   const pratica = {
-    formato: 'perizia40.pratica', versioneSchema: '1.6.0', demo: !!o.demo, codicePratica: codice, regime: 'CRI_4.0',
+    formato: 'perizia40.pratica', versioneSchema: '1.7.0', demo: !!o.demo, codicePratica: codice, regime: 'CRI_4.0',
     annualita: o.annualita || ora.getFullYear(), aggiornataIl: ora.toISOString().replace(/\.\d+Z$/, 'Z'),
     cliente: { ragioneSociale: o.cliente, sedeIntervento: o.sede }, perito: { nome: o.perito || 'Perito' }, persone: [],
     beni: [], sopralluoghi: [], beniNuovi: [], evidenze: [], timeline: [], azioni: [], riscontriDiretti: [], dichiarazioniTerzi: [], noteCampo: [],

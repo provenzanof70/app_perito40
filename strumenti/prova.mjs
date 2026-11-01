@@ -455,6 +455,48 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
       verifica('F3.3 Pacchetto non nato da quell\'andata: rifiutato, fascicolo non toccato',
         !i3.importato && i3.esito.errori.some(e => e.codice === 'RIENTRO_ANDATA_HASH') && readFileSync(join(cartella, 'pratica_40.json'), 'utf8') === prima);
     }
+    // Emissione e chiusura: per la firma, giuramento, documenti finali firmati e marcati, sola lettura
+    {
+      const em = await import('./emissione.mjs');
+      const { sha256: impronta } = await import('./lib/disco.mjs');
+      const { mkdirSync } = await import('node:fs');
+      const pf = em.perLaFirma(cartella, 'B01', { data: '2026-11-20' });
+      const senzaDoc = (() => { em.giuramento(cartella, 'B01', { data: '2026-11-25', tribunale: 'Tribunale di Prova', rgvg: '123/2026', cronologico: '456' }); return em.chiudi(cartella, 'B01'); })();
+      const sc = JSON.parse(readFileSync(join(cartella, 'beni', 'B01.json'), 'utf8'));
+      verifica('Emissione: per la firma e giuramento registrati; senza documenti firmati e marcati la chiusura si ferma',
+        pf.fatto && sc.elaborato.stato === 'giurata' && sc.elaborato.giuramento.rgvg === '123/2026' && !senzaDoc.fatto
+        && senzaDoc.mancanze.some(m => /analisi tecnica/.test(m)) && senzaDoc.mancanze.some(m => /perizia giurata scansione/.test(m)));
+      const { opensslDisponibile } = await import('./lib/firme.mjs');
+      if (opensslDisponibile()) {
+        const { preparaFirme } = await import('./lib/prova_firme.mjs');
+        const df = join(radice, 'firme');
+        mkdirSync(df);
+        const f = preparaFirme(df);
+        const scrivi2 = (n, b) => { scrivi(join(df, n), b); return join(df, n); };
+        const a = em.registra(cartella, 'B01', { tipo: 'analisi_tecnica', file: scrivi2('Analisi tecnica B01.pdf', f.padesMarcato) });
+        const p = em.registra(cartella, 'B01', { tipo: 'perizia_giurata_scansione', file: scrivi2('Perizia giurata B01.pdf.p7m', f.p7m), marche: [scrivi2('Perizia giurata B01.pdf.tsr', f.tsr)] });
+        const t = em.registra(cartella, 'B01', { tipo: 'allegato', file: scrivi2('Allegato.pdf.tsd', f.tsd) });
+        const m = em.registra(cartella, 'B01', { tipo: 'allegato', file: scrivi2('Allegato.pdf.m7m', f.m7m) });
+        let alterato = '';
+        try { em.registra(cartella, 'B01', { tipo: 'allegato', file: scrivi2('alterato.pdf', f.pdfAlterato) }); } catch (e) { alterato = e.message; }
+        let altraMarca = '';
+        try { em.registra(cartella, 'B01', { tipo: 'allegato', file: scrivi2('scansione.pdf', f.scansione), marche: [join(df, 'Perizia giurata B01.pdf.tsr')] }); } catch (e) { altraMarca = e.message; }
+        verifica('Emissione: PAdES con marca nel PDF, CAdES .p7m con marca .tsr, .tsd e .m7m riconosciuti e verificati; firma alterata e marca di un altro documento rifiutate',
+          a.voce.firma.formato === 'pades' && a.voce.firma.integrita === 'verificata' && a.voce.marche.some(x => x.formato === 'pades' && x.riferita === 'si')
+          && p.voce.firma.formato === 'cades' && p.voce.firma.contenutoSha256 === impronta(f.scansione) && p.voce.marche.some(x => x.formato === 'tsr' && x.riferita === 'si' && x.data)
+          && t.voce.marche.some(x => x.formato === 'tsd' && x.riferita === 'si') && m.voce.marche.some(x => x.formato === 'm7m' && x.riferita === 'si')
+          && /non corrisponde/.test(alterato) && /non è la sua marca/.test(altraMarca) && existsSync(join(cartella, 'perizia', 'finale', 'Perizia giurata B01.pdf.tsr')));
+        const ch = em.chiudi(cartella, 'B01');
+        let dopo = '';
+        try { registraDocumento(cartella, join(cartella, 'documenti_cliente', 'fattura.pdf'), { beni: ['B01'], descrizione: 'x' }); } catch (e) { dopo = e.message; }
+        scrivi(join(cartella, 'perizia', 'finale', 'Analisi tecnica B01.pdf'), Buffer.concat([f.padesMarcato, Buffer.from('\n')]));
+        const ver = em.verifica(cartella).find(x => x.bene === 'B01');
+        const es = validaCaricata(caricaCartella(cartella), registro, {});
+        verifica('Chiusura: bene in sola lettura; un documento finale cambiato dopo la registrazione è segnalato',
+          ch.fatto && ch.esito.errori.length === 0 && /sola lettura/.test(dopo) && ver.problemi.some(x => /modificato/.test(x))
+          && es.errori.some(e => e.codice === 'DOCUMENTO_FINALE_MODIFICATO'));
+      } else console.log('saltata  Firme e marche: openssl non disponibile');
+    }
     const py = spawnSync('python', ['-c', 'import docx'], { encoding: 'utf-8' });
     if (py.status === 0) {
       const r = spawnSync('python', ['-I', join(RADICE, 'strumenti', 'word', 'scheletro_perizia.py'), join(RADICE, 'demo', 'PRATICA_DEMO_2026_001'),
