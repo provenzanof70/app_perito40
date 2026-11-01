@@ -10,13 +10,16 @@ import { GRUPPI_UI } from '../stato.js';
 import { registraEvidenza, gruppiPer, beneDi } from '../evidenze.js';
 import { useUrlFile, durata, avviaRegistrazione } from '../media.js';
 
+const TIPI_COMPONENTE = { M: 'macchina', QM: 'quasi-macchina', ITS: 'insieme', ACC: 'accessorio' };
+
 const MODI = [['video', 'VIDEO'], ['foto', 'FOTO'], ['vocale', 'VOCALE'], ['file', 'FILE']];
 
 function tuttiIBeni(pratica, registri) {
   const out = [];
   for (const b of [...pratica.andata.beni, ...registri.beneNuovo.values()]) {
     out.push({ codice: b.codice, nome: b.denominazione, livello: 0 });
-    for (const c of b.componenti || []) out.push({ codice: c.codice, nome: c.denominazione, livello: 1 });
+    for (const c of b.componenti || []) out.push({ codice: c.codice, nome: c.denominazione, livello: 1,
+      nota: [`componente di ${b.codice}`, TIPI_COMPONENTE[c.tipo]].filter(Boolean).join(' · ') });
   }
   return out;
 }
@@ -169,8 +172,8 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
       <div class="elenco">${beni.map(b => html`<button class="scelta" style=${{ paddingLeft: `${16 + b.livello * 22}px` }}
           onClick=${() => { setCodice(b.codice); setGruppo((gruppiPer(pratica, registri, b.codice).find(g => g.attesa === 'si') || {}).gruppo); setScelta(false); }}>
         <span class=${`spunta ${b.codice === codice ? 'si' : ''}`}>${b.codice === codice ? '✓' : ''}</span>
-        <span class="etichetta"><b>${b.codice}</b> ${b.nome}</span></button>`)}</div>
-      <div class="meta">Passando fisicamente a un altro bene, cambia subito il codice: l'evidenza prende il codice del bene scelto qui.</div>
+        <span class="etichetta"><b>${b.codice}</b> ${b.nome}${b.nota && html`<span class="nota-scelta">${b.nota}</span>`}</span></button>`)}</div>
+      <div class="meta">Passando fisicamente a un altro bene o componente, cambia subito il codice: l'evidenza prende il codice scelto qui. Una foto che vale per più beni si collega agli altri dal dettaglio dell'evidenza («Vale anche per altri beni»).</div>
     </${Foglio}>`}
   </div>`;
 }
