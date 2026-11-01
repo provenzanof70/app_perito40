@@ -9,6 +9,7 @@
 import { existsSync, mkdirSync, writeFileSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { caricaSchemi, caricaCartella, validaCaricata } from './lib/disco.mjs';
+import { aggiungiVoce } from './diario.mjs';
 
 const CARTELLE = {
   documenti_cliente: 'Documenti ricevuti dal cliente, come arrivano: non si modificano, non si rinominano.',
@@ -49,6 +50,7 @@ export function creaPratica(radice, codice, o) {
     'Pratica Perizia 4.0 (CRI 4.0). Fascicolo: `pratica_40.json` e `beni/`, controllato con `node strumenti/valida.mjs <questa cartella>` dal repository app_perito40.', '',
     ...Object.entries(CARTELLE).map(([c, t]) => `- \`${c}/\` — ${t}`), '',
   ].join('\n'));
+  aggiungiVoce(cartella, { fatto: ['pratica creata'], prossimo: 'analizzare i documenti del cliente e censire i beni', data: ora.toISOString().slice(0, 10) });
   const esito = validaCaricata(caricaCartella(cartella), caricaSchemi(), {});
   return { cartella, esito };
 }

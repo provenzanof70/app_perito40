@@ -28,6 +28,7 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | F3.2 | PC: pacchetto di andata generato dal fascicolo (revisioni, sopralluogo previsto, indicazioni di studio) | fatta |
 | F3.3 | PC: importazione dei rientri nel fascicolo (checkpoint e finale, volumi, senza doppioni); fascicolo fotografico Word | fatta |
 | F3.4 | PC: emissione e chiusura (per la firma, giuramento, documenti finali firmati PAdES/CAdES e marcati, sola lettura); schema 1.7 | fatta |
+| F3.5 | PC: diario di ogni pratica e cruscotto delle pratiche aperte con il prossimo passo (`/pratiche` nella cartella delle pratiche) | fatta |
 | 0.9–0.10 | Gruppo Sicurezza (RO5), riquadri per requisito, nota breve facoltativa in campo, dati del documento; schemi 1.5–1.6 | fatta |
 
 ## Struttura
@@ -54,6 +55,8 @@ strumenti/
   genera_andata.mjs            pacchetto di andata per l'app dal fascicolo (F3.2)
   importa_rientro.mjs          importa gli ZIP di rientro dell'app nel fascicolo (F3.3)
   emissione.mjs                per la firma, giuramento, documenti finali firmati e marcati, chiusura (F3.4)
+  diario.mjs                   diario di lavoro della pratica (DIARIO.md): fatto, decisioni, prossimo passo
+  cruscotto.mjs                riepilogo delle pratiche aperte con il prossimo passo (CRUSCOTTO.md)
   word/scheletro_perizia.py    scheletro Word di perizia giurata e analisi tecnica dal fascicolo
   word/fascicolo_fotografico.py  fascicolo fotografico Word: foto per requisito con le annotazioni del campo
   word/regime_CRI_4.0.json     testi del credito d'imposta 4.0 (VISTI, PREMESSO, requisiti, check list, conclusioni): da verificare per annualità
@@ -321,6 +324,16 @@ node strumenti/emissione.mjs chiudi "<cartella pratica>" --bene B01
 - Dopo il giuramento la perizia non si rigenera più: lo scheletro produce solo l'analisi tecnica, con data, tribunale, R.G.V.G. e cronologico.
 - Firma PAdES (nel PDF) o CAdES (`.p7m`), marca nel PDF, nella busta o a parte (`.tsr`, `.tsd`, `.m7m`). Lo script verifica con openssl che la firma corrisponda al contenuto e che la marca riporti l'impronta del documento; firmatario e ora della marca si leggono dal file. Catena e validità dei certificati restano al software di firma.
 - La chiusura richiede perizia giurata scansionata e analisi tecnica firmate e marcate, con impronte invariate. Dopo, il bene è in sola lettura e il validatore segnala ogni documento finale cambiato.
+
+## Sul PC: riprendere il lavoro (F3.5)
+
+```bash
+node strumenti/cruscotto.mjs "<cartella delle pratiche>" --scrivi
+```
+
+- Ogni pratica ha un `DIARIO.md` (creato con la pratica): a fine lavoro si aggiunge cosa è stato fatto, le decisioni e il prossimo passo (`strumenti/diario.mjs`).
+- Il cruscotto legge fascicoli, schede e diari (non i documenti dei clienti) e mostra per ogni pratica aperta lo stato delle perizie, il sopralluogo, le integrazioni per destinatario, le segnalazioni che cambiano il lavoro e il prossimo passo: quello del diario, oppure uno suggerito dallo stato del fascicolo.
+- Nella cartella delle pratiche il comando `/pratiche` (skill privata) mostra il cruscotto e riprende la pratica scelta dal suo diario: non serve ricordare le conversazioni precedenti.
 
 ## Pratica DEMO
 

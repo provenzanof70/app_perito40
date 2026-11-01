@@ -497,6 +497,20 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
           && es.errori.some(e => e.codice === 'DOCUMENTO_FINALE_MODIFICATO'));
       } else console.log('saltata  Firme e marche: openssl non disponibile');
     }
+    // Diario e cruscotto: ogni pratica nasce con il diario; il cruscotto mostra l'ultimo prossimo passo
+    {
+      const { aggiungiVoce, ultimaVoce } = await import('./diario.mjs');
+      const { cruscotto } = await import('./cruscotto.mjs');
+      const nascita = ultimaVoce(cartella);
+      aggiungiVoce(cartella, { fatto: ['prova del diario'], decisioni: ['nessuna'], prossimo: 'chiamare il cliente per la data del sopralluogo', data: '2026-11-30' });
+      const righe = cruscotto(radice);
+      const r1 = righe.find(r => r.codice === 'PROVA-2026-001');
+      const r2 = righe.find(r => r.codice === 'PROVA-2026-002');
+      verifica('Diario e cruscotto: diario creato con la pratica, prossimo passo dal diario o suggerito dallo stato, pratiche più recenti in cima',
+        nascita && /censire i beni/.test(nascita.prossimo) && r1.prossimoDiario === 'chiamare il cliente per la data del sopralluogo'
+        && r1.ultimoLavoro === '2026-11-30' && righe[0] === r1 && r1.beni.find(b => b.codice === 'B01').chiuso && !r1.chiusa
+        && r2 && r2.suggerito === 'analizzare i documenti e censire i beni');
+    }
     const py = spawnSync('python', ['-c', 'import docx'], { encoding: 'utf-8' });
     if (py.status === 0) {
       const r = spawnSync('python', ['-I', join(RADICE, 'strumenti', 'word', 'scheletro_perizia.py'), join(RADICE, 'demo', 'PRATICA_DEMO_2026_001'),
