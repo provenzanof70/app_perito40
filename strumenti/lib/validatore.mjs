@@ -613,6 +613,9 @@ export function controllaPratica(ctx, esito, dove = 'pratica_40.json') {
   }
 
   controllaTardiva(pratica, schedePerCodice, esito, dove);
+  for (const a of pratica.azioni) {
+    if (a.stato === 'aperta' && [a.percheServe, a.esempioAccettabile].includes('[da completare sul PC]')) esito.avviso('AZIONE_DA_COMPLETARE', `${dove}#/azioni`, `${a.id} nata in campo: perché serve, esempio accettabile, priorità e destinatario da completare`);
+  }
   const aperte = pratica.azioni.filter(a => a.stato === 'aperta');
   if (aperte.length) esito.avviso('AZIONI_APERTE', dove, `${aperte.length} azioni aperte (${aperte.map(a => a.id).join(', ')}): riportarle nel cruscotto pratiche`);
   return { schedePerCodice };

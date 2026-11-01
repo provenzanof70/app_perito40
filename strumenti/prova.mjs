@@ -402,6 +402,59 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
       g2.esito.errori.length === 0 && g2.andata.revisione === 'rev002' && g2.andata.sopralluogo.id === 'S01' && pr2.sopralluoghi.length === 1
       && pr2.sopralluoghi[0].data === '2026-11-12' && existsSync(join(cartella, 'andata', 'perizia40-andata_rev001.json'))
       && pr2.pacchetti.filter(p => p.tipo === 'andata').length === 2 && g2.andata.sopralluogo.avvertenze[0].startsWith('Accesso'));
+    // F3.3: rientro finale sintetico nato dall'andata rev002, importato due volte
+    {
+      const { importaRientro } = await import('./importa_rientro.mjs');
+      const { sha256: impronta } = await import('./lib/disco.mjs');
+      const foto = Buffer.from('FOTO DI PROVA DELLA TARGA');
+      const hFoto = impronta(foto);
+      const t = (hh) => `2026-11-12T${hh}+01:00`;
+      const rientro = {
+        formato: 'perizia40.rientro', versioneSchema: '1.6.0', demo: true, idRientro: '0b7d4c2e-1111-4a2b-9c3d-00000000c001', tipoPacchetto: 'finale', volume: { numero: 1, totale: 1 },
+        andata: { idAndata: g2.andata.idAndata, revisione: 'rev002', sha256: impronta(readFileSync(g2.file)) }, codicePratica: 'PROVA-2026-001',
+        app: { versione: 'prova' }, creatoIl: t('12:00:00'), fusoOrario: 'Europe/Rome',
+        sopralluogo: { id: 'S01', data: '2026-11-12', presenti: [{ id: 'P01', nome: 'Referente Prova', ruolo: 'Responsabile di produzione', organizzazione: 'Officine Prova S.r.l.' }] },
+        beniNuovi: [],
+        evidenze: [{ id: 'B01-ID-001', beni: ['B01'], gruppo: 2, requisiti: ['ID', 'RO5'], tipo: 'foto', file: 'evidenze/B01-ID-001_targa.jpg', mime: 'image/jpeg', sha256: hFoto,
+          provenienza: 'perito', idSopralluogo: 'S01', acquisitaIl: t('10:00:05'), origineDataScatto: 'fotocamera_app', aperturaFotocamera: t('09:59:30'), dataScatto: t('10:00:00'),
+          descrizione: 'Targa di B01 (da descrivere)', annotazioni: [], stato: 'valida' }],
+        verificheDati: [{ bene: 'B01', campo: 'identita.matricola', valoreAgliAtti: null, esito: 'corretto', valoreRilevato: 'M-123', evidenze: ['B01-ID-001'], data: '2026-11-12' }],
+        riscontriDiretti: [{ id: 'RD-001', bene: 'B01', requisito: 'ID', idSopralluogo: 'S01', dataVisita: '2026-11-12', fatto: 'la targa riporta la matricola M-123', oggetto: 'targa della pressa',
+          circostanza: 'durante il sopralluogo', frase: 'La targa della pressa riporta la matricola M-123, letta durante il sopralluogo.', evidenze: ['B01-ID-001'] }],
+        dichiarazioniTerzi: [], noteCampo: [],
+        dateRilevate: [{ id: 'T001', evento: 'installazione', descrizione: 'Verbale di installazione mostrato in visita', beni: ['B01'], data: { valore: '2025-03-10', precisione: 'giorno' },
+          tipoData: 'documento', origine: 'verbale', stato: 'documentata', prove: [{ idEvidenza: 'B01-ID-001' }], coerenza: 'S' }],
+        nuoveAzioni: [{ id: 'A001', categoria: 'documento', beni: ['B01'], requisito: 'RO2', cosaServe: 'Schema di rete con la pressa', stato: 'aperta', apertaIl: '2026-11-12' }],
+        aggiornamentiAzioni: [],
+        manifesto: [{ idEvidenza: 'B01-ID-001', file: 'evidenze/B01-ID-001_targa.jpg', sha256: hFoto, byte: foto.length, dataAcquisizione: t('10:00:05'), provenienza: 'perito', hash: 'C', marcaTemporale: { tipo: 'n/a' }, volume: 1 }],
+      };
+      const voci = [{ nome: 'perizia40-rientro.json', dati: Buffer.from(JSON.stringify(rientro, null, 2)) }, { nome: 'evidenze/B01-ID-001_targa.jpg', dati: foto }];
+      voci.splice(1, 0, { nome: 'hash.sha256', dati: Buffer.from(voci.map(v => `${impronta(v.dati)}  ${v.nome}`).join('\n') + '\n') });
+      const zipRientro = join(radice, 'PROVA-2026-001_rientro_FIN_v1di1.zip');
+      scrivi(zipRientro, Buffer.from(scriviZip(voci, '2026-11-12T12:00:00')));
+      const i1 = importaRientro(cartella, [zipRientro]);
+      const i2 = importaRientro(cartella, [zipRientro]);
+      const pr3 = JSON.parse(readFileSync(join(cartella, 'pratica_40.json'), 'utf8'));
+      const sc3 = JSON.parse(readFileSync(join(cartella, 'beni', 'B01.json'), 'utf8'));
+      const a1 = pr3.azioni.find(a => a.id === 'A001');
+      verifica('F3.3 Import del rientro: evidenza copiata con impronta, esito in scheda, registri, data e azione nate in campo; fascicolo valido',
+        i1.importato && i1.esito.errori.length === 0 && existsSync(join(cartella, 'evidenze', 'sopralluogo_S01', 'B01-ID-001_targa.jpg'))
+        && sc3.datiAgliAtti.identita.matricola.verificaCampo.valoreRilevato === 'M-123' && pr3.riscontriDiretti.length === 1
+        && pr3.sopralluoghi[0].stato === 'eseguito' && pr3.persone.some(p => p.id === 'P01') && a1.destinatario === 'perito'
+        && i1.esito.avvisi.some(a => a.codice === 'AZIONE_DA_COMPLETARE') && i1.rapporto.targhe[0].id === 'B01-ID-001' && i1.rapporto.daDescrivere.includes('B01-ID-001'));
+      verifica('F3.3 Rifare l\'import dello stesso pacchetto non crea doppioni',
+        i2.importato && i2.esito.errori.length === 0 && pr3.evidenze.filter(e => e.id === 'B01-ID-001').length === 1
+        && pr3.timeline.filter(r => r.evento === 'installazione').length === 1 && pr3.pacchetti.filter(p => p.tipo === 'rientro_finale').length === 1 && i2.rapporto.evidenzeNuove.length === 0);
+      const alterato = { ...rientro, andata: { ...rientro.andata, sha256: '0'.repeat(64) } };
+      const zipAlterato = join(radice, 'alterato.zip');
+      const vociA = [{ nome: 'perizia40-rientro.json', dati: Buffer.from(JSON.stringify(alterato)) }, voci[2]];
+      vociA.splice(1, 0, { nome: 'hash.sha256', dati: Buffer.from(vociA.map(v => `${impronta(v.dati)}  ${v.nome}`).join('\n') + '\n') });
+      scrivi(zipAlterato, Buffer.from(scriviZip(vociA, '2026-11-12T12:00:00')));
+      const prima = readFileSync(join(cartella, 'pratica_40.json'), 'utf8');
+      const i3 = importaRientro(cartella, [zipAlterato]);
+      verifica('F3.3 Pacchetto non nato da quell\'andata: rifiutato, fascicolo non toccato',
+        !i3.importato && i3.esito.errori.some(e => e.codice === 'RIENTRO_ANDATA_HASH') && readFileSync(join(cartella, 'pratica_40.json'), 'utf8') === prima);
+    }
     const py = spawnSync('python', ['-c', 'import docx'], { encoding: 'utf-8' });
     if (py.status === 0) {
       const r = spawnSync('python', ['-I', join(RADICE, 'strumenti', 'word', 'scheletro_perizia.py'), join(RADICE, 'demo', 'PRATICA_DEMO_2026_001'),
