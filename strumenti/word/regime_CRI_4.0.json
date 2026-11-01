@@ -1,24 +1,33 @@
 {
   "regime": "CRI_4.0",
-  "avvertenza": "Testi del regime CRI 4.0 (L. 178/2020) per lo scheletro di perizia e analisi tecnica. L'elenco VISTI e le diciture di legge dipendono da regime e annualità: vanno verificati a ogni pratica prima dell'uso.",
+  "nome": "credito d'imposta per investimenti in beni strumentali 4.0",
+  "avvertenza": "Testi del regime CRI 4.0 (art. 1, comma 1057-bis, L. 178/2020) per lo scheletro di perizia e analisi tecnica, sul modello delle perizie giurate dello studio. L'elenco VISTI, le caselle degli anni e le diciture di legge dipendono da regime e annualità: vanno verificati a ogni pratica prima dell'uso. {esito: …} diventa un segnaposto che decide il perito.",
   "riferimentoAnalisi": "art. 1, comma 1062, della Legge 30 dicembre 2020, n. 178",
+  "allegatiLegge": "annesso alla Legge 11 dicembre 2016, n. 232",
   "visti": [
-    "la Legge 11 dicembre 2016, n. 232 e i relativi Allegati A e B",
-    "la Circolare n. 4/E del 30 marzo 2017 dell'Agenzia delle Entrate e del Ministero dello Sviluppo Economico",
-    "la Circolare MiSE n. 547750 del 15 dicembre 2017 e la Circolare MiSE n. 177355 del 23 maggio 2018",
-    "la Legge 30 dicembre 2020, n. 178, art. 1, commi 1051–1063",
-    "la Legge 30 dicembre 2024, n. 207 (Legge di Bilancio 2025)",
-    "il D.L. 29 marzo 2024, n. 39, convertito dalla L. 23 maggio 2024, n. 67, art. 6",
-    "il D.D. MIMIT del 24 aprile 2024 (modelli di comunicazione)",
-    "la Circolare n. 9/E del 23 luglio 2021 dell'Agenzia delle Entrate",
-    "la documentazione tecnica e di costo elencata nell'Analisi tecnica allegata"
+    "gli estremi e il contenuto della Legge 11 dicembre 2016, n. 232, pubblicata nella Gazzetta Ufficiale Serie Generale n. 297 del 21 dicembre 2016, Suppl. Ordinario n. 57, così come modificata dall'articolo 7-novies del decreto-legge 29 dicembre 2016, n. 243, convertito con modificazioni dalla legge 27 febbraio 2017, n. 18, e i relativi Allegati A e B;",
+    "la Circolare n. 4/E del 30 marzo 2017 emanata dall'Agenzia delle Entrate e dal Ministero dello Sviluppo Economico;",
+    "i contenuti del Piano Nazionale «Industria 4.0» 2017-2020;",
+    "i contenuti della Legge n. 160 del 27 dicembre 2019, all'art. 1, commi 184-195 (Legge di Bilancio 2020);",
+    "i contenuti della Legge n. 178 del 30 dicembre 2020, all'art. 1, commi 1051-1063 (Legge di Bilancio 2021), con specifico riferimento al comma 1057-bis introdotto dall'art. 1, comma 44, della Legge 30 dicembre 2021, n. 234, che disciplina il credito d'imposta per gli investimenti in beni materiali di cui all'Allegato A effettuati dal 1° gennaio 2023 al 31 dicembre 2025, ovvero entro il 30 giugno 2026 a condizione che entro il 31 dicembre 2025 il relativo ordine risulti accettato dal venditore e sia avvenuto il pagamento di acconti in misura almeno pari al 20 per cento del costo di acquisizione, nonché al comma 1062 in materia di oneri documentali;",
+    "i contenuti della Legge n. 197 del 29 dicembre 2022 (Legge di Bilancio 2023), all'art. 1, comma 423, che modifica l'art. 1, comma 1057, della Legge 30 dicembre 2020, n. 178;",
+    "i contenuti della Legge n. 207 del 30 dicembre 2024 (Legge di Bilancio 2025), all'art. 1, commi 445-448, che modificano la Legge 30 dicembre 2020, n. 178;",
+    "la documentazione tecnica ed i costi aziendali sostenuti per gli investimenti in oggetto, forniti dalla stessa impresa ed elencati nell'Analisi Tecnica allegata;"
   ],
   "premesso": [
-    "di aver effettuato investimenti ammessi al credito d'imposta di cui all'art. 1, comma 1057-bis, della L. 178/2020",
-    "che i costi di tali investimenti sono imputabili ai sensi dell'art. 109, commi 1 e 2, del TUIR",
-    "che i beni oggetto della presente perizia sono nuovi",
-    "di essere consapevole delle sanzioni previste dal D.P.R. 445/2000 per le dichiarazioni mendaci"
+    "di aver effettuato investimenti ammessi al credito d'imposta di cui all'art. 1, comma 1057-bis, della Legge 30 dicembre 2020, n. 178, così come indicati nella documentazione e nei contratti di acquisto di cui ho preso visione;",
+    "che i costi di tali investimenti sono imputabili ai sensi dell'art. 109, commi 1 e 2, del TUIR al periodo d'imposta agevolabile, sono stati determinati secondo corretti criteri fiscali e contabili e sono stati correttamente iscritti in bilancio e nel libro cespiti;",
+    "che gli investimenti effettuati rispondono al requisito della novità richiesto dalla norma agevolativa, così come precisato dalla circolare dell'Agenzia delle Entrate n. 4/E del 30 marzo 2017;",
+    "consapevole delle sanzioni stabilite in caso di mendaci dichiarazioni e false attestazioni, ai sensi dell'art. 76 del D.P.R. 445/2000;"
   ],
+  "premessoValore": "preso atto che il valore complessivo degli investimenti (beni, impianti, macchinari, attrezzature, accessori) rilevante ai fini dell'agevolazione, così come indicato dalla società stessa, è pari a un importo complessivo di euro {valore};",
+  "inclusione": "possiede caratteristiche tecniche tali da poter essere incluso nell'Allegato {allegato} annesso alla Legge 11 dicembre 2016, n. 232, richiamato dall'art. 1, comma 1057-bis, della Legge 30 dicembre 2020, n. 178, e",
+  "anni": [2023, 2024, 2025, 2026],
+  "gruppi": {
+    "1": {"romano": "I", "ordinale": "Primo", "voci": 12, "revamping": true, "titolo": "Beni strumentali il cui funzionamento è controllato da sistemi computerizzati o gestito tramite opportuni sensori e azionamenti"},
+    "2": {"romano": "II", "ordinale": "Secondo", "voci": 9, "revamping": false, "titolo": "Sistemi per l'assicurazione della qualità e della sostenibilità"},
+    "3": {"romano": "III", "ordinale": "Terzo", "voci": 4, "revamping": false, "titolo": "Dispositivi per l'interazione uomo macchina e per il miglioramento dell'ergonomia e della sicurezza del posto di lavoro in logica «4.0»"}
+  },
   "obbligatori": {
     "RO1": "controllo per mezzo di CNC (Computer Numerical Control) e/o PLC (Programmable Logic Controller)",
     "RO2": "interconnessione ai sistemi informatici di fabbrica con caricamento da remoto di istruzioni e/o part program",
@@ -31,7 +40,21 @@
     "RU2": "monitoraggio continuo delle condizioni di lavoro e dei parametri di processo mediante opportuni set di sensori e adattività alle derive di processo",
     "RU3": "caratteristiche di integrazione tra macchina fisica e/o impianto con la modellizzazione e/o la simulazione del proprio comportamento nello svolgimento del processo (sistema cyberfisico)"
   },
-  "interconnessioneRidotto": "il bene è interconnesso perché scambia informazioni con sistemi interni e/o esterni attraverso un collegamento basato su specifiche documentate, disponibili pubblicamente e internazionalmente riconosciute",
+  "introObbligatori": "Ai fini del riconoscimento del credito d'imposta per investimenti in beni strumentali 4.0 di cui all'art. 1, comma 1057-bis, della L. 178/2020, il bene in analisi deve obbligatoriamente possedere tutte le seguenti 5 caratteristiche:",
+  "introUlteriori": "Il bene deve essere dotato inoltre di almeno due tra le seguenti ulteriori caratteristiche, per renderlo assimilabile o integrabile a sistemi cyberfisici:",
+  "introRidotto": "Ai fini del riconoscimento del credito d'imposta per investimenti in beni strumentali 4.0 di cui all'art. 1, comma 1057-bis, della L. 178/2020, il bene in analisi deve rientrare in una delle voci dell'Allegato e soddisfare il requisito obbligatorio di interconnessione:",
+  "dueFasi": "La Circ. AE/MiSE 4/E del 30/03/2017 (par. 6.3) ammette la possibilità di produrre la perizia in due fasi separate e successive: la prima basata sulla verifica dei requisiti tecnici del bene e la seconda a buon esito della verifica dell'avvenuta interconnessione. Si riporta di seguito quanto specificato dalla citata circolare con riferimento alle singole caratteristiche obbligatorie.",
+  "spiegazioni": {
+    "RO1": "La caratteristica del controllo per mezzo di CNC e/o PLC è da considerarsi pienamente accettata anche quando la macchina/impianto possiede soluzioni di controllo equipollenti, ovvero da un apparato a logica programmabile PC, microprocessore o equivalente che utilizzi un linguaggio standardizzato o personalizzato, oppure più complessi, dotato o meno di controllore centralizzato, che combinano più PLC o CNC (es.: soluzioni di controllo per celle/FMS oppure sistemi dotati di soluzione DCS – Distributed Control System).",
+    "RO2": "La caratteristica dell'interconnessione ai sistemi informatici di fabbrica con caricamento da remoto di istruzioni e/o part program è soddisfatta se il bene scambia informazioni con sistemi interni (es.: sistema gestionale, sistemi di pianificazione, sistemi di progettazione e sviluppo del prodotto, monitoraggio, anche in remoto, e controllo, altre macchine dello stabilimento, ecc.) per mezzo di un collegamento basato su specifiche documentate, disponibili pubblicamente e internazionalmente riconosciute (esempi: TCP-IP, HTTP, MQTT, ecc.). Inoltre, il bene deve essere identificato univocamente, al fine di riconoscere l'origine delle informazioni, mediante l'utilizzo di standard di indirizzamento internazionalmente riconosciuti (es.: indirizzo IP). Per istruzioni si possono intendere anche indicazioni, inviate dal sistema informativo di fabbrica alla macchina, legate alla pianificazione, alla schedulazione o al controllo avanzamento della produzione, senza necessariamente avere caratteristiche di attuazione o avvio della macchina.",
+    "RO3": "La macchina/impianto deve essere integrata in una delle seguenti opzioni: con il sistema logistico della fabbrica (integrazione fisica – asservimento in input o in output da un sistema di movimentazione automatizzato o semiautomatizzato a sua volta integrato con un altro elemento della fabbrica – oppure integrazione informativa mediante tracciabilità automatizzata di prodotti/lotti); con la rete di fornitura (scambio di dati con i sistemi informativi di fornitori a monte o clienti a valle); con altre macchine del ciclo produttivo (integrazione informativa M2M con altra macchina/impianto a monte e/o a valle).",
+    "RO4": "La macchina/impianto deve essere dotata di un sistema hardware, a bordo macchina o in remoto, di interfaccia con l'operatore per il monitoraggio e/o il controllo della macchina stessa; le interfacce devono garantire la lettura anche con indosso i dispositivi di protezione individuale e senza errori nelle condizioni ambientali del reparto.",
+    "RO5": "La macchina/impianto deve rispondere ai requisiti previsti dalle norme in vigore in materia di sicurezza, salute e igiene del lavoro.",
+    "RU1": "Per telemanutenzione si intendono sistemi che possono da remoto, in automatico o con la supervisione di un operatore, effettuare interventi di riparazione o di manutenzione su componenti della macchina/impianto; per telediagnosi sistemi che in automatico consentono la diagnosi sullo stato di salute di componenti della macchina/impianto; per controllo in remoto soluzioni di monitoraggio in anello aperto o di controllo in anello chiuso, purché in remoto e non a bordo macchina.",
+    "RU2": "Il monitoraggio si intende non esclusivamente finalizzato alla conduzione della macchina o impianto, ma anche al solo monitoraggio delle condizioni o dei parametri di processo e all'eventuale arresto del processo al manifestarsi di anomalie che ne impediscono lo svolgimento.",
+    "RU3": "Si fa riferimento alla disponibilità di un modello virtuale o digitale del comportamento della macchina fisica o dell'impianto (digital twin), sviluppato al fine di analizzarne il comportamento anche con finalità predittive e di ottimizzazione."
+  },
+  "interconnessioneRidotto": "il bene scambia informazioni con sistemi interni e/o esterni attraverso un collegamento basato su specifiche documentate, disponibili pubblicamente e internazionalmente riconosciute",
   "vociGruppo1": {
     "A11_01": "macchine utensili per asportazione",
     "A11_02": "macchine utensili operanti con laser e altri processi a flusso di energia, elettroerosione, processi elettrochimici",
@@ -47,27 +70,31 @@
     "A11_12": "magazzini automatizzati interconnessi ai sistemi gestionali di fabbrica",
     "A11_13": "dispositivi, strumentazione e componentistica intelligente per l'integrazione, la sensorizzazione e/o l'interconnessione e il controllo automatico dei processi, anche nell'ammodernamento o nel revamping dei sistemi di produzione esistenti"
   },
-  "notaAccessori": "La risoluzione dell'Agenzia delle Entrate n. 152 del 15 dicembre 2017 ha fissato nel 5% del costo del bene principale il limite forfetario entro il quale attrezzature e accessori strettamente necessari al funzionamento costituiscono «normale dotazione» del bene; oltre tale limite occorre dimostrarne la congruità.",
+  "notaAccessori": "Si segnala che la risoluzione dell'Agenzia delle Entrate n. 152 del 15 dicembre 2017 ha stabilito nella misura del 5% del costo del bene principale il limite quantitativo forfetario entro il quale si ritiene verificata la circostanza che le attrezzature e gli accessori strettamente necessari al funzionamento del bene dell'Allegato A costituiscono «normale dotazione» del bene medesimo. Nel limite di tale importo si può presumere che le dotazioni possano essere considerate accessorie, sempre che i relativi costi siano effettivamente sostenuti e debitamente documentati; resta ferma la facoltà per l'impresa di applicare l'agevolazione su un costo eccedente il predetto limite, a condizione che sia in grado di dimostrare l'effettiva congruità della dotazione.",
+  "notaMise": {
+    "intro": "Nota informativa. Con circolare del Ministero dello Sviluppo Economico n. 547750 del 15 dicembre 2017 è stato precisato che:",
+    "punti": [
+      "con riferimento alla determinazione del costo fiscalmente rilevante o alla sua imputazione secondo le regole della competenza al periodo d'imposta agevolabile o alle modalità di acquisizione dei beni (compravendita, appalto, leasing, ecc.), il professionista si limita a recepire in perizia e nell'analisi tecnica le indicazioni e le valutazioni operate dai competenti organi amministrativi (e, se del caso, di controllo) dell'impresa, che se ne assume diretta ed esclusiva responsabilità ai fini dei successivi controlli;",
+      "tra le verifiche tecniche richieste al professionista non rientra quella concernente il requisito di «novità» dei beni oggetto dell'investimento: si tratta di un presupposto per l'applicabilità del beneficio la cui asserzione ricade sotto l'esclusiva e diretta responsabilità dell'impresa beneficiaria."
+    ]
+  },
+  "acconto": {
+    "soglia": 0.2,
+    "dataLimite": "2025-12-31",
+    "nota": "rilevante per gli investimenti effettuati dal 1° gennaio al 30 giugno 2026, per i quali il comma 1057-bis richiede che entro il 31/12/2025 l'ordine risulti accettato dal venditore e sia avvenuto il pagamento di acconti almeno pari al 20% del costo di acquisizione"
+  },
   "dichiaraInoltre": [
-    "che l'Analisi tecnica allegata, che costituisce parte integrante della presente perizia, è rispondente al vero",
-    "di non avere rapporti di dipendenza o di collaborazione con i produttori e i fornitori dei beni oggetto della perizia (terzietà)"
+    "che tutto quanto riportato nell'Analisi Tecnica allegata è rispondente al vero;",
+    "di non avere alcun rapporto di dipendenza o collaborazione con i produttori e/o fornitori dei beni strumentali oggetto della presente perizia e analisi tecnica."
   ],
-  "nda": [
-    "La Committente è proprietaria esclusiva di disegni, dati, esperienze tecniche e altre informazioni che il Perito ha dovuto acquisire per redigere la presente perizia (Informazioni Riservate), rivelate al solo scopo di consentire l'analisi tecnica necessaria alla perizia asseverata per il credito d'imposta sui beni strumentali 4.0.",
-    "Il Perito non utilizzerà le Informazioni Riservate, senza il consenso scritto della Committente, per scopi diversi da quello indicato e non le divulgherà a terzi.",
-    "La Committente adotta le misure necessarie perché dipendenti e collaboratori che accedono alle Informazioni Riservate le mantengano riservate.",
-    "Disegni, dati e documenti forniti restano di proprietà della Committente e sono affidati al Perito per il solo scopo indicato; al termine dell'incarico sono restituiti o conservati secondo le istruzioni della Committente.",
-    "Come previsto dalla Circolare 4/E, a tutela della proprietà intellettuale e della riservatezza, l'analisi tecnica è realizzata in modo confidenziale ed è custodita presso la sede del beneficiario; le informazioni possono essere rese disponibili solo su richiesta degli organi di controllo o su mandato dell'autorità giudiziaria."
+  "conclusioniCompleto": [
+    "{esito: Rientra / Non rientra} in una delle categorie definite nell'Allegato A che identifica i beni strumentali il cui funzionamento è controllato da sistemi computerizzati o gestito tramite opportuni sensori e azionamenti;",
+    "{esito: Soddisfa / Non soddisfa} le cinque caratteristiche obbligatorie indicate all'Allegato A della Legge 11 dicembre 2016, n. 232;",
+    "{esito: Soddisfa / Non soddisfa} almeno due delle tre caratteristiche tecniche ulteriori indicate all'Allegato A della Legge 11 dicembre 2016, n. 232."
   ],
-  "formulaGiuramento": "Giuro di avere svolto l'incarico affidatomi bene e fedelmente al solo scopo di far conoscere la verità",
-  "allegati": [
-    "All_1 Conferma d'ordine / offerta accettata",
-    "All_2 Fatture di acconto e saldo con distinte di bonifico",
-    "All_3 Documenti di trasporto",
-    "All_4 Dichiarazione di consegna e collaudo",
-    "All_5 Dichiarazioni CE di conformità (comprese quelle dell'insieme)",
-    "All_6 Evidenze di interconnessione",
-    "All_7 Documento d'identità del perito"
+  "conclusioniRidotto": [
+    "{esito: Rientra / Non rientra} in una delle categorie definite nell'Allegato {allegato}{gruppo} della Legge 11 dicembre 2016, n. 232;",
+    "{esito: Soddisfa / Non soddisfa} il requisito obbligatorio di interconnessione, in quanto il bene scambia informazioni con sistemi interni e/o esterni attraverso un collegamento basato su specifiche documentate, disponibili pubblicamente e internazionalmente riconosciute."
   ],
-  "sogliaAcconto": 0.2
+  "conclusioneFinale": "Il bene, pertanto, {esito: soddisfa / non soddisfa} tutte le caratteristiche tecniche richieste affinché l'impresa {cliente}, con sede in {sede} – partita IVA {piva}, possa fruire del credito d'imposta previsto dall'art. 1, comma 1057-bis, della Legge 30 dicembre 2020, n. 178, fermi restando i presupposti non oggetto di asseverazione tecnica (novità del bene, determinazione e imputazione del costo, adempimenti comunicativi), che ricadono sotto la responsabilità dell'impresa."
 }

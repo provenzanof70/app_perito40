@@ -54,7 +54,8 @@ strumenti/
   importa_rientro.mjs          importa gli ZIP di rientro dell'app nel fascicolo (F3.3)
   word/scheletro_perizia.py    scheletro Word di perizia giurata e analisi tecnica dal fascicolo
   word/fascicolo_fotografico.py  fascicolo fotografico Word: foto per requisito con le annotazioni del campo
-  word/regime_CRI_4.0.json     testi del regime (VISTI, requisiti, check list, NDA): da verificare per annualità
+  word/regime_CRI_4.0.json     testi del credito d'imposta 4.0 (VISTI, PREMESSO, requisiti, check list, conclusioni): da verificare per annualità
+  word/regime_IPER_2026.json   iperammortamento 2026: solo punto di estensione, testi da redigere al primo caso reale
   aggiorna_app.mjs             aggiorna l'elenco dei file offline dell'app e la policy di sicurezza
   genera_icone.mjs             genera le icone dell'app dal logo
   lib/validatore.mjs           nucleo dei controlli, senza dipendenze né accesso al disco (riusabile nella PWA)
@@ -271,7 +272,8 @@ python strumenti/word/scheletro_perizia.py "<cartella pratica>" --perito "<file 
 
 - La nuova pratica ha `documenti_cliente/` (originali, mai modificati), `beni/`, `evidenze/`, `andata/`, `rientro/`, `perizia/` e `pratica_40.json`.
 - Il nome della cartella perde punti e spazi finali (es. «S.r.l.»): Windows non apre cartelle che finiscono con un punto.
-- Lo scheletro scrive per ogni bene perizia giurata (copertina, VISTI, PREMESSO, tabella del bene, DICHIARA con caselle vuote, NDA, verbale di asseverazione) e analisi tecnica (requisiti, dati identificativi, classificazione, costi, esame dei requisiti con evidenze, riscontri, dichiarazioni e lacune, check list, appendice istruttoria). Ciò che il fascicolo non contiene resta `[PLACEHOLDER: …]` in rosso, le istruzioni `[NOTA: …]` in grigio; caselle e conclusioni le decide il perito. Richiede Python 3 con `python-docx`.
+- Lo scheletro segue il formato delle perizie giurate dello studio. Per ogni bene scrive la perizia giurata di 4 pagine (VISTI, PREMESSO, tabella del bene, DICHIARA con la griglia delle voci e caselle vuote, verbale di asseverazione) e l'analisi tecnica (copertina con ordine, matricola, fornitore e costruttore; requisiti; dati identificativi in elenco; classificazione con voce numerata e documenti a supporto; costi con le note su limite del 5% e circolare MiSE 547750; per ogni requisito «Descrizione ed evidenze» e «Conclusione»; check list; conclusioni con firma; allegati elencati dai documenti del fascicolo; appendice istruttoria).
+- I testi normativi vengono da `regime_<regime>.json`, scelto dal campo `regime` della pratica. Per l'iperammortamento 2026 il file è solo predisposto e il generatore si ferma. Ciò che il fascicolo non contiene resta `[PLACEHOLDER: …]` in rosso, le istruzioni `[NOTA: …]` in grigio; caselle e conclusioni le decide il perito. Richiede Python 3 con `python-docx`.
 - Schema 1.4 (tutto facoltativo): dati dell'impresa (partita IVA, sede legale, legale rappresentante, RSPP, logo), del bene (fornitore, reparto, unità locale, voce numerata), costi (documenti, acconti, accessori, dicitura di legge) e stato dell'elaborato (revisione, bozza/per la firma, giuramento). I dati personali stanno solo nelle cartelle private delle pratiche.
 
 ## Sul PC: andata, rientro e fascicolo fotografico (F3.2, F3.3)

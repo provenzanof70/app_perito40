@@ -1,0 +1,12 @@
+{
+  "regime": "IPER_2026",
+  "nome": "iperammortamento 2026",
+  "daCompletare": true,
+  "avvertenza": "Punto di estensione per le perizie dell'iperammortamento 2026. I testi normativi non sono stati predisposti: vanno redatti al primo caso reale sul testo vigente della L. 199/2025 (Allegati IV e V) e dei provvedimenti attuativi, con le stesse chiavi di regime_CRI_4.0.json. Finché daCompletare è true il generatore si ferma e non produce bozze. Il codice IPER_2026 è provvisorio: gli schemi v1 accettano oggi solo CRI_4.0.",
+  "chiaviDaCompilare": [
+    "nome", "riferimentoAnalisi", "allegatiLegge", "visti", "premesso", "premessoValore", "inclusione", "anni", "gruppi",
+    "obbligatori", "ulteriori", "introObbligatori", "introUlteriori", "introRidotto", "dueFasi", "spiegazioni",
+    "interconnessioneRidotto", "vociGruppo1", "notaAccessori", "notaMise", "acconto", "dichiaraInoltre",
+    "conclusioniCompleto", "conclusioniRidotto", "conclusioneFinale"
+  ]
+}
