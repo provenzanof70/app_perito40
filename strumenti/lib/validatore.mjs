@@ -281,7 +281,43 @@ export function controllaScheda(scheda, esito, dove) {
   }
   if (scheda.datiAgliAtti.esitoGateC.esito === 'rosso') esito.avviso('ALERT_GATE_C', `${dove}#/datiAgliAtti/esitoGateC`, 'GATE C rosso: nessuna conclusione positiva senza risoluzione');
 
+  const acq = scheda.costi && scheda.costi.modalitaAcquisizione;
+  if (acq && acq.modalita === 'leasing' && !(scheda.costi.documenti || []).some(d => d.tipo === 'contratto_leasing')) {
+    esito.avviso('LEASING_SENZA_CONTRATTO', `${dove}#/costi`, 'acquisizione in leasing senza contratto di leasing tra i documenti di costo');
+  }
+  const it = scheda.interconnessioneTardiva;
+  if (it && it.pertinente) {
+    const p = `${dove}#/interconnessioneTardiva`;
+    if (!(it.causaRitardo || '').trim()) esito.avviso('TARDIVA_SENZA_CAUSA', p, 'interconnessione tardiva: causa del ritardo non indicata');
+    if (!(it.caratteristichePrimoUtilizzo || '').trim()) esito.avviso('TARDIVA_SENZA_CONFIGURAZIONE', p, 'interconnessione tardiva: caratteristiche al primo utilizzo non descritte');
+    const prove = it.proveDatate || [];
+    if (!prove.length) esito.avviso('TARDIVA_SENZA_PROVE', p, "interconnessione tardiva: nessuna prova datata dell'inizio dello scambio");
+    else if (prove.every(x => x.classe === 'documento_impresa')) esito.avviso('TARDIVA_SOLO_DICHIARAZIONI', p, "interconnessione tardiva: solo documenti dell'impresa, che da soli non datano l'inizio dello scambio");
+  }
+
   controllaGruppi(scheda.gruppiEvidenze, c, esito, `${dove}#/gruppiEvidenze`, scheda.versioneSchema);
+}
+
+// Fine del periodo d'imposta dell'annualità: quello dichiarato, altrimenti l'anno solare
+export const finePeriodo = pratica => (pratica.periodoImposta ? pratica.periodoImposta.fine : `${pratica.annualita}-12-31`);
+
+// Interconnessione (dichiarata o prima prova dello scambio) dopo la fine del periodo d'imposta: va valutata come tardiva
+function controllaTardiva(pratica, schedePerCodice, esito, dove) {
+  const pi = pratica.periodoImposta;
+  if (pi) {
+    if (pi.fine <= pi.inizio) esito.errore('PERIODO_IMPOSTA', `${dove}#/periodoImposta`, 'la fine del periodo non segue l\'inizio');
+    else if (Number(pi.fine.slice(0, 4)) !== pratica.annualita) esito.avviso('PERIODO_IMPOSTA_ANNUALITA', `${dove}#/periodoImposta`, `periodo che termina nel ${pi.fine.slice(0, 4)}, annualità ${pratica.annualita}`);
+  }
+  const fine = finePeriodo(pratica);
+  for (const [codice, sc] of schedePerCodice) {
+    const righe = pratica.timeline.filter(r => ['interconnessione_dichiarata', 'prima_prova_scambio'].includes(r.evento) && r.beni.map(beneDi).includes(codice));
+    // data più precoce possibile della riga: per un periodo l'inizio, per un mese il primo giorno
+    const primo = r => { const v = r.data.valore.split('/')[0]; return v.length === 7 ? `${v}-01` : v; };
+    const tardive = righe.filter(r => primo(r) > fine);
+    if (tardive.length && !sc.interconnessioneTardiva) {
+      esito.avviso('INTERCONNESSIONE_TARDIVA_DA_VALUTARE', `beni/${codice}.json`, `${tardive.map(r => `${r.id} ${r.data.valore}`).join(', ')} dopo la fine del periodo d'imposta (${fine}): compilare interconnessioneTardiva (pertinente o no, motivando)`);
+    }
+  }
 }
 
 // Gruppi introdotti dopo la prima versione dello schema: nei fascicoli più vecchi la loro assenza è solo un avviso
@@ -562,7 +598,7 @@ export function controllaPratica(ctx, esito, dove = 'pratica_40.json') {
 
   for (const [codice, sc] of schedePerCodice) {
     const nome = `beni/${codice}.json`;
-    controllaRiferimenti({ classificazione: sc.classificazione, datiAgliAtti: sc.datiAgliAtti }, evidenze, esito, nome);
+    controllaRiferimenti({ classificazione: sc.classificazione, datiAgliAtti: sc.datiAgliAtti, costi: sc.costi, interconnessioneTardiva: sc.interconnessioneTardiva }, evidenze, esito, nome);
     for (const [campo, voce] of vociAgliAtti(sc)) {
       if (voce.verificaCampo) controllaIdEvidenze(voce.verificaCampo.evidenze || [], evidenze, esito, `${nome}#/datiAgliAtti/${campo}`);
     }
@@ -576,6 +612,7 @@ export function controllaPratica(ctx, esito, dove = 'pratica_40.json') {
     });
   }
 
+  controllaTardiva(pratica, schedePerCodice, esito, dove);
   const aperte = pratica.azioni.filter(a => a.stato === 'aperta');
   if (aperte.length) esito.avviso('AZIONI_APERTE', dove, `${aperte.length} azioni aperte (${aperte.map(a => a.id).join(', ')}): riportarle nel cruscotto pratiche`);
   return { schedePerCodice };

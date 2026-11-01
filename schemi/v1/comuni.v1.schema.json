@@ -186,6 +186,17 @@
         "nota": { "type": "string", "description": "Nota facoltativa del perito sull'evidenza" },
         "annotazioni": { "type": "array", "items": { "$ref": "#/$defs/annotazione" } },
         "trascrizioni": { "type": "array", "items": { "$ref": "#/$defs/trascrizione" } },
+        "datiDocumento": {
+          "type": "object", "required": ["tipoDocumento"], "additionalProperties": false,
+          "description": "Per documenti e schermate: che documento è e a quale esemplare si riferisce (v1.6). Il fatto letto va in contenutoLetto.",
+          "properties": {
+            "tipoDocumento": { "enum": ["offerta", "ordine", "fattura", "ddt", "dichiarazione_ce", "manuale", "schema", "verbale", "certificato", "report", "registro", "altro"] },
+            "emittente": { "type": "string" },
+            "numero": { "type": "string" },
+            "data": { "$ref": "#/$defs/dataGiorno" },
+            "riferimentoBene": { "type": "string", "description": "Modello, matricola o altro identificativo dell'esemplare letto nel documento" }
+          }
+        },
         "contenutoLetto": {
           "type": "array",
           "description": "Per i documenti: posizione e fatto effettivamente letto (§1.6)",

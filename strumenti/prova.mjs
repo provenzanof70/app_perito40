@@ -53,6 +53,43 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   verifica('ZIP: archivio troncato rifiutato', errore !== '');
 }
 
+// Schema 1.6: modalità di acquisizione, periodo d'imposta, interconnessione tardiva, dati del documento
+{
+  const copia = () => { const c = caricaCartella(cartella); return c; };
+  const avvisi = car => new Set(validaCaricata(car, registro, { repoPubblico: true }).avvisi.map(a => a.codice));
+  const errori = car => validaCaricata(car, registro, { repoPubblico: true }).errori;
+  const b01 = car => car.documenti.get('beni/B01.json');
+  const pr = car => car.documenti.get('pratica_40.json');
+
+  let c = copia();
+  b01(c).costi = { modalitaAcquisizione: { modalita: 'leasing', stato: 'dichiarato' } };
+  verifica('1.6 Leasing senza contratto tra i documenti di costo → avviso', avvisi(c).has('LEASING_SENZA_CONTRATTO') && !errori(c).length);
+
+  c = copia();
+  pr(c).periodoImposta = { inizio: '2024-06-01', fine: '2025-05-31' };
+  const a1 = avvisi(c);
+  verifica("1.6 Periodo d'imposta non solare: interconnessione dopo la fine del periodo → da valutare come tardiva",
+    a1.has('INTERCONNESSIONE_TARDIVA_DA_VALUTARE') && !errori(c).length && !avvisi(copia()).has('INTERCONNESSIONE_TARDIVA_DA_VALUTARE'));
+
+  c = copia();
+  pr(c).periodoImposta = { inizio: '2024-06-01', fine: '2025-05-31' };
+  b01(c).interconnessioneTardiva = { pertinente: true, proveDatate: [{ classe: 'documento_impresa', data: { valore: '2025-07', precisione: 'mese' }, descrizione: 'dichiarazione della referente IT' }] };
+  const a2 = avvisi(c);
+  verifica('1.6 Interconnessione tardiva: causa, configurazione al primo utilizzo e prove non solo dichiarative',
+    a2.has('TARDIVA_SENZA_CAUSA') && a2.has('TARDIVA_SENZA_CONFIGURAZIONE') && a2.has('TARDIVA_SOLO_DICHIARAZIONI') && !errori(c).length);
+
+  c = copia();
+  pr(c).periodoImposta = { inizio: '2025-06-30', fine: '2025-01-01' };
+  verifica("1.6 Periodo d'imposta con fine prima dell'inizio → errore", errori(c).some(e => e.codice === 'PERIODO_IMPOSTA'));
+
+  c = copia();
+  const doc = pr(c).evidenze.find(e => e.tipo === 'documento');
+  doc.datiDocumento = { tipoDocumento: 'verbale', emittente: 'Fornitore Demo', numero: 'V-12', data: '2025-04-14', riferimentoBene: 'matricola DEMO-0001' };
+  verifica('1.6 Dati del documento su un\'evidenza documentale validi', !errori(c).length);
+  doc.datiDocumento = { tipoDocumento: 'scontrino' };
+  verifica('1.6 Tipo di documento fuori elenco → errore di schema', errori(c).some(e => e.codice === 'SCHEMA'));
+}
+
 // App: promemoria di checkpoint (2 ore o 30 evidenze dall'ultimo pacchetto o dall'inizio visita)
 {
   const { statoCheckpoint } = await import('../app/js/promemoria.js');

@@ -191,6 +191,16 @@
             }
           }
         },
+        "modalitaAcquisizione": {
+          "type": "object", "required": ["modalita", "stato"], "additionalProperties": false,
+          "description": "Come l'impresa ha acquisito il bene: determina quali date e documenti contano (v1.6)",
+          "properties": {
+            "modalita": { "enum": ["diretto", "leasing", "appalto", "economia"] },
+            "stato": { "$ref": "comuni.v1.schema.json#/$defs/statoDato" },
+            "fonti": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/refEv" } },
+            "nota": { "type": "string" }
+          }
+        },
         "dicituraLegge": {
           "type": "object", "required": ["presente"], "additionalProperties": false, "description": "Riferimento normativo indicato in fattura",
           "properties": {
@@ -199,6 +209,30 @@
             "fonte": { "$ref": "comuni.v1.schema.json#/$defs/refEv" }
           }
         }
+      }
+    },
+    "interconnessioneTardiva": {
+      "type": "object", "required": ["pertinente"], "additionalProperties": false,
+      "description": "Interconnessione avvenuta in un periodo successivo all'investimento: causa, configurazione al primo utilizzo e prove datate dell'inizio dello scambio (v1.6). Documentazione raccolta tardi non significa interconnessione tardiva.",
+      "properties": {
+        "pertinente": { "type": "boolean" },
+        "causaRitardo": { "type": "string" },
+        "caratteristichePrimoUtilizzo": { "type": "string", "description": "Com'era configurato il bene all'entrata in funzione: una condizione osservata oggi non lo dimostra" },
+        "modificheIntervenute": { "type": "string" },
+        "proveDatate": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["classe", "data", "descrizione"], "additionalProperties": false,
+            "properties": {
+              "classe": { "enum": ["log_sistema", "documento_terzo", "documento_impresa", "schermata", "riscontro_perito"] },
+              "sistema": { "type": "string", "description": "Sistema aziendale o di terzi da cui proviene la prova" },
+              "data": { "$ref": "comuni.v1.schema.json#/$defs/data" },
+              "descrizione": { "$ref": "comuni.v1.schema.json#/$defs/testo" },
+              "prove": { "type": "array", "items": { "$ref": "comuni.v1.schema.json#/$defs/refEv" } }
+            }
+          }
+        },
+        "nota": { "type": "string" }
       }
     },
     "elaborato": {

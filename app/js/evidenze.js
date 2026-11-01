@@ -97,7 +97,7 @@ export function annullaEvidenza(codicePratica, id, motivo, sostituitaDa) {
 // Evidenza nel formato del pacchetto di rientro (schemi/v1, $defs/evidenza): solo i campi previsti
 const CAMPI_RIENTRO = ['id', 'beni', 'comune', 'gruppo', 'requisiti', 'tipo', 'file', 'mime', 'sha256', 'provenienza', 'idSopralluogo',
   'acquisitaIl', 'dataScatto', 'origineDataScatto', 'aperturaFotocamera', 'dataMostrataAVideo', 'durataSecondi', 'descrizione', 'nota', 'annotazioni',
-  'trascrizioni', 'contenutoLetto', 'storicoIdentificativi', 'stato', 'annullamento'];
+  'trascrizioni', 'datiDocumento', 'contenutoLetto', 'storicoIdentificativi', 'stato', 'annullamento'];
 
 export function evidenzaPerRientro(e) {
   const out = {};

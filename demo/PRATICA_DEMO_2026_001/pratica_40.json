@@ -1,6 +1,6 @@
 {
   "formato": "perizia40.pratica",
-  "versioneSchema": "1.5.0",
+  "versioneSchema": "1.6.0",
   "demo": true,
   "codicePratica": "DEMO-2026-001",
   "regime": "CRI_4.0",
@@ -1650,7 +1650,7 @@
       "tipo": "andata",
       "id": "5f0c2a1e-1d2b-4c3a-9e00-00000000a001",
       "file": "andata/perizia40-andata.json",
-      "sha256": "3771d4dba57701c10bc52911010cfcf94f24177275dfc57543bde5e30dc20766",
+      "sha256": "dcf876ecca8619097d59204fe4c6ab057520af8ad08fa96f8c228be5f10c16c6",
       "data": "2026-10-10T18:00:00+02:00"
     },
     {
@@ -1658,7 +1658,7 @@
       "id": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
       "volume": 1,
       "file": "rientro/DEMO-2026-001_rientro_FIN_20261015-1730_v1di2.zip",
-      "sha256": "bc1604276057d7379be454b68352f9c4d66826c37ebf151f9c3a4c1c17d0128c",
+      "sha256": "e9cb60a5ffe19122cbda1e2f619a236c1f3bfa4275164981559b549706256796",
       "data": "2026-10-15T17:30:00+02:00"
     },
     {
@@ -1666,7 +1666,7 @@
       "id": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
       "volume": 2,
       "file": "rientro/DEMO-2026-001_rientro_FIN_20261015-1730_v2di2.zip",
-      "sha256": "22066cf55cd9cef507a004710b9fcc90d25546bc3db192f6694fa9e3e8ee0199",
+      "sha256": "4a5ece91ce0d1c5160163ca269074e657c4590b80eb0da98e704fd61e859070a",
       "data": "2026-10-15T17:30:00+02:00"
     }
   ]

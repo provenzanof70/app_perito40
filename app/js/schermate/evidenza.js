@@ -12,6 +12,9 @@ import { useUrlFile } from '../media.js';
 const STRUMENTI = [['freccia', 'arrow_up_right', 'Freccia'], ['cerchio', 'circle', 'Cerchio'], ['testo', 'text_t', 'Testo'], ['annulla', 'arrow_counter_clockwise', 'Annulla']];
 const COLORI = ['#FF453A', '#FFD60A', '#FFFFFF'];
 const r4 = n => Math.round(Math.min(1, Math.max(0, n)) * 10000) / 10000;
+// Dati del documento (schema 1.6): che documento è e a quale esemplare si riferisce; il fatto letto va in «Contenuto letto»
+const TIPI_DOCUMENTO = [['offerta', 'Offerta'], ['ordine', 'Ordine o conferma'], ['fattura', 'Fattura'], ['ddt', 'DDT'], ['dichiarazione_ce', 'Dichiarazione CE'],
+  ['manuale', 'Manuale'], ['schema', 'Schema'], ['verbale', 'Verbale'], ['certificato', 'Certificato'], ['report', 'Report'], ['registro', 'Registro o log'], ['altro', 'Altro']];
 const nomeGruppo = g => GRUPPI_UI[g].nome.replace('­', '');
 
 function Segno({ a, L, H }) {
@@ -82,6 +85,9 @@ export function DettaglioEvidenza({ pratica, evidenza: e, evidenze, registri, mo
   const [nota, setNota] = useState(e.nota || '');
   const [video, setVideo] = useState(e.dataMostrataAVideo || null);
   const [comuni, setComuni] = useState(e.beni.slice(1));
+  const [datiDoc, setDatiDoc] = useState(e.datiDocumento || {});
+  const [letto, setLetto] = useState(e.contenutoLetto || []);
+  const documento = e.tipo === 'documento' || e.tipo === 'screenshot';
   const [strumento, setStrumento] = useState('freccia');
   const [colore, setColore] = useState(COLORI[0]);
   const [testoIn, setTestoIn] = useState(null);
@@ -97,6 +103,12 @@ export function DettaglioEvidenza({ pratica, evidenza: e, evidenze, registri, mo
       x.annotazioni = annotazioni; x.descrizione = descrizione.trim() || provvisoria; x.nota = nota.trim() || undefined;
       x.dataMostrataAVideo = video && video.valore ? { ...video, valore: video.valore.trim() } : undefined;
       x.beni = [e.beni[0], ...comuni]; x.comune = comuni.length ? true : undefined;
+      if (documento) {
+        const d = Object.fromEntries(Object.entries(datiDoc).map(([k, v]) => [k, (v || '').trim()]).filter(([, v]) => v));
+        x.datiDocumento = d.tipoDocumento ? d : undefined;
+        const righe = letto.map(r => ({ posizione: r.posizione.trim(), fatto: r.fatto.trim() })).filter(r => r.posizione && r.fatto);
+        x.contenutoLetto = righe.length ? righe : undefined;
+      }
     });
     dispatchEvent(new Event('perito40:ricarica'));
     mostra(`${e.id} aggiornata`);
@@ -137,6 +149,21 @@ export function DettaglioEvidenza({ pratica, evidenza: e, evidenze, registri, mo
             onChange=${ev => setVideo(v => ({ ...(v || { valore: '' }), orologioErrato: ev.target.checked }))} />Orologio del bene errato (si registra, non si corregge)</label>
           ${video && video.orologioErrato && html`<input class="campo-testo scuro" value=${video.scartoStimato || ''} placeholder="Scarto stimato, es. -1 h"
             onInput=${ev => setVideo(v => ({ ...v, scartoStimato: ev.target.value }))} />`}
+        </details>`}
+        ${documento && html`<details class="dettagli" open=${!!(datiDoc.tipoDocumento || letto.length)}>
+          <summary>Dati del documento${datiDoc.tipoDocumento ? ` · ${(TIPI_DOCUMENTO.find(t => t[0] === datiDoc.tipoDocumento) || [])[1]}` : ''}</summary>
+          <select class="campo-testo scuro" disabled=${sola} value=${datiDoc.tipoDocumento || ''} onChange=${ev => setDatiDoc(d => ({ ...d, tipoDocumento: ev.target.value }))}>
+            <option value="">Tipo di documento…</option>${TIPI_DOCUMENTO.map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select>
+          <input class="campo-testo scuro" value=${datiDoc.emittente || ''} disabled=${sola} placeholder="Emittente" onInput=${ev => setDatiDoc(d => ({ ...d, emittente: ev.target.value }))} />
+          <div class="riga-doppia"><input class="campo-testo scuro" value=${datiDoc.numero || ''} disabled=${sola} placeholder="Numero" onInput=${ev => setDatiDoc(d => ({ ...d, numero: ev.target.value }))} />
+            <input class="campo-testo scuro" type="date" value=${datiDoc.data || ''} disabled=${sola} aria-label="Data del documento" onInput=${ev => setDatiDoc(d => ({ ...d, data: ev.target.value }))} /></div>
+          <input class="campo-testo scuro" value=${datiDoc.riferimentoBene || ''} disabled=${sola} placeholder="Esemplare citato (modello, matricola)" onInput=${ev => setDatiDoc(d => ({ ...d, riferimentoBene: ev.target.value }))} />
+          <div class="meta chiara">Contenuto letto: pagina e fatto effettivamente letti</div>
+          ${letto.map((r, i) => html`<div class="riga-doppia"><input class="campo-testo scuro corto" value=${r.posizione} disabled=${sola} placeholder="p.3"
+              onInput=${ev => setLetto(l => l.map((x, j) => j === i ? { ...x, posizione: ev.target.value } : x))} />
+            <input class="campo-testo scuro" value=${r.fatto} disabled=${sola} placeholder="Fatto letto"
+              onInput=${ev => setLetto(l => l.map((x, j) => j === i ? { ...x, fatto: ev.target.value } : x))} /></div>`)}
+          ${!sola && html`<button class="collegamento chiaro" onClick=${() => setLetto(l => [...l, { posizione: '', fatto: '' }])}>+ Aggiungi fatto letto</button>`}
         </details>`}
         <details class="dettagli">
           <summary>Vale anche per altri beni${comuni.length ? ` (${comuni.join(', ')})` : ''}</summary>

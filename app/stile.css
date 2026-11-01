@@ -281,6 +281,8 @@ button.scheda { border: none; text-align: left; width: 100%; color: var(--testo)
 .dettagli { font-size: 14px; color: #fff; }
 .dettagli summary { color: #5A9BFF; font-weight: 600; padding: 4px 0; }
 .dettagli > * + * { margin-top: 8px; }
+.riga-doppia { display: flex; gap: 8px; } .riga-doppia > * { flex: 1; min-width: 0; } .riga-doppia > .corto { flex: 0 0 72px; }
+select.campo-testo { appearance: none; -webkit-appearance: none; }
 .spunta-riga { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 .spunta-riga input { width: 20px; height: 20px; }
 .scelte-beni { display: flex; flex-wrap: wrap; gap: 10px 16px; }

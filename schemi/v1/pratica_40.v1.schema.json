@@ -13,6 +13,16 @@
     "codicePratica": { "$ref": "comuni.v1.schema.json#/$defs/codicePratica" },
     "regime": { "const": "CRI_4.0" },
     "annualita": { "type": "integer", "minimum": 2017, "maximum": 2100 },
+    "periodoImposta": {
+      "type": "object", "required": ["inizio", "fine"], "additionalProperties": false,
+      "description": "Periodo d'imposta dell'impresa se diverso dall'anno solare dell'annualità (v1.6). Se manca vale l'anno solare, e lo si dichiara.",
+      "properties": {
+        "inizio": { "$ref": "comuni.v1.schema.json#/$defs/dataGiorno" },
+        "fine": { "$ref": "comuni.v1.schema.json#/$defs/dataGiorno" },
+        "fonte": { "$ref": "comuni.v1.schema.json#/$defs/refEv" },
+        "nota": { "type": "string" }
+      }
+    },
     "aggiornataIl": { "$ref": "comuni.v1.schema.json#/$defs/dataOra" },
     "cliente": {
       "type": "object", "required": ["ragioneSociale", "sedeIntervento"], "additionalProperties": false,
