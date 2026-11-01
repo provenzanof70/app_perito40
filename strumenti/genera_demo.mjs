@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { deflateSync, crc32 } from 'node:zlib';
 import { sha256 } from './lib/disco.mjs';
 import { GRUPPI } from './lib/validatore.mjs';
+import { costruisciAndata, voceDi } from './lib/andata.mjs';
 import { scriviZip } from './lib/zip.mjs';
 
 const RADICE = join(dirname(fileURLToPath(import.meta.url)), '..', 'demo', 'PRATICA_DEMO_2026_001');
@@ -396,22 +397,7 @@ const schede = {
   },
 };
 
-const VERIFICARE = ['identita.costruttore', 'identita.modello', 'identita.matricola', 'identita.anno', 'controllore.marca', 'controllore.modello', 'controllore.firmware',
-  'hmi.modello', 'reteDichiarata.ip', 'reteDichiarata.sistemaAziendale', 'reteDichiarata.protocollo', 'dichiarazioneCE.riferimentoMatricola', 'esitoGateC'];
-const ETICHETTE = {
-  'identita.costruttore': 'Costruttore', 'identita.modello': 'Modello', 'identita.matricola': 'Matricola (leggere sulla targa)', 'identita.anno': 'Anno',
-  'controllore.marca': 'PLC/CNC: marca', 'controllore.modello': 'PLC/CNC: modello', 'controllore.firmware': 'PLC/CNC: firmware', 'hmi.modello': 'HMI: modello',
-  'reteDichiarata.ip': 'IP dichiarato', 'reteDichiarata.sistemaAziendale': 'Sistema aziendale', 'reteDichiarata.protocollo': 'Protocollo',
-  'dichiarazioneCE.riferimentoMatricola': 'DdC: corrispondenza con la matricola in targa', esitoGateC: 'GATE C: perimetro e componenti',
-};
-const COSA_CERCARE = {
-  1: 'contesto prima del dettaglio', 2: 'targa leggibile, senza riflessi; confrontare con fattura e DdC', 3: 'targa e pagina di sistema del controllore',
-  4: 'pagine operative e livelli utente', 5: 'entrambi i lati dello scambio: bene e sistema aziendale, stesso ordine o dato', 6: 'flusso logistico o M2M effettivo',
-  7: 'configurazione o sessione di telemanutenzione, senza credenziali', 8: 'variabili monitorate e reazione alle derive', 9: 'modello di comportamento e suo aggiornamento',
-  10: 'percorso, file riferibili al bene, contenuto di almeno un report',
-  11: 'ripari, pulsanti di emergenza, barriere e marcatura CE sul bene', DOC: 'originali in risoluzione nativa',
-};
-const valore = (sc, campo) => campo === 'esitoGateC' ? sc.datiAgliAtti.esitoGateC : sc.datiAgliAtti[campo.split('.')[0]][campo.split('.')[1]];
+const valore = voceDi;
 
 // Timeline agli atti prima del sopralluogo (va nell'andata)
 const riga = (id, evento, beni, valore_, precisione, tipoData, origine, stato, prove, coerenza, descrizione, nota) =>
@@ -439,38 +425,22 @@ const AZIONI_INIZIALI = [
   azione('A003', 'indispensabile', ['B01'], 'RO2', 'perito', 'Riscontro in campo dello scambio MES-DEMO verso B01',
     'La dichiarazione del cliente da sola non dimostra lo scambio', 'Stesso ordine visibile sul MES e sull\'HMI di B01, con foto di entrambi i lati', '2026-10-01', 'evidenza'),
 ];
-const andata = {
-  formato: 'perizia40.andata', versioneSchema: VERSIONE, demo: true, idAndata: ID_ANDATA, revisione: 'rev001', creatoIl: '2026-10-10T18:00:00+02:00',
-  codicePratica: PRATICA, regime: 'CRI_4.0', cliente: CLIENTE,
-  sopralluogo: {
-    id: 'S01', dataPrevista: VISITA, referenti: PERSONE,
-    avvertenze: ['Prove sulla rete aziendale solo con la referente IT presente', 'Nessuna password, token o badge nelle foto: se compaiono, oscurare e segnalare',
-      'Cambiare codice bene appena si passa fisicamente a un altro bene'],
-  },
-  beni: Object.values(schede).map(sc => ({
-    codice: sc.codice, denominazione: sc.denominazione, funzione: sc.funzione, ubicazione: sc.ubicazione,
-    componenti: sc.componenti.map(c => ({ codice: c.codice, denominazione: c.denominazione, tipo: c.tipo })),
-    classificazione: pulisci({ allegato: sc.classificazione.allegato, gruppo: sc.classificazione.gruppo, voce: sc.classificazione.voce, profilo: sc.classificazione.profilo, ruDichiarati: sc.classificazione.ruDichiarati }),
-    gruppiEvidenze: sc.gruppiEvidenze.map(g => ({ ...g, cosaCercare: COSA_CERCARE[g.gruppo] })),
-    datiDaVerificare: VERIFICARE.map(campo => {
-      const v = valore(sc, campo);
-      return pulisci({
-        campo, etichetta: ETICHETTE[campo], valoreAgliAtti: campo === 'esitoGateC' ? v.esito : v.valore, statoAgliAtti: v.stato,
-        fonte: v.fonti.length ? v.fonti.map(f => `[ev: ${f.idEvidenza} | ${f.file}, ${f.posizione}]`).join(' ') : undefined,
-      });
-    }),
-  })),
-  timeline: TIMELINE_ATTI,
-  azioniAperte: AZIONI_INIZIALI,
-  evidenzeEsistenti: DOCUMENTI.map(d => d.id),
-  idUsati: { dichiarazioni: ['DT-001'], azioni: AZIONI_INIZIALI.map(a => a.id) },
+// Stato del fascicolo prima del sopralluogo: da qui nasce l'andata, con lo stesso codice usato per le pratiche (genera_andata.mjs)
+const praticaPrima = {
+  demo: true, codicePratica: PRATICA, regime: 'CRI_4.0', cliente: CLIENTE, persone: PERSONE,
+  beni: Object.values(schede).map(sc => ({ codice: sc.codice, denominazione: sc.denominazione, scheda: `beni/${sc.codice}.json` })),
+  timeline: TIMELINE_ATTI, azioni: AZIONI_INIZIALI, evidenze: [...evidenzePratica], riscontriDiretti: [], dichiarazioniTerzi: [{ id: 'DT-001' }], noteCampo: [],
+};
+const andata = costruisciAndata(praticaPrima, new Map(Object.values(schede).map(sc => [sc.codice, sc])), {
+  versione: VERSIONE, idAndata: ID_ANDATA, revisione: 'rev001', creatoIl: '2026-10-10T18:00:00+02:00',
+  sopralluogo: { id: 'S01', dataPrevista: VISITA },
   // indicazioni di studio (fittizie): nelle pratiche reali le prepara il PC a partire dalle perizie precedenti
   guidaRequisiti: [
     { requisito: 'RO2', testo: "Su centri di lavoro simili lo scambio con il MES si è dimostrato meglio con lo stesso numero di ordine fotografato sul MES e sull'HMI, con l'ora visibile." },
     { requisito: 'RO2', beni: ['B02'], testo: "Per la macchina di misura chiedere il percorso della cartella condivisa e fotografare un report con data e matricola dello strumento." },
     { requisito: 'RO5', beni: ['B01'], testo: "Con un aspiratore di altro costruttore montato sulla cabina, cercare la dichiarazione CE dell'insieme o la valutazione dei rischi dell'integratore." },
   ],
-};
+});
 const fAndata = scrivi('andata/perizia40-andata.json', json(andata));
 
 // Esiti in campo

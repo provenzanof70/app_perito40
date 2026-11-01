@@ -709,9 +709,11 @@
     "B02-RO5-001"
   ],
   "idUsati": {
+    "riscontri": [],
     "dichiarazioni": [
       "DT-001"
     ],
+    "note": [],
     "azioni": [
       "A001",
       "A002",

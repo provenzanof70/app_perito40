@@ -1650,7 +1650,7 @@
       "tipo": "andata",
       "id": "5f0c2a1e-1d2b-4c3a-9e00-00000000a001",
       "file": "andata/perizia40-andata.json",
-      "sha256": "dcf876ecca8619097d59204fe4c6ab057520af8ad08fa96f8c228be5f10c16c6",
+      "sha256": "316ee5774ca33c684a4ac22577adea6e8e9e7d611abd0032308459f9612588ca",
       "data": "2026-10-10T18:00:00+02:00"
     },
     {
@@ -1658,7 +1658,7 @@
       "id": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
       "volume": 1,
       "file": "rientro/DEMO-2026-001_rientro_FIN_20261015-1730_v1di2.zip",
-      "sha256": "e9cb60a5ffe19122cbda1e2f619a236c1f3bfa4275164981559b549706256796",
+      "sha256": "6b2b8c5167be3bf5b7f8de4bbee785a8777fde43d67b4ed5a684a1437d9750a1",
       "data": "2026-10-15T17:30:00+02:00"
     },
     {
@@ -1666,7 +1666,7 @@
       "id": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
       "volume": 2,
       "file": "rientro/DEMO-2026-001_rientro_FIN_20261015-1730_v2di2.zip",
-      "sha256": "4a5ece91ce0d1c5160163ca269074e657c4590b80eb0da98e704fd61e859070a",
+      "sha256": "e5467baddbfcba2c0223d6391af44ad330cecd740fd9ed8d83aa824eaa894f30",
       "data": "2026-10-15T17:30:00+02:00"
     }
   ]
