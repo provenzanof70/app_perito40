@@ -29,6 +29,7 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | F3.3 | PC: importazione dei rientri nel fascicolo (checkpoint e finale, volumi, senza doppioni); fascicolo fotografico Word | fatta |
 | F3.4 | PC: emissione e chiusura (per la firma, giuramento, documenti finali firmati PAdES/CAdES e marcati, sola lettura); schema 1.7 | fatta |
 | F3.5 | PC: diario di ogni pratica e cruscotto delle pratiche aperte con il prossimo passo (`/pratiche` nella cartella delle pratiche) | fatta |
+| F4.1 | Studio desktop (`studio/`): cruscotto, pratica con beni, documenti da trascinare e registrare, diario; server locale solo su 127.0.0.1 | fatta |
 | 0.9–0.10 | Gruppo Sicurezza (RO5), riquadri per requisito, nota breve facoltativa in campo, dati del documento; schemi 1.5–1.6 | fatta |
 
 ## Struttura
@@ -45,6 +46,9 @@ schemi/v1/                     formati dei file
   scheda_bene.v1.schema.json   una scheda per bene
   perizia40-andata.v1.schema.json   pacchetto PC → telefono
   perizia40-rientro.v1.schema.json  pacchetto telefono → PC
+studio/                        Perito 4.0 Studio: versione desktop sulle cartelle delle pratiche
+  server.mjs                   server locale (solo 127.0.0.1) che usa gli stessi script della riga di comando
+  web/                         interfaccia (Preact + htm, stessi componenti grafici dell'app)
 strumenti/
   valida.mjs                   validatore da riga di comando
   prova.mjs                    prova del validatore sulla DEMO e sui casi errati
@@ -334,6 +338,17 @@ node strumenti/cruscotto.mjs "<cartella delle pratiche>" --scrivi
 - Ogni pratica ha un `DIARIO.md` (creato con la pratica): a fine lavoro si aggiunge cosa è stato fatto, le decisioni e il prossimo passo (`strumenti/diario.mjs`).
 - Il cruscotto legge fascicoli, schede e diari (non i documenti dei clienti) e mostra per ogni pratica aperta lo stato delle perizie, il sopralluogo, le integrazioni per destinatario, le segnalazioni che cambiano il lavoro e il prossimo passo: quello del diario, oppure uno suggerito dallo stato del fascicolo.
 - Nella cartella delle pratiche il comando `/pratiche` (skill privata) mostra il cruscotto e riprende la pratica scelta dal suo diario: non serve ricordare le conversazioni precedenti.
+
+## Perito 4.0 Studio (F4)
+
+```bash
+node studio/server.mjs "<cartella delle pratiche>" --apri
+```
+
+- Versione desktop dell'app: cruscotto delle pratiche come l'elenco dell'iPhone; per ogni pratica beni (riquadri per requisito, dati agli atti con stato e verifica in campo), documenti del cliente da trascinare nella finestra e registrare come evidenze, diario.
+- Il server ascolta solo su 127.0.0.1, rifiuta host diversi da quello locale, accetta modifiche solo dalla pagina che ha servito (gettone casuale a ogni avvio) e non esce dalle cartelle delle pratiche. Nessun servizio esterno.
+- Le operazioni usano gli stessi script della riga di comando: ciò che fa lo Studio lo controlla lo stesso validatore.
+- Nella cartella delle pratiche un file `Avvia Perito Studio.cmd` lo apre con un doppio clic. Sopralluogo, foto, azioni e perizia arrivano nelle fasi successive.
 
 ## Pratica DEMO
 

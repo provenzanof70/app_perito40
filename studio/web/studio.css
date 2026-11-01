@@ -1,0 +1,95 @@
+/* Perito 4.0 Studio: stessi colori dell'app di sopralluogo, impaginazione da scrivania */
+:root {
+  --sfondo: #F2F2F7; --testo: #1C1C1E; --testo2: #8A8A8E; --testo3: #3A3A3C;
+  --scheda: #FFFFFF; --campo: #E4E4E9; --linea: #D1D1D6; --linea2: #E5E5EA;
+  --accento: #1E5AA8; --accentoT: #E6EEF8; --accentoP: #164784;
+  --ok: #1F7A3D; --okT: #E7F4EB; --att: #A65A00; --attT: #FFF0DB; --errore: #C0352B; --erroreT: #FDEBEA;
+  --neutro: #6C6C70; --neutroT: #EEEEF1;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sfondo: #000000; --testo: #F2F2F7; --testo2: #98989F; --testo3: #C7C7CC;
+    --scheda: #1C1C1E; --campo: #2C2C2E; --linea: #38383A; --linea2: #2C2C2E;
+    --accento: #5A9BFF; --accentoT: #1A2B44; --accentoP: #8AB8FF;
+    --ok: #5FD488; --okT: #13301D; --att: #FFB347; --attT: #3A2A12; --errore: #FF6961; --erroreT: #3A1715;
+    --neutro: #AEAEB2; --neutroT: #2C2C2E;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--sfondo); color: var(--testo); font: 15px/1.4 -apple-system, "Segoe UI", system-ui, sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--accento); }
+
+.testata { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 14px; padding: 12px 28px; background: color-mix(in srgb, var(--sfondo) 92%, transparent); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--linea); }
+.testata img { width: 30px; height: 30px; border-radius: 7px; }
+.testata .titolo { font-weight: 700; font-size: 17px; }
+.testata .sotto { color: var(--testo2); font-size: 13px; }
+.testata .spazio { flex: 1; }
+.pagina { max-width: 1180px; margin: 0 auto; padding: 22px 28px 60px; }
+h1 { font-size: 28px; margin: 4px 0 4px; letter-spacing: -.3px; }
+h2 { font-size: 19px; margin: 26px 0 10px; }
+.meta { color: var(--testo2); font-size: 13px; }
+
+.bottone { display: inline-flex; align-items: center; gap: 8px; border: none; border-radius: 10px; padding: 9px 16px; background: var(--accento); color: #fff; font-weight: 600; cursor: pointer; }
+.bottone.secondario { background: var(--accentoT); color: var(--accento); }
+.bottone:disabled { opacity: .45; cursor: default; }
+.collegamento { background: none; border: none; color: var(--accento); cursor: pointer; padding: 0; font-weight: 600; }
+
+.griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+.carta { background: var(--scheda); border-radius: 16px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+.carta.cliccabile { cursor: pointer; transition: transform .08s ease, box-shadow .08s ease; text-align: left; border: none; width: 100%; }
+.carta.cliccabile:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); transform: translateY(-1px); }
+.carta .nome { font-weight: 700; font-size: 16px; margin: 6px 0 2px; }
+.carta .riga { display: flex; gap: 8px; align-items: baseline; margin-top: 8px; font-size: 14px; }
+.carta .riga .etichetta { color: var(--testo2); min-width: 92px; font-size: 13px; }
+.prossimo { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--accentoT); font-size: 14px; }
+.prossimo b { color: var(--accento); }
+
+.pastiglia { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 600; background: var(--neutroT); color: var(--neutro); white-space: nowrap; }
+.pastiglia.ok { background: var(--okT); color: var(--ok); }
+.pastiglia.att { background: var(--attT); color: var(--att); }
+.pastiglia.err { background: var(--erroreT); color: var(--errore); }
+.pastiglia.acc { background: var(--accentoT); color: var(--accento); }
+.pastiglie { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+.schede-nav { display: flex; gap: 4px; margin: 18px 0 6px; border-bottom: 0.5px solid var(--linea); flex-wrap: wrap; }
+.schede-nav button { background: none; border: none; padding: 10px 14px; border-bottom: 2px solid transparent; cursor: pointer; color: var(--testo2); font-weight: 600; }
+.schede-nav button.attiva { color: var(--accento); border-bottom-color: var(--accento); }
+.schede-nav button:disabled { opacity: .45; cursor: default; }
+.schede-nav .n { margin-left: 6px; font-size: 12px; color: var(--testo2); }
+
+table.dati { width: 100%; border-collapse: collapse; background: var(--scheda); border-radius: 12px; overflow: hidden; font-size: 14px; }
+table.dati th, table.dati td { text-align: left; padding: 9px 12px; border-bottom: 0.5px solid var(--linea2); vertical-align: top; }
+table.dati th { font-size: 12px; color: var(--testo2); font-weight: 600; background: var(--scheda); }
+table.dati tr:last-child td { border-bottom: none; }
+
+.tessere { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.tessera { border-radius: 12px; padding: 10px 12px; background: var(--scheda); }
+.tessera.ok { background: var(--okT); } .tessera.manca { background: var(--attT); } .tessera.na { opacity: .6; }
+.tessera .su { display: flex; justify-content: space-between; align-items: center; }
+.tessera .nome { font-weight: 600; margin-top: 6px; }
+.tessera .stato { font-size: 12px; color: var(--testo2); margin-top: 2px; }
+
+.rilascio { border: 2px dashed var(--linea); border-radius: 16px; padding: 26px; text-align: center; color: var(--testo2); background: var(--scheda); margin-bottom: 16px; }
+.rilascio.sopra { border-color: var(--accento); background: var(--accentoT); color: var(--accento); }
+.cartella-doc { font-size: 12px; color: var(--testo2); font-weight: 600; text-transform: uppercase; letter-spacing: .3px; padding: 14px 12px 4px; }
+
+.velo { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; z-index: 20; }
+.finestra { background: var(--sfondo); border-radius: 16px; width: min(620px, 94vw); max-height: 90vh; overflow: auto; padding: 18px 22px 22px; }
+.finestra h3 { margin: 0 0 12px; font-size: 18px; }
+.campo { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; font-size: 13px; color: var(--testo2); font-weight: 600; }
+.campo input, .campo select, .campo textarea { padding: 9px 11px; border-radius: 9px; border: 0.5px solid var(--linea); background: var(--scheda); font-weight: 400; color: var(--testo); }
+.scelte { display: flex; flex-wrap: wrap; gap: 6px 14px; font-weight: 400; color: var(--testo); }
+.scelte label { display: flex; gap: 6px; align-items: center; }
+.azioni-finestra { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+.avviso { border-radius: 12px; padding: 10px 14px; margin: 10px 0; font-size: 14px; }
+.avviso.err { background: var(--erroreT); color: var(--errore); } .avviso.att { background: var(--attT); } .avviso.info { background: var(--accentoT); }
+.avviso ul { margin: 6px 0 0; padding-left: 18px; }
+.claude { border-left: 3px solid var(--accento); }
+.claude code { background: var(--scheda); padding: 2px 6px; border-radius: 6px; user-select: all; }
+
+.diario { background: var(--scheda); border-radius: 12px; padding: 4px 18px 12px; white-space: pre-wrap; font-size: 14px; }
+.messaggio { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--testo); color: var(--sfondo); padding: 10px 18px; border-radius: 12px; z-index: 30; font-size: 14px; }
+.vuoto { color: var(--testo2); padding: 18px; text-align: center; }

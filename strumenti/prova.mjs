@@ -512,6 +512,25 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
         && r1.ultimoLavoro === '2026-11-30' && righe[0] === r1 && r1.beni.find(b => b.codice === 'B01').chiuso && !r1.chiusa
         && r2 && r2.suggerito === 'analizzare i documenti e censire i beni');
     }
+    // Studio desktop: server locale, cruscotto, caricamento e registrazione di un documento, protezioni
+    {
+      const { avviaStudio } = await import('../studio/server.mjs');
+      const { server, token, indirizzo } = await avviaStudio(radice, { porta: 0 });
+      try {
+        const chiama = (metodo, p, corpo, intestazioni = {}) => fetch(indirizzo + p.replace(/^\//, ''), { method: metodo, body: corpo, headers: metodo === 'GET' ? intestazioni : { 'X-Studio': token, ...intestazioni } });
+        const elenco = await (await chiama('GET', '/api/pratiche')).json();
+        const nome = elenco.pratiche.find(p => p.codice === 'PROVA-2026-002').cartella;
+        const nuovo = await (await chiama('POST', `/api/pratiche`, JSON.stringify({ codice: 'PROVA-2026-003', nome: 'PROVA SRL - pressa', cliente: 'PROVA SRL', sede: 'X', annualita: '2025' }))).json();
+        const c = await (await chiama('POST', `/api/carica?${new URLSearchParams({ nome, file: 'offerta.pdf' })}`, Buffer.from('%PDF-1.4 offerta di prova'))).json();
+        const c2 = await (await chiama('POST', `/api/carica?${new URLSearchParams({ nome, file: 'offerta.pdf' })}`, Buffer.from('%PDF-1.4 offerta di prova'))).json();
+        const senza = await fetch(indirizzo + `api/diario?nome=${encodeURIComponent(nome)}`, { method: 'POST', body: '{}' });
+        const fuori = await chiama('GET', `/file?${new URLSearchParams({ nome, percorso: '../../x' })}`);
+        const dati = await (await chiama('GET', `/api/pratica?${new URLSearchParams({ nome })}`)).json();
+        verifica('Studio: cruscotto, nuova pratica, documento copiato in documenti_cliente (senza doppioni), richieste senza gettone e percorsi esterni rifiutati',
+          elenco.pratiche.length >= 2 && nuovo.nome === 'PROVA SRL - pressa' && c.file === 'documenti_cliente/Caricati con lo Studio/offerta.pdf' && !c.giaPresente
+          && c2.giaPresente && senza.status === 403 && fuori.status === 400 && dati.documenti.some(d => d.nome === 'offerta.pdf' && !d.evidenza));
+      } finally { server.close(); }
+    }
     const py = spawnSync('python', ['-c', 'import docx'], { encoding: 'utf-8' });
     if (py.status === 0) {
       const r = spawnSync('python', ['-I', join(RADICE, 'strumenti', 'word', 'scheletro_perizia.py'), join(RADICE, 'demo', 'PRATICA_DEMO_2026_001'),
