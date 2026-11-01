@@ -330,6 +330,7 @@ function controllaEvidenze(evidenze, beniNoti, esito, dove) {
     if (e.stato === 'valida' && e.annullamento) esito.errore('EVIDENZA_ANNULLAMENTO', p, 'evidenza valida con dati di annullamento');
     if ((e.tipo === 'vocale' || e.tipo === 'video') && e.durataSecondi === undefined) esito.avviso('MEDIA_SENZA_DURATA', p, `${e.tipo} senza durata`);
     if (e.tipo === 'foto' && !(e.annotazioni || []).length && !e.descrizione) esito.avviso('FOTO_SENZA_ANNOTAZIONE', p, 'foto senza annotazione');
+    if (e.stato === 'valida' && /\(da descrivere/.test(e.descrizione || '')) esito.avviso('EVIDENZA_DA_DESCRIVERE', p, `nota breve rimandata in campo: «${e.descrizione}»`);
     (e.trascrizioni || []).forEach((t, j) => {
       if (!t.confrontataConOriginale) esito.avviso('TRASCRIZIONE_NON_CONFRONTATA', `${p}/trascrizioni/${j}`, `trascrizione (${t.origine}) non ancora confrontata con l'originale`);
     });

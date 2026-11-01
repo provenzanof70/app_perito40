@@ -19,6 +19,10 @@ export function gruppiPer(pratica, registri, codice) {
   return GRUPPI_BENE_NUOVO;
 }
 
+// In campo la nota breve si può rimandare: l'evidenza nasce con un titolo provvisorio riconoscibile, da completare in studio
+export const descrizioneProvvisoria = (gruppo, codice) => `${GRUPPI_UI[gruppo].nome.replace('­', '')} di ${codice} (da descrivere)`;
+export const daDescrivere = e => /\(da descrivere/.test(e.descrizione || '');
+
 // Primo progressivo libero per bene e requisito, tra le evidenze del telefono e quelle già nel fascicolo
 export function prossimoId(pratica, evidenze, codice, requisito) {
   const usati = new Set([...pratica.andata.evidenzeEsistenti, ...evidenze.map(e => e.id),
@@ -65,7 +69,7 @@ export async function registraEvidenza(pratica, evidenze, registri, o) {
     file: `evidenze/${nomeFile}`, nomeFile, mime, sha256: impronta, byte: bytes.length, provenienza: 'perito',
     idSopralluogo: pratica.visita ? pratica.visita.id : pratica.andata.sopralluogo.id,
     acquisitaIl: isoLocale(ora), ...scatto,
-    durataSecondi: o.durataSecondi, descrizione: o.descrizione || '', nota: o.nota || undefined,
+    durataSecondi: o.durataSecondi, descrizione: o.descrizione || descrizioneProvvisoria(o.gruppo, o.codice), nota: o.nota || undefined,
     annotazioni: [], stato: 'valida', nomeOriginale: o.nomeOriginale,
   };
   await transazione(['evidenze', 'media'], 'readwrite', (se, sm) => {

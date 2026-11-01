@@ -6,7 +6,7 @@ import { html, Icona, dataBreve, oraBreve } from '../ui.js';
 import { Foglio, Avviso } from '../componenti.js';
 import { vai, rottaPratica } from '../rotte.js';
 import { GRUPPI_UI } from '../stato.js';
-import { aggiornaEvidenza, annullaEvidenza, beneDi } from '../evidenze.js';
+import { aggiornaEvidenza, annullaEvidenza, beneDi, descrizioneProvvisoria, daDescrivere } from '../evidenze.js';
 import { useUrlFile } from '../media.js';
 
 const STRUMENTI = [['freccia', 'arrow_up_right', 'Freccia'], ['cerchio', 'circle', 'Cerchio'], ['testo', 'text_t', 'Testo'], ['annulla', 'arrow_counter_clockwise', 'Annulla']];
@@ -76,7 +76,9 @@ function Disegno({ url, annotazioni, strumento, colore, alSegno, alPunto }) {
 export function DettaglioEvidenza({ pratica, evidenza: e, evidenze, registri, mostra }) {
   const url = useUrlFile(e);
   const [annotazioni, setAnnotazioni] = useState(e.annotazioni || []);
-  const [descrizione, setDescrizione] = useState(e.descrizione || '');
+  // Titolo provvisorio «(da descrivere)»: il campo resta vuoto, con il titolo come suggerimento
+  const provvisoria = daDescrivere(e) ? e.descrizione : descrizioneProvvisoria(e.gruppo, e.beni[0]);
+  const [descrizione, setDescrizione] = useState(daDescrivere(e) ? '' : e.descrizione || '');
   const [nota, setNota] = useState(e.nota || '');
   const [video, setVideo] = useState(e.dataMostrataAVideo || null);
   const [comuni, setComuni] = useState(e.beni.slice(1));
@@ -92,7 +94,7 @@ export function DettaglioEvidenza({ pratica, evidenza: e, evidenze, registri, mo
 
   const salva = async () => {
     await aggiornaEvidenza(pratica.codicePratica, e.id, x => {
-      x.annotazioni = annotazioni; x.descrizione = descrizione.trim(); x.nota = nota.trim() || undefined;
+      x.annotazioni = annotazioni; x.descrizione = descrizione.trim() || provvisoria; x.nota = nota.trim() || undefined;
       x.dataMostrataAVideo = video && video.valore ? { ...video, valore: video.valore.trim() } : undefined;
       x.beni = [e.beni[0], ...comuni]; x.comune = comuni.length ? true : undefined;
     });
@@ -105,7 +107,7 @@ export function DettaglioEvidenza({ pratica, evidenza: e, evidenze, registri, mo
     <header class="annota-testa">
       <button class="collegamento chiaro" onClick=${torna}>Annulla</button>
       <div class="centro"><div class="cliente">${e.beni[0]} · ${nomeGruppo(e.gruppo)}</div><div class="codice chiaro">${e.id} · ${e.tipo} ${n} di ${stessi.length}</div></div>
-      <button class="primario mini" disabled=${sola || !descrizione.trim()} onClick=${salva}>Fatto</button>
+      <button class="primario mini" disabled=${sola} onClick=${salva}>Fatto</button>
     </header>
     <div class="annota-corpo">
       ${sola && html`<${Avviso} tipo="errore" titolo="Evidenza annullata">${e.annullamento.motivo} · ${dataBreve(e.annullamento.data)} ${oraBreve(e.annullamento.data)}${e.annullamento.sostituitaDa ? ` · sostituita da ${e.annullamento.sostituitaDa}` : ''}. Resta nel pacchetto, non si cancella.</${Avviso}>`}
@@ -120,7 +122,7 @@ export function DettaglioEvidenza({ pratica, evidenza: e, evidenze, registri, mo
         <button class="primario mini" disabled=${!testoIn.testo.trim()} onClick=${() => { setAnnotazioni(x => [...x, { tipo: 'testo', colore, x: testoIn.x, y: testoIn.y, testo: testoIn.testo.trim() }]); setTestoIn(null); }}>Aggiungi</button></div>`}
       <div class="pannello-scuro">
         <div class="riga-nota"><span>${e.tipo === 'vocale' || e.tipo === 'video' ? 'Titolo' : 'Nota breve'}</span><span>${descrizione.length}/80</span></div>
-        <input class="campo-testo scuro" value=${descrizione} disabled=${sola} placeholder="Quale fatto mostra, di quale bene (obbligatoria)"
+        <input class="campo-testo scuro" value=${descrizione} disabled=${sola} placeholder=${`Facoltativa in campo · ${provvisoria}`}
           onInput=${ev => setDescrizione(ev.target.value.slice(0, 80))} />
         ${e.tipo === 'foto' && !sola && html`
           <div class="strumenti">${STRUMENTI.map(([k, ic, l]) => html`<button class=${strumento === k ? 'attivo' : ''}

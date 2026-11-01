@@ -83,8 +83,8 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
     try {
       const e = await registraEvidenza(pratica, evidenze, registri, { codice, gruppo, tipo, blob, ...extra });
       dispatchEvent(new Event('perito40:ricarica'));
-      mostra(`${e.id} salvata${e.origineDataScatto === 'assente' ? ' · data di scatto assente' : e.origineDataScatto === 'metadati' ? ' · data di scatto dai metadati' : ''}`);
-      if (tipo === 'foto' || tipo === 'video' || tipo === 'documento' || tipo === 'screenshot') vai(rottaPratica(pratica.codicePratica, 'evidenza', e.id));
+      // Si resta sulla fotocamera per lo scatto successivo: nota e annotazioni si aggiungono toccando la miniatura, anche dopo
+      mostra(`${e.id} salvata${e.origineDataScatto === 'assente' ? ' · data di scatto assente' : e.origineDataScatto === 'metadati' ? ' · data di scatto dai metadati' : ''} · tocca la miniatura per descriverla`);
     } catch (err) {
       mostra(`Evidenza non salvata: ${err.message}`);
     } finally { setLavoro(false); }
