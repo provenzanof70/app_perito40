@@ -10,7 +10,7 @@ import { perTipo } from './registri.js';
 import { Elenco } from './schermate/elenco.js';
 import { SchermataPratica } from './schermate/pratica.js';
 
-export const VERSIONE_APP = '0.11.0 · schema 1.7';
+export const VERSIONE_APP = '0.11.1 · schema 1.7';
 const NOME_PERITO = 'Perito Ing. Francesco Provenzano';
 
 function MenuApp({ sistema, nomePerito, alNome, visitaInCorso, alChiudi }) {
@@ -97,6 +97,12 @@ export function App({ sistema: sistemaIniziale }) {
     return () => { removeEventListener('hashchange', suHash); removeEventListener('online', rete); removeEventListener('offline', rete); removeEventListener('perito40:aggiornamento', agg); removeEventListener('perito40:ricarica', ricarica); };
   }, []);
 
+  // Versione nuova pronta: senza visita in corso si applica subito; con una visita aperta si chiede, con una striscia visibile
+  const visitaInCorso = (pratiche || []).some(p => p.visita && p.stato !== 'rientrata');
+  useEffect(() => {
+    if (sistema.aggiornamento && pratiche && !visitaInCorso) sistema.applicaAggiornamento();
+  }, [sistema.aggiornamento, pratiche]);
+
   let schermata;
   if (rotta.nome === 'pratica' && pratiche) {
     const p = pratiche.find(x => x.codicePratica === rotta.codice);
@@ -114,6 +120,9 @@ export function App({ sistema: sistemaIniziale }) {
   }
 
   return html`${schermata}
+    ${sistema.aggiornamento && visitaInCorso && html`<div class="striscia-agg" role="status">
+      <span>Nuova versione dell'app pronta. Visita in corso: aggiorna quando vuoi, i dati restano sul telefono.</span>
+      <button onClick=${sistema.applicaAggiornamento}>Aggiorna</button></div>`}
     ${toast && html`<div class="toast" role="status">${toast}</div>`}
     ${rifiuto && html`<${Foglio} titolo="Pacchetto non importato" alChiudi=${() => setRifiuto(null)}>
       <${Avviso} tipo="errore">${rifiuto.motivo}</${Avviso}>
