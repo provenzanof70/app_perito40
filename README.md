@@ -25,7 +25,9 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | F2.7 | Prove: visita completa riletta dal PC, protocollo sull'iPhone ([docs/F2_7_prove_iphone.md](docs/F2_7_prove_iphone.md)), «Ricomincia la DEMO» | fatta |
 | F2.8 | Pubblicazione su GitHub Pages | attiva: https://provenzanof70.github.io/app_perito40/app/ |
 | F3.1 | PC: nuova pratica, nuovo bene, registrazione dei documenti, scheletro Word di perizia e analisi tecnica; schemi 1.4 | fatta |
-| F3.2–F3.3 | PC: pacchetto di andata dal fascicolo; importazione del rientro | da fare |
+| F3.2 | PC: pacchetto di andata generato dal fascicolo (revisioni, sopralluogo previsto, indicazioni di studio) | fatta |
+| F3.3 | PC: importazione dei rientri nel fascicolo (checkpoint e finale, volumi, senza doppioni); fascicolo fotografico Word | fatta |
+| 0.9–0.10 | Gruppo Sicurezza (RO5), riquadri per requisito, nota breve facoltativa in campo, dati del documento; schemi 1.5–1.6 | fatta |
 
 ## Struttura
 
@@ -48,13 +50,17 @@ strumenti/
   crea_pratica.mjs             crea la cartella di una nuova pratica con il fascicolo iniziale
   nuovo_bene.mjs               aggiunge un bene: scheda valida con i dati agli atti da compilare
   registra_documento.mjs       registra un documento del cliente come evidenza (copia, codice, impronta, manifesto)
+  genera_andata.mjs            pacchetto di andata per l'app dal fascicolo (F3.2)
+  importa_rientro.mjs          importa gli ZIP di rientro dell'app nel fascicolo (F3.3)
   word/scheletro_perizia.py    scheletro Word di perizia giurata e analisi tecnica dal fascicolo
+  word/fascicolo_fotografico.py  fascicolo fotografico Word: foto per requisito con le annotazioni del campo
   word/regime_CRI_4.0.json     testi del regime (VISTI, requisiti, check list, NDA): da verificare per annualità
   aggiorna_app.mjs             aggiorna l'elenco dei file offline dell'app e la policy di sicurezza
   genera_icone.mjs             genera le icone dell'app dal logo
   lib/validatore.mjs           nucleo dei controlli, senza dipendenze né accesso al disco (riusabile nella PWA)
   lib/zip.mjs                  lettura e scrittura ZIP senza dipendenze (riusabile nella PWA)
   lib/disco.mjs                lettura di cartelle e ZIP, calcolo delle impronte (Node)
+  lib/andata.mjs               costruzione dell'andata dal fascicolo (usata anche per la DEMO)
 demo/
   PRATICA_DEMO_2026_001/       pratica fittizia completa (dopo l'importazione del rientro)
   casi_errati/casi.json        modifiche che il validatore deve rifiutare
@@ -267,6 +273,26 @@ python strumenti/word/scheletro_perizia.py "<cartella pratica>" --perito "<file 
 - Il nome della cartella perde punti e spazi finali (es. «S.r.l.»): Windows non apre cartelle che finiscono con un punto.
 - Lo scheletro scrive per ogni bene perizia giurata (copertina, VISTI, PREMESSO, tabella del bene, DICHIARA con caselle vuote, NDA, verbale di asseverazione) e analisi tecnica (requisiti, dati identificativi, classificazione, costi, esame dei requisiti con evidenze, riscontri, dichiarazioni e lacune, check list, appendice istruttoria). Ciò che il fascicolo non contiene resta `[PLACEHOLDER: …]` in rosso, le istruzioni `[NOTA: …]` in grigio; caselle e conclusioni le decide il perito. Richiede Python 3 con `python-docx`.
 - Schema 1.4 (tutto facoltativo): dati dell'impresa (partita IVA, sede legale, legale rappresentante, RSPP, logo), del bene (fornitore, reparto, unità locale, voce numerata), costi (documenti, acconti, accessori, dicitura di legge) e stato dell'elaborato (revisione, bozza/per la firma, giuramento). I dati personali stanno solo nelle cartelle private delle pratiche.
+
+## Sul PC: andata, rientro e fascicolo fotografico (F3.2, F3.3)
+
+```bash
+node strumenti/genera_andata.mjs "<cartella pratica>" --data 2026-11-10
+```
+
+```bash
+node strumenti/importa_rientro.mjs "<cartella pratica>" "<…_v1di2.zip>" "<…_v2di2.zip>"
+```
+
+```bash
+python strumenti/word/fascicolo_fotografico.py "<cartella pratica>"
+```
+
+- L'andata nasce da pratica e schede: beni, gruppi di evidenze, dati agli atti da verificare, date, azioni aperte, codici già usati, indicazioni di studio (`andata/guida_requisiti.json`). Ogni rigenerazione è una nuova revisione; le precedenti restano nella cartella perché i rientri che ne derivano si possano ancora controllare.
+- L'import controlla prima i volumi contro l'andata di origine e, se trova errori, non tocca il fascicolo. Poi salva una copia di sicurezza, copia ZIP ed evidenze verificandone le impronte, riporta gli esiti dei dati agli atti nelle schede, registri, date (confermate, precisate o difformi) e bozze di azione. Le proposte di chiusura restano annotate: la chiusura la decide il perito. Rifare l'import non crea doppioni.
+- Il rapporto dell'import elenca le targhe da leggere e confrontare con gli atti e le evidenze ancora «da descrivere»: si completano sul PC.
+- Il fascicolo fotografico è un documento di lavoro: le annotazioni sono disegnate su una copia, l'originale resta invariato.
+- Schema 1.6 (tutto facoltativo): modalità di acquisizione del bene (diretto, leasing, appalto, in economia), periodo d'imposta non solare, interconnessione tardiva (causa, caratteristiche al primo utilizzo, prove datate per classe), dati del documento acquisito in campo.
 
 ## Pratica DEMO
 
