@@ -122,7 +122,7 @@ button.scheda { border: none; text-align: left; width: 100%; color: var(--testo)
 
 /* Foglio dal basso */
 .velo { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); z-index: 10; display: flex; align-items: flex-end; justify-content: center; }
-.foglio { background: var(--sfondo); width: 100%; max-width: 600px; max-height: 88dvh; border-radius: 14px 14px 0 0; display: flex; flex-direction: column; padding-bottom: var(--sicuro-basso); }
+.foglio { background: var(--sfondo); color: var(--testo); width: 100%; max-width: 600px; max-height: 88dvh; border-radius: 14px 14px 0 0; display: flex; flex-direction: column; padding-bottom: var(--sicuro-basso); }
 .foglio-testa { display: grid; grid-template-columns: 90px 1fr 90px; align-items: center; padding: 14px 12px 10px; font-size: 17px; }
 .foglio-testa .tit { text-align: center; font-weight: 600; }
 .foglio-testa button { background: none; border: none; color: var(--accento); font-size: 17px; padding: 0; }
