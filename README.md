@@ -60,6 +60,7 @@ strumenti/
   importa_rientro.mjs          importa gli ZIP di rientro dell'app nel fascicolo (F3.3)
   emissione.mjs                per la firma, giuramento, documenti finali firmati e marcati, chiusura (F3.4)
   diario.mjs                   diario di lavoro della pratica (DIARIO.md): fatto, decisioni, prossimo passo
+  salva_mail.mjs               salva nella pratica una mail del cliente (originale .eml, testo, allegati) da messaggio MIME o RAW di Gmail
   cruscotto.mjs                riepilogo delle pratiche aperte con il prossimo passo (CRUSCOTTO.md)
   word/scheletro_perizia.py    scheletro Word di perizia giurata e analisi tecnica dal fascicolo
   word/fascicolo_fotografico.py  fascicolo fotografico Word: foto per requisito con le annotazioni del campo
@@ -348,6 +349,8 @@ node studio/server.mjs "<cartella delle pratiche>" --apri
 - Versione desktop dell'app: cruscotto delle pratiche come l'elenco dell'iPhone; per ogni pratica beni (riquadri per requisito, dati agli atti con stato e verifica in campo), documenti del cliente da trascinare nella finestra e registrare come evidenze, diario.
 - Il server ascolta solo su 127.0.0.1, rifiuta host diversi da quello locale, accetta modifiche solo dalla pagina che ha servito (gettone casuale a ogni avvio) e non esce dalle cartelle delle pratiche. Nessun servizio esterno.
 - Le operazioni usano gli stessi script della riga di comando: ciò che fa lo Studio lo controlla lo stesso validatore.
+- Le immagini caricate si registrano come foto del cliente, con la data di scatto letta dai metadati del file (EXIF), mai inventata.
+- Le mail del cliente si salvano nella pratica con `strumenti/salva_mail.mjs` (messaggio originale, testo e allegati in `documenti_cliente/Mail/`), a partire dal messaggio letto in sola lettura dal collegamento Gmail di Claude.
 - Nella cartella delle pratiche un file `Avvia Perito Studio.cmd` lo apre con un doppio clic. Sopralluogo, foto, azioni e perizia arrivano nelle fasi successive.
 
 ## Pratica DEMO

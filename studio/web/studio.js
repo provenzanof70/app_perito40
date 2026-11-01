@@ -238,12 +238,15 @@ function Documenti({ dati, ricarica, mostra }) {
           <td>${d.evidenza ? html`<span class="pastiglia ok">${d.evidenza}</span>` : html`<span class="pastiglia att">da registrare</span>`}</td>
           <td>${d.evidenza ? null : html`<button class="collegamento" onClick=${() => setRegistra(d)}>Registra…</button>`}</td></tr>`)}`)}
     </tbody></table>`}
-    ${registra && html`<${Registra} dati=${dati} doc=${registra} alChiudi=${() => setRegistra(null)} alFatto=${id => { setRegistra(null); mostra(`Registrato come ${id}`); ricarica(); }} />`}`;
+    ${registra && html`<${Registra} dati=${dati} doc=${registra} alChiudi=${() => setRegistra(null)} alFatto=${testo => { setRegistra(null); mostra(`Registrato come ${testo}`); ricarica(); }} />`}`;
 }
 
 function Registra({ dati, doc, alChiudi, alFatto }) {
   const codici = dati.schede.flatMap(sc => [sc.codice, ...sc.componenti.map(c => c.codice)]);
-  const [d, setD] = useState({ beni: codici.slice(0, 1), gruppo: 'DOC', requisiti: ['DOC'], descrizione: doc.nome.replace(/\.[^.]+$/, ''), provenienza: 'cliente' });
+  // le immagini nascono come foto del cliente (data di scatto dai metadati del file); si può scegliere documento o schermata
+  const immagine = /\.(jpe?g|png|heic|webp)$/i.test(doc.nome), filmato = /\.(mp4|mov)$/i.test(doc.nome);
+  const [d, setD] = useState({ beni: codici.slice(0, 1), tipo: immagine ? 'foto' : filmato ? 'video' : 'documento', gruppo: immagine || filmato ? 1 : 'DOC', requisiti: [immagine || filmato ? 'ID' : 'DOC'],
+    descrizione: doc.nome.replace(/\.[^.]+$/, ''), provenienza: 'cliente' });
   const [errore, setErrore] = useState(null);
   const gruppi = ORDINE_GRUPPI.filter(g => GRUPPI_UI[g]);
   const sceltaGruppo = g => setD(x => ({ ...x, gruppo: g, requisiti: [g === 'DOC' ? 'DOC' : GRUPPI_UI[g].requisito] }));
@@ -252,8 +255,9 @@ function Registra({ dati, doc, alChiudi, alFatto }) {
   const invia = async () => {
     try {
       // il codice dell'evidenza nasce dal primo bene e dal primo requisito scelti
-      const r = await chiedi('POST', `/api/registra?${q({ nome: dati.nome })}`, JSON.stringify({ file: doc.file, beni: d.beni, gruppo: d.gruppo, requisiti: d.requisiti, descrizione: d.descrizione.trim(), provenienza: d.provenienza }));
-      alFatto(r.id);
+      const r = await chiedi('POST', `/api/registra?${q({ nome: dati.nome })}`, JSON.stringify({ file: doc.file, beni: d.beni, tipo: d.tipo, gruppo: d.gruppo, requisiti: d.requisiti, descrizione: d.descrizione.trim(), provenienza: d.provenienza }));
+      const s = r.scatto || {};
+      alFatto(`${r.id}${s.origineDataScatto === 'metadati' ? ` · scattata il ${new Date(s.dataScatto).toLocaleString('it-IT')} (dai metadati)` : s.origineDataScatto === 'assente' ? ' · data di scatto assente nel file' : ''}`);
     } catch (e) { setErrore(e.message); }
   };
   if (!codici.length) return html`<div class="velo"><div class="finestra"><h3>Registra ${doc.nome}</h3><div class="avviso att">La pratica non ha ancora beni: si censiscono con Claude, poi si registrano i documenti.</div><div class="azioni-finestra"><button class="bottone" onClick=${alChiudi}>Chiudi</button></div></div></div>`;
@@ -261,6 +265,7 @@ function Registra({ dati, doc, alChiudi, alFatto }) {
     <h3>Registra come evidenza</h3>
     <div class="meta" style=${{ marginBottom: 12 }}>${doc.file} · se ne fa una copia identica in <code>evidenze/documenti</code> con codice e impronta.</div>
     <div class="campo">Beni a cui si riferisce<div class="scelte">${codici.map(c => html`<label><input type="checkbox" checked=${d.beni.includes(c)} onChange=${() => commuta('beni', c)} />${c}</label>`)}</div></div>
+    <div class="campo">Tipo<div class="scelte">${[['foto', 'Foto'], ['screenshot', 'Schermata'], ['video', 'Video'], ['documento', 'Documento']].map(([k, l]) => html`<label><input type="radio" name="tipo" checked=${d.tipo === k} onChange=${() => setD(x => ({ ...x, tipo: k }))} />${l}</label>`)}</div></div>
     <label class="campo">Gruppo di evidenze<select value=${d.gruppo} onChange=${e => sceltaGruppo(e.target.value === 'DOC' ? 'DOC' : Number(e.target.value))}>
       ${gruppi.map(g => html`<option value=${g}>${nomeGruppo(g)} · ${GRUPPI_UI[g].requisito}</option>`)}</select></label>
     <div class="campo">Requisiti che sostiene<div class="scelte">${REQUISITI.map(r => html`<label><input type="checkbox" checked=${d.requisiti.includes(r)} onChange=${() => commuta('requisiti', r)} />${r}</label>`)}</div></div>

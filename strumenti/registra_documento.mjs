@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync } from
 import { join, basename, extname, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { caricaSchemi, caricaCartella, validaCaricata } from './lib/disco.mjs';
+import { dataScatto } from '../app/js/metadati.js';
 
 const MIME = { '.pdf': 'application/pdf', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.heic': 'image/heic',
   '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -19,6 +20,13 @@ function isoLocale(d) {
   const z = -d.getTimezoneOffset(), s = z >= 0 ? '+' : '-', a = Math.abs(z);
   const p = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}${s}${p(Math.floor(a / 60))}:${p(a % 60)}`;
+}
+
+// Foto e video: data di scatto dai metadati del file (EXIF, QuickTime); se manca si dichiara assente, mai sostituita
+export function datiScatto(tipo, dati, mime) {
+  if (!['foto', 'video'].includes(tipo)) return {};
+  const d = dataScatto(new Uint8Array(dati), mime || '');
+  return d.origine === 'metadati' ? { origineDataScatto: 'metadati', dataScatto: d.data } : { origineDataScatto: 'assente' };
 }
 
 export function registraDocumento(cartella, file, o) {
@@ -60,7 +68,7 @@ export function registraDocumento(cartella, file, o) {
   const evidenza = {
     id, beni, ...(beni.length > 1 ? { comune: true } : {}), gruppo, requisiti, tipo, file: rel,
     mime: MIME[extname(nome).toLowerCase()] || 'application/octet-stream', sha256: sha, provenienza: o.provenienza || 'cliente',
-    acquisitaIl: ora, ...(['foto', 'video'].includes(tipo) ? { origineDataScatto: 'assente' } : {}), descrizione: o.descrizione, stato: 'valida',
+    acquisitaIl: ora, ...datiScatto(tipo, dati, MIME[extname(nome).toLowerCase()]), descrizione: o.descrizione, stato: 'valida',
   };
   pratica.evidenze.push(evidenza);
   pratica.manifesto.push({ idEvidenza: id, file: rel, sha256: sha, byte: dati.length, dataAcquisizione: ora, provenienza: evidenza.provenienza, hash: 'C', marcaTemporale: { tipo: 'n/a' } });

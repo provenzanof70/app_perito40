@@ -103,10 +103,8 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   verifica('Checkpoint: «più tardi» sospende il promemoria', !statoCheckpoint(p('2026-10-15T09:00:00+02:00', null, '2026-10-15T12:20:00+02:00'), 3, ora).dovuto);
 }
 
-// App: data di scatto dai metadati (EXIF per le foto, mvhd per i video), mai inventata
-{
-  const { dataScatto, dataScattoJpeg, dataScattoVideo } = await import('../app/js/metadati.js');
-  const jpeg = (le, data, scarto) => {
+// JPEG minimo con EXIF DateTimeOriginal (e fuso se indicato), usato dalle prove dei metadati e dello Studio
+const jpeg = (le, data, scarto) => {
     const u16 = n => le ? [n & 255, n >> 8] : [n >> 8, n & 255];
     const u32 = n => le ? [n & 255, (n >> 8) & 255, (n >> 16) & 255, n >>> 24] : [n >>> 24, (n >> 16) & 255, (n >> 8) & 255, n & 255];
     const asc = s => [...Buffer.from(s + '\0', 'latin1')];
@@ -120,6 +118,10 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
     const app1 = [...Buffer.from('Exif\0\0', 'latin1'), ...t];
     return new Uint8Array([0xff, 0xd8, 0xff, 0xe1, (app1.length + 2) >> 8, (app1.length + 2) & 255, ...app1, 0xff, 0xd9]);
   };
+
+// App: data di scatto dai metadati (EXIF per le foto, mvhd per i video), mai inventata
+{
+  const { dataScatto, dataScattoJpeg, dataScattoVideo } = await import('../app/js/metadati.js');
   verifica('Metadati: EXIF big-endian con fuso', dataScattoJpeg(jpeg(false, '2026:10:15 10:42:07', '+02:00')) === '2026-10-15T10:42:07+02:00');
   verifica('Metadati: EXIF little-endian con fuso', dataScattoJpeg(jpeg(true, '2026:10:15 10:42:07', '+01:00')) === '2026-10-15T10:42:07+01:00');
   verifica('Metadati: EXIF senza fuso usa quello del dispositivo', /^2026-10-15T10:42:07[+-]\d{2}:\d{2}$/.test(dataScattoJpeg(jpeg(false, '2026:10:15 10:42:07'))));
@@ -541,10 +543,40 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
         const senza = await fetch(indirizzo + `api/diario?nome=${encodeURIComponent(nome)}`, { method: 'POST', body: '{}' });
         const fuori = await chiama('GET', `/file?${new URLSearchParams({ nome, percorso: '../../x' })}`);
         const dati = await (await chiama('GET', `/api/pratica?${new URLSearchParams({ nome })}`)).json();
+        // foto del cliente: registrata come foto, con la data di scatto letta dall'EXIF
+        // nella prima pratica di prova B01 è chiuso (sola lettura): la foto va su B02
+        const nome1 = elenco.pratiche.find(p => p.codice === 'PROVA-2026-001').cartella;
+        const pf = await (await chiama('POST', `/api/carica?${new URLSearchParams({ nome: nome1, file: 'targa cliente.jpg' })}`, Buffer.from(jpeg(false, '2026:10:20 09:15:30', '+02:00')))).json();
+        const foto = await (await chiama('POST', `/api/registra?${new URLSearchParams({ nome: nome1 })}`, JSON.stringify({ file: pf.file, beni: ['B02'], tipo: 'foto', gruppo: 2, requisiti: ['ID'], descrizione: 'Targa fotografata dal cliente', provenienza: 'cliente' }))).json();
+        verifica('Studio: foto del cliente registrata come foto con la data di scatto dai metadati EXIF',
+          foto.scatto && foto.scatto.origineDataScatto === 'metadati' && foto.scatto.dataScatto === '2026-10-20T09:15:30+02:00'
+          && !foto.errori.some(e => e.codice !== 'DOCUMENTO_FINALE_MODIFICATO')); // quell'errore è voluto dalla prova di emissione
         verifica('Studio: cruscotto, nuova pratica, documento copiato in documenti_cliente (senza doppioni), richieste senza gettone e percorsi esterni rifiutati',
           elenco.pratiche.length >= 2 && nuovo.nome === 'PROVA SRL - pressa' && c.file === 'documenti_cliente/Caricati con lo Studio/offerta.pdf' && !c.giaPresente
           && c2.giaPresente && senza.status === 403 && fuori.status === 400 && dati.documenti.some(d => d.nome === 'offerta.pdf' && !d.evidenza));
       } finally { server.close(); }
+    }
+    // Mail del cliente da Gmail: messaggio originale, testo e allegati nella pratica (anche dal formato RAW base64url)
+    {
+      const { salvaMail } = await import('./salva_mail.mjs');
+      const pdf = Buffer.from('%PDF-1.4 dichiarazione CE di prova');
+      const mime = [
+        'From: =?UTF-8?B?' + Buffer.from('Ufficio Tecnico Più').toString('base64') + '?= <tecnico@example.com>', 'To: perito@example.com',
+        'Subject: =?UTF-8?Q?Dichiarazione_interconnessione_e_DdC?=', 'Date: Mon, 02 Nov 2026 09:30:00 +0100', 'Message-ID: <prova-1@example.com>',
+        'MIME-Version: 1.0', 'Content-Type: multipart/mixed; boundary="CONF"', '', '--CONF',
+        'Content-Type: text/plain; charset=utf-8', 'Content-Transfer-Encoding: quoted-printable', '',
+        'Confermiamo che la pressa =C3=A8 collegata al gestionale dal 10/06/2025.', '--CONF',
+        'Content-Type: application/pdf; name="DdC pressa.pdf"', 'Content-Disposition: attachment; filename="DdC pressa.pdf"', 'Content-Transfer-Encoding: base64', '',
+        pdf.toString('base64'), '--CONF--', ''].join('\r\n');
+      const fileRaw = join(radice, 'mail.txt');
+      scrivi(fileRaw, Buffer.from(mime).toString('base64').replace(/\+/g, '-').replace(/\//g, '_'));
+      const m1 = salvaMail(cartella, fileRaw);
+      const m2 = salvaMail(cartella, fileRaw);
+      const testo = readFileSync(join(m1.cartella, 'testo.txt'), 'utf8');
+      verifica('Mail da Gmail: .eml originale, testo con intestazioni decodificate e allegato identico salvati nella pratica, senza doppioni',
+        /Mail[\\/]2026-11-02 Dichiarazione interconnessione e DdC$/.test(m1.cartella) && m1.allegati[0].file === 'DdC pressa.pdf'
+        && Buffer.compare(readFileSync(join(m1.cartella, 'DdC pressa.pdf')), pdf) === 0 && /Ufficio Tecnico Più/.test(testo) && /pressa è collegata/.test(testo)
+        && existsSync(join(m1.cartella, 'messaggio.eml')) && m2.giaPresente);
     }
     const py = spawnSync('python', ['-c', 'import docx'], { encoding: 'utf-8' });
     if (py.status === 0) {

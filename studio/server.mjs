@@ -14,7 +14,7 @@ import { spawn } from 'node:child_process';
 import { caricaSchemi, caricaCartella, validaCaricata, trovaPratiche, sha256 } from '../strumenti/lib/disco.mjs';
 import { cruscotto } from '../strumenti/cruscotto.mjs';
 import { creaPratica } from '../strumenti/crea_pratica.mjs';
-import { registraDocumento } from '../strumenti/registra_documento.mjs';
+import { registraDocumento, datiScatto } from '../strumenti/registra_documento.mjs';
 import { aggiungiVoce, FILE_DIARIO } from '../strumenti/diario.mjs';
 import { GRUPPI } from '../strumenti/lib/validatore.mjs';
 
@@ -87,8 +87,10 @@ export function avviaStudio(radice, { porta = 4040 } = {}) {
       const cartella = cartellaDi(p.nome);
       const o = JSON.parse(corpo);
       const file = dentro(join(cartella, 'documenti_cliente'), String(o.file || '').replace(/^documenti_cliente\//, ''));
-      const r = registraDocumento(cartella, file, { beni: o.beni, descrizione: o.descrizione, gruppo: o.gruppo === 'DOC' || !o.gruppo ? 'DOC' : Number(o.gruppo), requisiti: o.requisiti, provenienza: o.provenienza });
-      return { id: r.id, errori: r.esito.errori };
+      const tipo = ['foto', 'screenshot', 'video'].includes(o.tipo) ? o.tipo : 'documento';
+      const r = registraDocumento(cartella, file, { beni: o.beni, descrizione: o.descrizione, gruppo: o.gruppo === 'DOC' || !o.gruppo ? 'DOC' : Number(o.gruppo), requisiti: o.requisiti, provenienza: o.provenienza, tipo });
+      const ext = extname(file).toLowerCase();
+      return { id: r.id, errori: r.esito.errori, scatto: datiScatto(tipo, readFileSync(file), TIPI[ext]) };
     },
     'POST /api/diario': (p, corpo) => {
       const o = JSON.parse(corpo);
