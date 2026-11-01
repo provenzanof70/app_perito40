@@ -35,7 +35,7 @@ function leggiVolumi(zips) {
   return volumi.sort((a, b) => a.doc.volume.numero - b.doc.volume.numero);
 }
 
-export function importaRientro(cartella, zips) {
+export function importaRientro(cartella, zips, o = {}) {
   const registro = caricaSchemi();
   const volumi = leggiVolumi(zips);
   const r = volumi[0].doc;
@@ -46,6 +46,10 @@ export function importaRientro(cartella, zips) {
   if (!pAndata) throw new Error(`l'andata ${r.andata.revisione} da cui nasce il pacchetto non è registrata in questa pratica`);
   const chiusi = pratica.beni.filter(b => (JSON.parse(readFileSync(join(cartella, b.scheda), 'utf8')).elaborato || {}).chiusoIl).map(b => b.codice);
   if (chiusi.length) throw new Error(`beni chiusi, in sola lettura: ${chiusi.join(', ')}. Il rientro non si importa in una pratica con perizie già chiuse`);
+
+  // Un pacchetto più vecchio di un finale già importato riporterebbe indietro il fascicolo (es. foto annullate dopo)
+  const piuRecente = pratica.pacchetti.find(p => p.tipo === 'rientro_finale' && p.id !== r.idRientro && new Date(p.data) > new Date(r.creatoIl));
+  if (piuRecente && !o.forza) throw new Error(`pacchetto del ${r.creatoIl} più vecchio del finale già importato del ${piuRecente.data} (${piuRecente.file}): non si importa`);
 
   // 1. Controllo dei volumi contro la loro andata, prima di toccare il fascicolo
   const pre = validaCaricata(caricaZip(volumi.map(v => v.percorso), join(cartella, pAndata.file)), registro, { soloRientro: true });

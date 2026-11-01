@@ -63,11 +63,25 @@ export async function conta(archivio, indice, valore) {
   return attesa(db.transaction(archivio).objectStore(archivio).index(indice).count(valore));
 }
 
-// Toglie dal telefono una pratica con evidenze, file e registri. Usata solo per la pratica DEMO (prove).
+// Toglie dal telefono una pratica con evidenze, file e registri. I pacchetti già salvati in File restano dove sono.
 export function eliminaPratica(codice) {
   const intervallo = IDBKeyRange.bound([codice], [codice, []]);
   return transazione(['pratiche', 'evidenze', 'media', 'registri'], 'readwrite', (p, e, m, r) => {
     p.delete(codice); e.delete(intervallo); m.delete(intervallo); r.delete(intervallo);
+  });
+}
+
+// Ricomincia la raccolta da capo: si cancellano evidenze, file e registri della pratica; resta l'andata importata
+export function azzeraRaccolta(codice) {
+  const intervallo = IDBKeyRange.bound([codice], [codice, []]);
+  return transazione(['pratiche', 'evidenze', 'media', 'registri'], 'readwrite', (p, e, m, r) => {
+    e.delete(intervallo); m.delete(intervallo); r.delete(intervallo);
+    const g = p.get(codice);
+    g.onsuccess = () => {
+      const x = g.result;
+      if (!x) return;
+      p.put({ ...x, stato: 'in_corso', visita: null, esportazioni: { ultimo: null, numeroCheckpoint: 0 }, promemoria: { rinviatoFino: null } });
+    };
   });
 }
 

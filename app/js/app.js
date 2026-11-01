@@ -10,7 +10,7 @@ import { perTipo } from './registri.js';
 import { Elenco } from './schermate/elenco.js';
 import { SchermataPratica } from './schermate/pratica.js';
 
-export const VERSIONE_APP = '0.10.1 · schema 1.7';
+export const VERSIONE_APP = '0.11.0 · schema 1.7';
 const NOME_PERITO = 'Perito Ing. Francesco Provenzano';
 
 function MenuApp({ sistema, nomePerito, alNome, visitaInCorso, alChiudi }) {
@@ -41,6 +41,7 @@ export function App({ sistema: sistemaIniziale }) {
   const [nomePerito, setNomePerito] = useState(NOME_PERITO);
   const [toast, setToast] = useState(null);
   const [rifiuto, setRifiuto] = useState(null);
+  const [conflitto, setConflitto] = useState(null);
   const [menu, setMenu] = useState(false);
 
   const mostra = testo => { setToast(testo); clearTimeout(mostra.t); mostra.t = setTimeout(() => setToast(null), 3500); };
@@ -68,10 +69,11 @@ export function App({ sistema: sistemaIniziale }) {
     await ricarica();
   }
 
-  async function importa(bytes, nomeFile) {
+  async function importa(bytes, nomeFile, o = {}) {
     try {
-      const r = await importaAndata(bytes, nomeFile);
+      const r = await importaAndata(bytes, nomeFile, new Date(), o);
       if (r.stato === 'rifiutata') { setRifiuto(r); return; }
+      if (r.stato === 'conflitto') { setConflitto({ ...r, bytes, nomeFile }); return; }
       await ricarica();
       const n = r.esito.avvisi.length;
       const c = r.pratica.codicePratica;
@@ -116,6 +118,11 @@ export function App({ sistema: sistemaIniziale }) {
     ${rifiuto && html`<${Foglio} titolo="Pacchetto non importato" alChiudi=${() => setRifiuto(null)}>
       <${Avviso} tipo="errore">${rifiuto.motivo}</${Avviso}>
       ${rifiuto.esito.errori.length ? html`<${ElencoErrori} voci=${rifiuto.esito.errori} />` : null}
+    </${Foglio}>`}
+    ${conflitto && html`<${Foglio} titolo="Pratica già sul telefono" annulla="Annulla" conferma="Sostituisci" alChiudi=${() => setConflitto(null)}
+        alConferma=${() => { const c = conflitto; setConflitto(null); importa(c.bytes, c.nomeFile, { sostituisci: true }); }}>
+      <div class="meta">La pratica ${conflitto.esistente.codicePratica} è già sul telefono con ${conflitto.evidenze === 1 ? '1 evidenza' : `${conflitto.evidenze} evidenze`}${conflitto.esistente.visita ? ' e una visita avviata' : ''}${conflitto.stessaAndata ? ', con la stessa andata' : `, con l'andata ${conflitto.esistente.andata.revisione}: quella scelta la sostituisce`}.</div>
+      <div class="meta">«Sostituisci» toglie dal telefono foto, verifiche e registri di questa pratica e la importa da capo. ${conflitto.esistente.esportazioni && conflitto.esistente.esportazioni.ultimo ? `L'ultimo pacchetto salvato è un ${conflitto.esistente.esportazioni.ultimo.tipo} del ${new Date(conflitto.esistente.esportazioni.ultimo.data).toLocaleString('it-IT')}: ciò che è stato raccolto dopo andrà perso.` : 'Nessun pacchetto è stato salvato: tutto ciò che è stato raccolto andrà perso.'}</div>
     </${Foglio}>`}
     ${menu && html`<${MenuApp} sistema=${sistema} nomePerito=${nomePerito} visitaInCorso=${(pratiche || []).some(p => p.visita && p.stato !== 'rientrata')}
       alNome=${n => { setNomePerito(n); salvaImpostazione('nomePerito', n); }} alChiudi=${() => setMenu(false)} />`}`;

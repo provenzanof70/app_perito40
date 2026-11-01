@@ -2,7 +2,7 @@
 // validatore usato sul PC (strumenti/lib/validatore.mjs), registrazione nell'archivio del telefono.
 
 import { creaRegistroSchemi, validaStruttura, controllaAndata, controllaRiservatezza, nuovoEsito } from '../../strumenti/lib/validatore.mjs';
-import { leggi, scrivi, conta } from './archivio.js';
+import { leggi, scrivi, conta, eliminaPratica } from './archivio.js';
 
 const SCHEMI = ['comuni', 'pratica_40', 'scheda_bene', 'perizia40-andata', 'perizia40-rientro'];
 let registro = null;
@@ -47,21 +47,23 @@ export async function controllaAndataBytes(bytes, nomeFile) {
 
 // Importa un'andata. Esiti possibili:
 //   { stato: 'importata' | 'aggiornata' | 'gia_presente', pratica, esito }
+//   { stato: 'conflitto', esistente, evidenze, esito }  la pratica è già sul telefono con dati raccolti: decide il perito
 //   { stato: 'rifiutata', motivo, esito }
-export async function importaAndata(bytes, nomeFile, ora = new Date()) {
+// o.sostituisci: toglie dal telefono la pratica esistente (dati compresi) e importa l'andata da capo
+export async function importaAndata(bytes, nomeFile, ora = new Date(), o = {}) {
   const { andata, impronta, esito } = await controllaAndataBytes(bytes, nomeFile);
   if (esito.errori.length) return { stato: 'rifiutata', motivo: 'Il pacchetto non supera i controlli', esito };
 
-  const esistente = await leggi('pratiche', andata.codicePratica);
+  let esistente = await leggi('pratiche', andata.codicePratica);
+  if (esistente && o.sostituisci) {
+    await eliminaPratica(andata.codicePratica);
+    esistente = null;
+  }
   if (esistente) {
-    if (esistente.andataSha256 === impronta) return { stato: 'gia_presente', pratica: esistente, esito };
     const evidenze = await conta('evidenze', 'perPratica', andata.codicePratica);
-    if (evidenze > 0 || esistente.visita) {
-      return {
-        stato: 'rifiutata', esito,
-        motivo: `La pratica ${andata.codicePratica} ha già dati raccolti in campo: non si sostituisce l'andata. Crea prima il pacchetto finale e importalo sul PC.`,
-      };
-    }
+    const conDati = evidenze > 0 || !!esistente.visita;
+    if (esistente.andataSha256 === impronta && !conDati) return { stato: 'gia_presente', pratica: esistente, esito };
+    if (conDati) return { stato: 'conflitto', esistente, evidenze, stessaAndata: esistente.andataSha256 === impronta, esito };
   }
   const pratica = {
     codicePratica: andata.codicePratica,

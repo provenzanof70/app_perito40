@@ -1,11 +1,11 @@
 // Schermate di una pratica: testata, barra in basso, promemoria di checkpoint, schede Beni e Pratica.
-// Dopo il pacchetto finale la pratica è in sola lettura.
+// Dopo il pacchetto finale la pratica è in sola lettura, finché il perito non la riapre dalla scheda Pratica.
 
 import { useState, useEffect } from 'preact/hooks';
 import { html, dataBreve, oraBreve, megabyte } from '../ui.js';
 import { Testata, Barra, Foglio, Avviso } from '../componenti.js';
 import { vai, rottaPratica } from '../rotte.js';
-import { eliminaPratica } from '../archivio.js';
+import { eliminaPratica, azzeraRaccolta } from '../archivio.js';
 import { ElencoBeni, SchedaBene, GalleriaGruppo } from './beni.js';
 import { Rilievo } from './rilievo.js';
 import { DettaglioEvidenza } from './evidenza.js';
@@ -61,7 +61,7 @@ function Segnaposto({ scheda }) {
   return html`<div class="vuoto">Questa schermata arriva nella fase ${FASE[scheda]}.</div>`;
 }
 
-function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita, alRicominciaDemo }) {
+function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita, alRicominciaDemo, alGestione }) {
   const a = pratica.andata;
   const v = pratica.visita;
   const nomi = v ? a.sopralluogo.referenti.filter(r => v.presenti.includes(r.id)).map(r => r.nome).join(', ') : '';
@@ -104,15 +104,46 @@ function SchedaPraticaDettagli({ pratica, sistema, cp, alIniziaVisita, alRicomin
 
     ${a.demo === true && html`<div class="sezione">Pratica DEMO</div>
       <div class="scheda">
-        <div class="meta">Per rifare le prove da capo: toglie dal telefono la DEMO con foto, registri e pacchetti; poi la si importa di nuovo dall'elenco. Le pratiche reali non hanno questo tasto.</div>
+        <div class="meta">Per rifare le prove da capo: toglie dal telefono la DEMO con foto, registri e pacchetti; poi la si importa di nuovo dall'elenco.</div>
         <button class="secondario rosso" style=${{ alignSelf: 'flex-start' }} onClick=${alRicominciaDemo}>Ricomincia la DEMO</button>
       </div>`}
+
+    <div class="sezione">Gestione della pratica</div>
+    <div class="scheda">
+      ${pratica.stato === 'rientrata' && html`<div class="meta">Raccolta chiusa con il pacchetto finale. Riaprendola si continua la stessa visita: il prossimo pacchetto finale sostituisce quello precedente.</div>
+        <button class="secondario pieno" style=${{ alignSelf: 'flex-start' }} onClick=${() => alGestione('riapri')}>Riapri la raccolta</button>`}
+      <div class="meta">Ricomincia da capo: cancella dal telefono foto, verifiche e registri di questa pratica e riparte dall'andata, come appena importata.</div>
+      <button class="secondario rosso" style=${{ alignSelf: 'flex-start' }} onClick=${() => alGestione('azzera')}>Ricomincia da capo</button>
+      <div class="meta">Togli dal telefono: elimina la pratica con tutti i suoi dati. Per riaverla si importa di nuovo l'andata.</div>
+      <button class="secondario rosso" style=${{ alignSelf: 'flex-start' }} onClick=${() => alGestione('togli')}>Togli dal telefono</button>
+    </div>
 
     <div class="sezione">Archivio sul telefono</div>
     <div class="elenco">
       <div class="voce"><span class="etichetta">Archiviazione persistente</span><span class="valore">${!p.supportata ? 'non disponibile' : p.persistente ? 'concessa' : 'non concessa'}</span></div>
       <div class="voce"><span class="etichetta">Spazio usato</span><span class="valore">${megabyte(p.usato)} di ${megabyte(p.quota)}</span></div>
     </div>`;
+}
+
+// Riaprire, ricominciare da capo, togliere dal telefono: sempre possibile, con conferma e con quanto si perde in chiaro
+const GESTIONE = {
+  riapri: ['Riapri la raccolta', 'Riapri'],
+  azzera: ['Ricomincia da capo', 'Cancella e ricomincia'],
+  togli: ['Togli dal telefono', 'Togli dal telefono'],
+};
+function FoglioGestione({ tipo, pratica, evidenze, alChiudi, alConferma }) {
+  const [titolo, conferma] = GESTIONE[tipo];
+  const esp = pratica.esportazioni || {};
+  const ultimo = esp.ultimo;
+  // evidenze non ancora in un pacchetto salvato: quelle acquisite dopo l'ultimo pacchetto
+  const nonSalvate = ultimo ? evidenze.filter(e => new Date(e.acquisitaIl) > new Date(ultimo.data)).length : evidenze.length;
+  return html`<${Foglio} titolo=${titolo} annulla="Annulla" conferma=${conferma} alChiudi=${alChiudi} alConferma=${alConferma}>
+    ${tipo === 'riapri'
+      ? html`<div class="meta">La pratica torna modificabile e la visita prosegue. Per consegnare le aggiunte al PC servirà un nuovo pacchetto finale.</div>`
+      : html`<div class="meta">${tipo === 'azzera' ? 'Si cancellano dal telefono' : 'Si toglie dal telefono la pratica con'} ${evidenze.length === 1 ? "l'evidenza raccolta con il suo file" : `le ${evidenze.length} evidenze raccolte con i loro file`} e tutti i registri (verifiche, riscontri, dichiarazioni, note, date, azioni).${tipo === 'azzera' ? " Resta l'andata: la visita si può iniziare di nuovo." : ''}</div>
+        <div class="meta">${ultimo ? `Ultimo pacchetto salvato: ${ultimo.tipo} delle ${oraBreve(ultimo.data)} del ${dataBreve(ultimo.data)}.` : 'Nessun pacchetto è stato salvato.'}${nonSalvate ? ` ${nonSalvate === 1 ? "1 evidenza non è" : `${nonSalvate} evidenze non sono`} in nessun pacchetto salvato e ${nonSalvate === 1 ? 'andrà persa' : 'andranno perse'}.` : ''}</div>
+        <div class="meta">I pacchetti già salvati in File restano dove sono.</div>`}
+  </${Foglio}>`;
 }
 
 export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBene, gruppo, idEvidenza, requisito, idRegistro, modo, sistema, aggiorna, mostra, alMenu }) {
@@ -126,7 +157,7 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
   const bene = codiceBene && (pratica.andata.beni.find(b => b.codice === codiceBene) || registri.beneNuovo.get(codiceBene));
   // Chiamata da scatto, verifica o bene nuovo senza visita avviata: apre «Inizia visita» e poi prosegue l'azione
   const rientrata = pratica.stato === 'rientrata';
-  const serveVisita = continua => rientrata ? mostra('Raccolta chiusa con il pacchetto finale: pratica in sola lettura') : (setDopo(() => continua || null), setFoglio('azione'));
+  const serveVisita = continua => rientrata ? mostra('Raccolta chiusa con il pacchetto finale: per continuare, «Riapri la raccolta» nella scheda Pratica') : (setDopo(() => continua || null), setFoglio('azione'));
   // Alle schede che offrono modifiche arriva la pratica senza visita: ogni modifica passa da serveVisita
   const vista = rientrata ? { ...pratica, visita: null } : pratica;
   const galleria = scheda === 'beni' && bene && gruppo != null && GRUPPI_UI[gruppo];
@@ -171,7 +202,7 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
       ${cp.dovuto && html`<${Avviso} tipo="att" titolo="Crea un checkpoint" tasti=${[
         ['Crea checkpoint', () => vai(rottaPratica(codice, 'pacchetto'))],
         ['Più tardi', rinvia]]}>${testoPromemoria(cp)}</${Avviso}>`}
-      ${rientrata && MODIFICA.has(scheda) ? html`<div class="vuoto">Raccolta chiusa con il pacchetto finale: la pratica è in sola lettura.</div>`
+      ${rientrata && MODIFICA.has(scheda) ? html`<div class="vuoto">Raccolta chiusa con il pacchetto finale: la pratica è in sola lettura. Per continuare: scheda Pratica › «Riapri la raccolta».</div>`
         : scheda === 'pacchetto' ? html`<${Pacchetto} pratica=${pratica} evidenze=${evidenze} registri=${registri} sistema=${sistema} aggiorna=${aggiorna} mostra=${mostra} />`
         : scheda === 'azioni' ? html`<${Azioni} pratica=${vista} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
         : scheda === 'azione' ? html`<${FormAzione} pratica=${pratica} registri=${registri} idAzione=${idRegistro} mostra=${mostra} />`
@@ -184,7 +215,7 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
         : scheda === 'rilievo' ? html`<${Rilievo} key=${(codiceBene || '') + gruppo} pratica=${pratica} evidenze=${evidenze} registri=${registri} beneIniziale=${codiceBene} gruppoIniziale=${gruppo} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
         : beneScelto ? html`<${SchedaBene} pratica=${vista} bene=${bene} evidenze=${evidenze} registri=${registri} mostra=${mostra} alVisitaNecessaria=${serveVisita} />`
         : scheda === 'beni' ? html`<${ElencoBeni} pratica=${vista} evidenze=${evidenze} registri=${registri} alVisitaNecessaria=${serveVisita} />`
-        : scheda === 'pratica' ? html`<${SchedaPraticaDettagli} pratica=${pratica} sistema=${sistema} cp=${cp} alIniziaVisita=${() => setFoglio('scheda')} alRicominciaDemo=${() => setFoglio('demo')} />`
+        : scheda === 'pratica' ? html`<${SchedaPraticaDettagli} pratica=${pratica} sistema=${sistema} cp=${cp} alIniziaVisita=${() => setFoglio('scheda')} alRicominciaDemo=${() => setFoglio('demo')} alGestione=${setFoglio} />`
         : html`<${Segnaposto} scheda=${scheda} />`}
     </div>
     <${Barra} codicePratica=${codice} attiva=${modulo ? 'requisiti' : scheda === 'azione' ? 'azioni' : scheda === 'cronologia' || scheda === 'data' || scheda === 'pacchetto' ? 'pratica' : scheda} distintivi=${{ azioni: azioniAperte(pratica, registri).length, requisiti: requisitiSenzaBasi(pratica, evidenze, registri) }} />
@@ -192,7 +223,22 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
         alConferma=${async () => { await eliminaPratica(codice); dispatchEvent(new Event('perito40:ricarica')); vai('/'); mostra('DEMO tolta dal telefono: importala di nuovo con «Prova con la pratica DEMO»'); }}>
       <div class="meta">Si tolgono dal telefono la pratica DEMO, ${evidenze.length === 1 ? 'la sua evidenza' : `le sue ${evidenze.length} evidenze`} con i file e tutti i registri. I pacchetti già salvati in File restano dove sono.</div>
     </${Foglio}>`}
-    ${foglio && foglio !== 'demo' && html`<${FoglioIniziaVisita} pratica=${pratica} annulla=${foglio === 'apertura' ? 'Più tardi' : 'Annulla'}
+    ${GESTIONE[foglio] && html`<${FoglioGestione} tipo=${foglio} pratica=${pratica} evidenze=${evidenze} alChiudi=${() => setFoglio(null)}
+      alConferma=${async () => {
+        const tipo = foglio;
+        setFoglio(null);
+        if (tipo === 'riapri') {
+          await aggiorna(codice, p => { p.stato = 'in_corso'; p.visita = { ...p.visita, riaperture: [...((p.visita && p.visita.riaperture) || []), new Date().toISOString()] }; delete p.visita.chiusaIl; });
+          mostra('Raccolta riaperta: si continua la stessa visita');
+        } else if (tipo === 'azzera') {
+          await azzeraRaccolta(codice); dispatchEvent(new Event('perito40:ricarica')); vai(rottaPratica(codice, 'beni'));
+          mostra("Raccolta azzerata: la pratica riparte dall'andata");
+        } else {
+          await eliminaPratica(codice); dispatchEvent(new Event('perito40:ricarica')); vai('/');
+          mostra(`${codice} tolta dal telefono: per riaverla importa di nuovo l'andata`);
+        }
+      }} />`}
+    ${foglio && foglio !== 'demo' && !GESTIONE[foglio] && html`<${FoglioIniziaVisita} pratica=${pratica} annulla=${foglio === 'apertura' ? 'Più tardi' : 'Annulla'}
       perAzione=${foglio === 'azione'} alChiudi=${chiudiFoglio} alConferma=${iniziaVisita} />`}
   </div>`;
 }

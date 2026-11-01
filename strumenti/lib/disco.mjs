@@ -20,11 +20,12 @@ export function caricaSchemi(cartella = CARTELLA_SCHEMI) {
 
 const rel = (base, p) => relative(base, p).split(sep).join('/');
 
+// Le cartelle che iniziano con «_» (es. rientro/_prove) sono messe da parte dal perito: non fanno parte del fascicolo
 function elencaFile(cartella) {
   const out = [];
   for (const n of readdirSync(cartella)) {
     const p = join(cartella, n);
-    if (statSync(p).isDirectory()) out.push(...elencaFile(p));
+    if (statSync(p).isDirectory()) { if (!n.startsWith('_')) out.push(...elencaFile(p)); }
     else out.push(p);
   }
   return out;
@@ -126,10 +127,16 @@ export function validaCaricata(car, registro, opzioni = {}) {
   }
 
   if (ok('pratica_40.json')) {
+    // Il fascicolo si confronta con l'ultimo finale importato di ogni sopralluogo (dopo una riapertura ce ne può essere più d'uno)
     const importati = new Set(pratica.pacchetti.filter(p => p.tipo === 'rientro_finale').map(p => p.id));
+    const ultimi = new Map();
     for (const [id, vv] of pacchetti) {
-      if (vv[0].doc.tipoPacchetto === 'finale' && importati.has(id)) controllaImportazione(pratica, schedePerCodice, vv[0].doc, esito, vv[0].dove);
+      const d = vv[0].doc;
+      if (d.tipoPacchetto !== 'finale' || !importati.has(id)) continue;
+      const g = ultimi.get(d.sopralluogo.id);
+      if (!g || new Date(d.creatoIl) > new Date(g.doc.creatoIl)) ultimi.set(d.sopralluogo.id, vv[0]);
     }
+    for (const v of ultimi.values()) controllaImportazione(pratica, schedePerCodice, v.doc, esito, v.dove);
   }
   return esito;
 }

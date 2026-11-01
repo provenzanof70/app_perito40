@@ -54,7 +54,7 @@ export function Pacchetto({ pratica, evidenze, registri, sistema, aggiorna, most
   const rientrata = pratica.stato === 'rientrata';
   const nuove = evidenze.filter(e => !trasmesse[e.id]);
   const prossimo = (esp.numeroCheckpoint || 0) + 1;
-  const finaleFatto = (esp.pacchetti || []).find(p => p.tipo === 'finale');
+  const finaleFatto = (esp.pacchetti || []).filter(p => p.tipo === 'finale').pop();
 
   async function prepara(tipo, ricrea = null) {
     setConfermaFinale(false);

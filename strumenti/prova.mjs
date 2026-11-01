@@ -455,6 +455,21 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
       const i3 = importaRientro(cartella, [zipAlterato]);
       verifica('F3.3 Pacchetto non nato da quell\'andata: rifiutato, fascicolo non toccato',
         !i3.importato && i3.esito.errori.some(e => e.codice === 'RIENTRO_ANDATA_HASH') && readFileSync(join(cartella, 'pratica_40.json'), 'utf8') === prima);
+      // Finale più vecchio di uno già importato: rifiutato; pacchetti messi da parte in una cartella «_…»: ignorati dal controllo
+      const vecchio = { ...rientro, idRientro: '0b7d4c2e-1111-4a2b-9c3d-00000000c000', creatoIl: t('11:00:00') };
+      const vociV = [{ nome: 'perizia40-rientro.json', dati: Buffer.from(JSON.stringify(vecchio)) }, voci[2]];
+      vociV.splice(1, 0, { nome: 'hash.sha256', dati: Buffer.from(vociV.map(v => `${impronta(v.dati)}  ${v.nome}`).join('\n') + '\n') });
+      const zipVecchio = join(radice, 'PROVA-2026-001_rientro_FIN_vecchio.zip');
+      scrivi(zipVecchio, Buffer.from(scriviZip(vociV, '2026-11-12T11:00:00')));
+      let rifiuto = '';
+      try { importaRientro(cartella, [zipVecchio]); } catch (e) { rifiuto = e.message; }
+      const avvisiPrima = validaCaricata(caricaCartella(cartella), registro, {}).avvisi.length;
+      const { mkdirSync: crea, copyFileSync: copia } = await import('node:fs');
+      crea(join(cartella, 'rientro', '_prove'), { recursive: true });
+      copia(zipAlterato, join(cartella, 'rientro', '_prove', 'alterato.zip'));
+      const dopo = validaCaricata(caricaCartella(cartella), registro, {});
+      verifica('F3.3 Finale più vecchio di uno già importato rifiutato; ZIP messi da parte in rientro/_prove ignorati dal controllo',
+        /più vecchio/.test(rifiuto) && dopo.errori.length === 0 && dopo.avvisi.length === avvisiPrima);
     }
     // Emissione e chiusura: per la firma, giuramento, documenti finali firmati e marcati, sola lettura
     {
