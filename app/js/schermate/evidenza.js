@@ -8,6 +8,7 @@ import { vai, rottaPratica } from '../rotte.js';
 import { GRUPPI_UI } from '../stato.js';
 import { aggiornaEvidenza, annullaEvidenza, beneDi, descrizioneProvvisoria, daDescrivere, leggiFile } from '../evidenze.js';
 import { statoCopia, comeFile, condividi, segnaFatte, android } from '../copie.js';
+import { ApriPerSalvare } from './copie.js';
 import { useUrlFile } from '../media.js';
 
 const STRUMENTI = [['freccia', 'arrow_up_right', 'Freccia'], ['cerchio', 'circle', 'Cerchio'], ['testo', 'text_t', 'Testo'], ['annulla', 'arrow_counter_clockwise', 'Annulla']];
@@ -81,6 +82,7 @@ function Disegno({ url, annotazioni, strumento, colore, alSegno, alPunto }) {
 const ORIGINI = { app: "scattata o registrata con l'app", rullino: 'importata dal Rullino', file: 'importata da File' };
 function CopiaSicurezza({ evidenza: e, mostra }) {
   const [file, setFile] = useState(null);
+  const [aMano, setAMano] = useState(false);
   useEffect(() => { leggiFile(e.codicePratica, e.nomeFile).then(b => b && setFile(comeFile(e, b))); }, [e.nomeFile]);
   const stato = statoCopia(e);
   const cs = e.copiaSicurezza || {};
@@ -92,13 +94,17 @@ function CopiaSicurezza({ evidenza: e, mostra }) {
     mostra(`Copia di sicurezza di ${e.id} salvata sul telefono`);
   };
   return html`<div class=${`copia-evidenza ${stato}`}>
-    <div><b>Copia di sicurezza</b> · ${stato === 'fatta' ? `fatta il ${dataBreve(cs.il)} alle ${oraBreve(cs.il)}${cs.modo === 'scaricamento' ? ' (scaricata)' : ''}`
+    <div><b>Copia di sicurezza</b> · ${stato === 'fatta' ? `fatta il ${dataBreve(cs.il)} alle ${oraBreve(cs.il)}${cs.modo === 'scaricamento' ? ' (scaricata)' : cs.modo === 'manuale' ? ' (salvata a mano)' : ''}`
       : stato === 'gia_presente' ? 'già presente sul telefono' : 'da fare: il file esiste solo nell\'app'}${e.origineFile ? ` · ${ORIGINI[e.origineFile]}` : ''}</div>
     ${(cs.rinunce || []).map(r => html`<div class="meta">Proseguito senza copia (${r.momento.replace('_', ' ')}, ${dataBreve(r.il)} ${oraBreve(r.il)}): ${r.motivo}</div>`)}
     ${e.stato === 'valida' && html`<button class=${stato === 'da_fare' ? 'primario mini' : 'collegamento chiaro'} disabled=${!file} onClick=${() => salva()}>
       ${stato === 'da_fare' ? (android ? 'Scarica copia nel telefono' : 'Salva copia sul telefono') : "Salva un'altra copia"}</button>`}
     ${e.stato === 'valida' && android && html`<button class="collegamento chiaro" disabled=${!file} onClick=${() => salva('condividi')}>Condividi… (es. Drive)</button>`}
+    ${e.stato === 'valida' && android && html`<button class="collegamento chiaro" disabled=${!file} onClick=${() => setAMano(true)}>Non la trovi in Galleria? Apri per salvare a mano</button>`}
     ${stato === 'fatta' && cs.modo === 'scaricamento' && html`<div class="meta">Scaricata nella cartella Download del telefono.</div>`}
+    ${stato === 'fatta' && cs.modo === 'manuale' && html`<div class="meta">Salvata a mano sul telefono.</div>`}
+    ${aMano && html`<${ApriPerSalvare} voci=${[{ evidenza: e, file }]} alChiudi=${() => setAMano(false)}
+      alFatto=${async () => { setAMano(false); await segnaFatte(e.codicePratica, [e.id], 'manuale'); dispatchEvent(new Event('perito40:ricarica')); mostra(`Copia di ${e.id} segnata come salvata a mano`); }} />`}
   </div>`;
 }
 

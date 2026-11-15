@@ -76,3 +76,5 @@ e Google Foto mostrano tra le cartelle del dispositivo. «Condividi…» resta d
 | F6 | Registra un vocale › «Scarica copia nel telefono» | Il file audio è in Download (app File › Download). |
 | F7 | Dettaglio di un'evidenza › «Condividi… (es. Drive)» | Si apre il foglio di condivisione di Android con le app. |
 | F8 | Avvisi bloccanti (prove C1–C7) e Importa (D1–D4) | Stesso comportamento dell'iPhone. |
+| F9 | Tablet o telefono Android senza servizi Google (es. Huawei, Browser Huawei): dopo «Scarica copia nel telefono» cerca il file in File › Interna › Download (anche Download › Browser) o nel menu del browser › Download | Il file c'è; se non compare in Galleria, prosegui con F10. |
+| F10 | Dettaglio dell'evidenza › «Non la trovi in Galleria? Apri per salvare a mano» › tieni premuto sull'immagine › «Salva immagine» (o «Scarica immagine») › «Fatto, le ho salvate» | La foto compare in Galleria; nel dettaglio «fatta … (salvata a mano)». Dal foglio delle copie mancanti lo stesso con più file insieme. |

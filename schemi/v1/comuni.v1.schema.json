@@ -192,7 +192,7 @@
           "properties": {
             "stato": { "enum": ["da_fare", "fatta", "gia_presente"], "description": "gia_presente = il file era già sul telefono (importato dal Rullino o da File)" },
             "il": { "$ref": "#/$defs/dataOra", "description": "Quando la copia è stata fatta" },
-            "modo": { "enum": ["condivisione", "scaricamento"], "description": "condivisione = foglio di condivisione di iOS completato (Salva immagine, Salva in File…): l'app non può verificare quale azione è stata scelta" },
+            "modo": { "enum": ["condivisione", "scaricamento", "manuale"], "description": "condivisione = foglio di condivisione completato (Salva immagine, Salva in File…): l'app non può verificare quale azione è stata scelta; scaricamento = file scaricato dal browser; manuale = salvata a mano dal perito (tieni premuto › Salva immagine) e confermata con un tocco" },
             "rinunce": {
               "type": "array",
               "description": "Ogni volta che il perito ha proseguito senza copia, con il motivo",

@@ -6,12 +6,34 @@ import { html } from '../ui.js';
 import { Foglio } from '../componenti.js';
 import { copieMancanti, perRullino, preparaFile, condividi, segnaFatte, registraRinuncia, android } from '../copie.js';
 
+// Su alcuni browser Android (es. tablet Huawei) il file scaricato non compare in Galleria: si mostra il file e il perito lo salva
+// a mano (tieni premuto › Salva immagine; ⋮ del lettore › Scarica), poi conferma con un tocco
+export function ApriPerSalvare({ voci, alChiudi, alFatto }) {
+  const [url, setUrl] = useState([]);
+  useEffect(() => {
+    const u = voci.map(x => URL.createObjectURL(x.file));
+    setUrl(u);
+    return () => u.forEach(x => URL.revokeObjectURL(x));
+  }, []);
+  return html`<${Foglio} titolo="Salva a mano" annulla="Chiudi" conferma="Fatto, le ho salvate" alChiudi=${alChiudi} alConferma=${alFatto}>
+    <div class="meta">Per ogni file: <b>tieni premuto sull'immagine</b> e scegli «Salva immagine» o «Scarica immagine». Per video e vocali usa il menu del lettore (⋮ › Scarica). Poi tocca «Fatto, le ho salvate».</div>
+    ${voci.map((x, i) => html`<div class="scheda">
+      <b>${x.evidenza.id}</b>
+      ${!url[i] ? null : /^image\//.test(x.file.type) ? html`<img class="salva-a-mano" src=${url[i]} alt=${x.evidenza.id} />`
+        : /^video\//.test(x.file.type) ? html`<video class="salva-a-mano" src=${url[i]} controls playsinline></video>`
+        : /^audio\//.test(x.file.type) ? html`<audio src=${url[i]} controls></audio>`
+        : html`<a class="collegamento" href=${url[i]} target="_blank" rel="noopener" download=${x.file.name}>Apri ${x.file.name}</a>`}
+    </div>`)}
+  </${Foglio}>`;
+}
+
 const MOMENTI = { cambio_bene: 'Prima di passare a un altro bene', checkpoint: 'Prima del checkpoint', chiusura: 'Prima di chiudere la visita' };
 
 export function FoglioCopie({ pratica, evidenze, momento, alChiudi, alProsegui, mostra }) {
   const [pronti, setPronti] = useState(null);
   const [salvate, setSalvate] = useState(new Set());
   const [rinuncia, setRinuncia] = useState(null);
+  const [aMano, setAMano] = useState(null);
   useEffect(() => { preparaFile(copieMancanti(evidenze)).then(setPronti); }, []);
   const restano = (pronti || []).filter(x => !salvate.has(x.evidenza.id));
   // su Android tutto si scarica nella cartella Download con un tocco; su iPhone due gruppi (Rullino, File)
@@ -27,6 +49,14 @@ export function FoglioCopie({ pratica, evidenze, momento, alChiudi, alProsegui, 
     setSalvate(s => new Set([...s, ...ids]));
     dispatchEvent(new Event('perito40:ricarica'));
     mostra(`${ids.length === 1 ? 'Copia di sicurezza salvata' : `${ids.length} copie di sicurezza salvate`}`);
+  }
+  async function confermaAMano() {
+    const ids = aMano.map(x => x.evidenza.id);
+    await segnaFatte(pratica.codicePratica, ids, 'manuale');
+    setSalvate(s => new Set([...s, ...ids]));
+    setAMano(null);
+    dispatchEvent(new Event('perito40:ricarica'));
+    mostra(`${ids.length === 1 ? 'Copia segnata come salvata a mano' : `${ids.length} copie segnate come salvate a mano`}`);
   }
   async function prosegui() {
     await registraRinuncia(pratica.codicePratica, restano.map(x => x.evidenza.id), momento, rinuncia.trim());
@@ -47,7 +77,8 @@ export function FoglioCopie({ pratica, evidenze, momento, alChiudi, alProsegui, 
             : dove === 'Rullino' ? 'Nel foglio di iOS scegli «Salva immagine» o «Salva video»: finiscono nel Rullino.' : 'Nel foglio di iOS scegli «Salva in File» e una cartella, per esempio quella della pratica.'}</div>
           <div class="meta">${lista.map(x => x.evidenza.id).join(' · ')}</div>
           <button class="primario" style=${{ alignSelf: 'flex-start' }} onClick=${() => salva(lista)}>${dove === 'Telefono' ? `Scarica ${lista.length === 1 ? 'la copia' : `le ${lista.length} copie`} nel telefono` : `Salva ${lista.length === 1 ? 'la copia' : `${lista.length} copie`} ${dove === 'Rullino' ? 'nel Rullino' : 'in File'}`}</button>
-          ${dove === 'Telefono' && html`<button class="collegamento" style=${{ alignSelf: 'flex-start' }} onClick=${() => salva(lista, 'condividi')}>Condividi… (es. Drive)</button>`}
+          ${dove === 'Telefono' && html`<button class="collegamento" style=${{ alignSelf: 'flex-start' }} onClick=${() => salva(lista, 'condividi')}>Condividi… (es. Drive)</button>
+            <button class="collegamento" style=${{ alignSelf: 'flex-start' }} onClick=${() => setAMano(lista)}>Non le trovi in Galleria? Apri per salvare a mano</button>`}
         </div>`)}
         ${momento && (rinuncia === null
           ? html`<button class="collegamento rosso" style=${{ alignSelf: 'flex-start' }} onClick=${() => setRinuncia('')}>Prosegui senza copia…</button>`
@@ -57,5 +88,6 @@ export function FoglioCopie({ pratica, evidenze, momento, alChiudi, alProsegui, 
               <textarea class="campo-testo area" rows="2" placeholder="Motivo (obbligatorio), es. spazio esaurito sul telefono" value=${rinuncia} onInput=${e => setRinuncia(e.target.value)} />
               <button class="secondario rosso" style=${{ alignSelf: 'flex-start' }} disabled=${!rinuncia.trim()} onClick=${prosegui}>Registra il motivo e prosegui</button>
             </div>`)}`}
+    ${aMano && html`<${ApriPerSalvare} voci=${aMano} alChiudi=${() => setAMano(null)} alFatto=${confermaAMano} />`}
   </${Foglio}>`;
 }
