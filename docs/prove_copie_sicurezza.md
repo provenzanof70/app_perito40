@@ -60,3 +60,19 @@ Preparazione: app aggiornata (Menu › Versione **0.12.0 · schema 1.8**), prati
 
 Note: il foglio di condivisione di iOS non dice all'app quale azione hai scelto. Se scegli «Copia» invece di «Salva immagine», la
 copia risulta comunque «fatta». La voce Rullino o File di Importa è quella che tocchi tu: iOS non indica la provenienza del file.
+
+## F. Android (app 0.12.1)
+
+Su Android il foglio di condivisione non ha «Salva in galleria»: la copia si **scarica** nella cartella Download, che Galleria
+e Google Foto mostrano tra le cartelle del dispositivo. «Condividi…» resta disponibile, per esempio per Drive.
+
+| # | Prova | Atteso |
+|---|---|---|
+| F1 | Rilievo › FOTO › scatta una foto | Striscia arancione con «Scarica copia nel telefono». |
+| F2 | Tocca «Scarica copia nel telefono» | Chrome scarica il file (notifica di download); la striscia sparisce; nel dettaglio «fatta … (scaricata)». |
+| F3 | Apri Galleria o Google Foto › cartelle del dispositivo › Download | La foto c'è. |
+| F4 | Scatta 3 foto senza copia › tocca «3 copie di sicurezza da fare» | Un solo riquadro «Foto, video, vocali e documenti · 3» con «Scarica le 3 copie nel telefono». |
+| F5 | Tocca «Scarica le 3 copie nel telefono» | Se Chrome chiede «Consentire download multipli?», rispondi sì; i 3 file sono in Download; numero a 0. |
+| F6 | Registra un vocale › «Scarica copia nel telefono» | Il file audio è in Download (app File › Download). |
+| F7 | Dettaglio di un'evidenza › «Condividi… (es. Drive)» | Si apre il foglio di condivisione di Android con le app. |
+| F8 | Avvisi bloccanti (prove C1–C7) e Importa (D1–D4) | Stesso comportamento dell'iPhone. |

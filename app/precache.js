@@ -1,5 +1,5 @@
 // Generato da strumenti/aggiorna_app.mjs: non modificare a mano.
-self.VERSIONE = '4b66cc765efcec36';
+self.VERSIONE = '3217a415bf064b8d';
 self.FILE_APP = [
   "./img/icona-180.png",
   "./img/icona-192.png",

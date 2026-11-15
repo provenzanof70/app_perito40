@@ -1,6 +1,8 @@
 // Copie di sicurezza: i rilievi sono irripetibili, quindi nessuna evidenza deve esistere solo nell'archivio dell'app.
 // Dopo ogni acquisizione si salva una copia del file originale sul telefono con il foglio di condivisione di iOS:
 // foto e video nel Rullino («Salva immagine», «Salva video»), vocali e documenti in File («Salva in File»).
+// Su Android il foglio di condivisione non ha «Salva in galleria»: la copia si scarica nella cartella Download,
+// che Galleria e Google Foto mostrano tra le cartelle del dispositivo; «Condividi…» resta una scelta in più.
 // Fa fede l'originale dell'app con il suo SHA-256: la copia è solo di sicurezza, iOS potrebbe ricomprimerla.
 
 import { aggiornaEvidenza, leggiFile } from './evidenze.js';
@@ -17,6 +19,8 @@ export const copieMancanti = evidenze => evidenze.filter(e => e.stato === 'valid
 // Foto e video vanno nel Rullino, il resto in File: iOS propone azioni diverse per i due gruppi
 export const perRullino = e => /^(image|video)\//.test(e.mime || '');
 
+export const android = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+
 export function comeFile(e, blob) {
   return new File([blob], e.nomeFile, { type: e.mime || blob.type || 'application/octet-stream' });
 }
@@ -30,20 +34,27 @@ export async function preparaFile(evidenze) {
   return out;
 }
 
-// Apre il foglio di condivisione di iOS. Va chiamata direttamente dal tocco, con i file già pronti:
-// iOS rifiuta la condivisione se prima si aspetta altro. Esito: 'condivisione' | 'scaricamento' | null (annullata)
-export async function condividi(files) {
-  if (navigator.canShare && navigator.canShare({ files })) {
+// Salva le copie. Va chiamata direttamente dal tocco, con i file già pronti: iOS rifiuta la condivisione se prima si aspetta altro.
+// modo: 'auto' (iPhone: condivisione; Android e PC: scaricamento) | 'condividi' (foglio di condivisione anche su Android)
+// Esito: 'condivisione' | 'scaricamento' | null (annullata)
+export async function condividi(files, modo = 'auto') {
+  const conCondivisione = modo === 'condividi' || !android;
+  if (conCondivisione && navigator.canShare && navigator.canShare({ files })) {
     try { await navigator.share({ files }); return 'condivisione'; } catch (e) { if (e.name === 'AbortError') return null; }
   }
-  // senza condivisione (es. PC): si scaricano i file
-  for (const f of files) {
+  await scarica(files);
+  return 'scaricamento';
+}
+
+// Scaricamento nella cartella Download del telefono (o del PC); più file uno dopo l'altro, come chiede Chrome
+async function scarica(files) {
+  for (const [i, f] of files.entries()) {
+    if (i) await new Promise(r => setTimeout(r, 400));
     const a = document.createElement('a');
     a.href = URL.createObjectURL(f); a.download = f.name;
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
   }
-  return 'scaricamento';
 }
 
 export async function segnaFatte(codicePratica, ids, modo) {

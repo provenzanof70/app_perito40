@@ -10,7 +10,7 @@ import { vai, rottaPratica } from '../rotte.js';
 import { GRUPPI_UI } from '../stato.js';
 import { registraEvidenza, gruppiPer, beneDi } from '../evidenze.js';
 import { useUrlFile, durata, avviaRegistrazione } from '../media.js';
-import { comeFile, condividi, segnaFatte, copieMancanti, statoCopia } from '../copie.js';
+import { comeFile, condividi, segnaFatte, copieMancanti, statoCopia, android } from '../copie.js';
 import { FoglioCopie } from './copie.js';
 
 const TIPI_COMPONENTE = { M: 'macchina', QM: 'quasi-macchina', ITS: 'insieme', ACC: 'accessorio' };
@@ -173,7 +173,7 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
     <div class="rilievo-pannello">
       ${copiaAperta && html`<div class="striscia-copia" role="status">
         <span><b>Copia di sicurezza</b> · ${copia.id} esiste solo nell'app</span>
-        <button onClick=${salvaCopia}>Salva copia sul telefono</button>
+        <button onClick=${salvaCopia}>${android ? 'Scarica copia nel telefono' : 'Salva copia sul telefono'}</button>
         <button class="chiudi" aria-label="Più tardi" onClick=${() => setCopia(null)}>×</button>
       </div>`}
       <div class="rilievo-bene">
