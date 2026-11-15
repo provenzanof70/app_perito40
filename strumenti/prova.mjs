@@ -90,6 +90,21 @@ const verifica = (nome, ok) => { prove++; if (!ok) falliti++; console.log(`${ok 
   verifica('1.6 Tipo di documento fuori elenco → errore di schema', errori(c).some(e => e.codice === 'SCHEMA'));
 }
 
+// App: stato delle copie di sicurezza (schema 1.8; prima del 1.8 foto, video e vocali senza stato contano come da fare)
+{
+  const { statoCopia, copieMancanti, perRullino } = await import('../app/js/copie.js');
+  const ev = [
+    { id: 'A', tipo: 'foto', mime: 'image/jpeg', stato: 'valida', copiaSicurezza: { stato: 'da_fare' } },
+    { id: 'B', tipo: 'foto', mime: 'image/jpeg', stato: 'valida', copiaSicurezza: { stato: 'fatta', il: 'x', modo: 'condivisione' } },
+    { id: 'C', tipo: 'vocale', mime: 'audio/mp4', stato: 'valida' },
+    { id: 'D', tipo: 'documento', mime: 'application/pdf', stato: 'valida' },
+    { id: 'E', tipo: 'video', mime: 'video/quicktime', stato: 'annullata', copiaSicurezza: { stato: 'da_fare' } },
+    { id: 'F', tipo: 'video', mime: 'video/quicktime', stato: 'valida', copiaSicurezza: { stato: 'gia_presente' } },
+  ];
+  verifica('Copie di sicurezza: mancanti solo le evidenze valide da copiare (anche le vecchie senza stato); foto e video al Rullino, il resto in File',
+    copieMancanti(ev).map(e => e.id).join() === 'A,C' && statoCopia(ev[3]) === 'gia_presente' && perRullino(ev[0]) && perRullino(ev[5]) && !perRullino(ev[2]) && !perRullino(ev[3]));
+}
+
 // App: promemoria di checkpoint (2 ore o 30 evidenze dall'ultimo pacchetto o dall'inizio visita)
 {
   const { statoCheckpoint } = await import('../app/js/promemoria.js');

@@ -18,7 +18,7 @@ const PRATICA = 'DEMO-2026-001';
 const VISITA = '2026-10-15';
 const ID_ANDATA = '5f0c2a1e-1d2b-4c3a-9e00-00000000a001';
 const ID_RIENTRO = '7b1e9c40-2f3a-4d5b-8c00-00000000b001';
-const VERSIONE = '1.7.0';
+const VERSIONE = '1.8.0';
 const ora = (data, hhmm, ss = '00') => `${data}T${hhmm}:${ss}+02:00`;
 
 // ---------------------------------------------------------------------------
@@ -277,6 +277,15 @@ function datiScatto(e, tipo) {
   return { origineDataScatto: tipo === 'vocale' ? 'registrazione_app' : 'metadati', dataScatto: ora(VISITA, e.t) };
 }
 
+// Copie di sicurezza (schema 1.8): foto e video della DEMO vengono dal Rullino (scattati con la Fotocamera), i vocali sono
+// registrati nell'app e copiati in File; la targa dell'aspiratore, scattata con l'app, è rimasta senza copia con il motivo
+function copiaDemo(e, tipo) {
+  if (e.id === 'B01.2-RO5-001') return { origineFile: 'app', copiaSicurezza: { stato: 'da_fare', rinunce: [{ momento: 'chiusura', motivo: 'memoria del telefono piena: copia rimandata in studio', il: ora(VISITA, '12:09') }] } };
+  if (tipo === 'vocale') return { origineFile: 'app', copiaSicurezza: { stato: 'fatta', il: ora(VISITA, e.t, '50'), modo: 'condivisione' } };
+  if (tipo === 'foto' || tipo === 'video') return { origineFile: 'rullino', copiaSicurezza: { stato: 'gia_presente' } };
+  return { origineFile: 'file', copiaSicurezza: { stato: 'gia_presente' } };
+}
+
 const evidenzaCampo = (e, file) => {
   const m = media.get(e.id);
   return pulisci({
@@ -286,6 +295,7 @@ const evidenzaCampo = (e, file) => {
     dataMostrataAVideo: e.dataMostrataAVideo, durataSecondi: e.durata, descrizione: e.descrizione, nota: e.nota,
     annotazioni: e.annotazioni, trascrizioni: e.trascrizioni, contenutoLetto: e.contenutoLetto,
     stato: e.stato || 'valida', annullamento: e.annullamento,
+    ...copiaDemo(e, m.tipo),
   });
 };
 

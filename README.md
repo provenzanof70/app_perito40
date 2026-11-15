@@ -30,6 +30,7 @@ App di sopralluogo per le perizie tecniche **Industria 4.0** (credito d'imposta 
 | F3.4 | PC: emissione e chiusura (per la firma, giuramento, documenti finali firmati PAdES/CAdES e marcati, sola lettura); schema 1.7 | fatta |
 | F3.5 | PC: diario di ogni pratica e cruscotto delle pratiche aperte con il prossimo passo (`/pratiche` nella cartella delle pratiche) | fatta |
 | F4.1 | Studio desktop (`studio/`): cruscotto, pratica con beni, documenti da trascinare e registrare, diario; server locale solo su 127.0.0.1 | fatta |
+| 0.12 | Copie di sicurezza sul telefono dopo ogni acquisizione (Rullino o File), copie multiple, avvisi bloccanti con motivo, «Importa» dal Rullino e da File; schema 1.8 ([prove sull'iPhone](docs/prove_copie_sicurezza.md)) | fatta |
 | 0.9–0.10 | Gruppo Sicurezza (RO5), riquadri per requisito, nota breve facoltativa in campo, dati del documento; schemi 1.5–1.6 | fatta |
 
 ## Struttura

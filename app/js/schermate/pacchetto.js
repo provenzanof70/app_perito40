@@ -7,6 +7,9 @@ import { Foglio, Avviso, ElencoErrori } from '../componenti.js';
 import { costruisciRientro, preparaEControlla, creaZip, registraEsportazione } from '../pacchetto.js';
 import { registroSchemi } from '../importa.js';
 import { leggiFile } from '../evidenze.js';
+import { tutti } from '../archivio.js';
+import { copieMancanti } from '../copie.js';
+import { FoglioCopie } from './copie.js';
 import { VERSIONE_APP } from '../app.js';
 
 const mono = { wordBreak: 'break-all', fontFamily: 'ui-monospace, Menlo, monospace' };
@@ -49,6 +52,9 @@ function Contenuto({ doc, volumi }) {
 export function Pacchetto({ pratica, evidenze, registri, sistema, aggiorna, mostra }) {
   const [fase, setFase] = useState(null); // null | { tipo, costruito, esito, preparati, ora, zip, salvati, avanzamento, errore, ricreato }
   const [confermaFinale, setConfermaFinale] = useState(false);
+  const [foglioCopie, setFoglioCopie] = useState(null); // null | { momento, continua }
+  // checkpoint e chiusura passano dal controllo delle copie di sicurezza mancanti
+  const conCopie = (momento, continua) => copieMancanti(evidenze).length ? setFoglioCopie({ momento, continua }) : continua();
   const esp = pratica.esportazioni || {};
   const trasmesse = esp.trasmesse || {};
   const rientrata = pratica.stato === 'rientrata';
@@ -61,7 +67,9 @@ export function Pacchetto({ pratica, evidenze, registri, sistema, aggiorna, most
     const ora = ricrea ? new Date(ricrea.ora) : new Date();
     setFase({ tipo, avanzamento: null });
     try {
-      const costruito = costruisciRientro({ pratica, evidenze, registri, tipo, ora, versioneApp: VERSIONE_APP.split(' ')[0], piattaforma: piattaforma(),
+      // le evidenze si rileggono: stato delle copie e motivi possono essere appena cambiati
+      const attuali = await tutti('evidenze', 'perPratica', pratica.codicePratica);
+      const costruito = costruisciRientro({ pratica, evidenze: attuali, registri, tipo, ora, versioneApp: VERSIONE_APP.split(' ')[0], piattaforma: piattaforma(),
         installata: sistema.installata, idRientro: ricrea ? ricrea.idRientro : undefined });
       const { esito, preparati } = await preparaEControlla(costruito, pratica, await registroSchemi());
       setFase({ tipo, costruito, esito, preparati, ora, zip: null, salvati: new Set(), ricreato: !!ricrea });
@@ -146,12 +154,12 @@ export function Pacchetto({ pratica, evidenze, registri, sistema, aggiorna, most
       <div class="scheda">
         <b>Checkpoint ${prossimo}</b>
         <div class="meta">Mette al sicuro quanto raccolto: stato completo della visita e solo i file nuovi. La raccolta continua.</div>
-        <button class="secondario pieno" style=${{ alignSelf: 'flex-start' }} onClick=${() => prepara('checkpoint')}>Crea checkpoint</button>
+        <button class="secondario pieno" style=${{ alignSelf: 'flex-start' }} onClick=${() => conCopie('checkpoint', () => prepara('checkpoint'))}>Crea checkpoint</button>
       </div>
       <div class="scheda">
         <b>Pacchetto finale</b>
         <div class="meta">Tutti i file e tutti gli esiti. Dopo il salvataggio la visita si chiude e la pratica resta in sola lettura.</div>
-        <button class="secondario" style=${{ alignSelf: 'flex-start' }} onClick=${() => setConfermaFinale(true)}>Crea pacchetto finale</button>
+        <button class="secondario" style=${{ alignSelf: 'flex-start' }} onClick=${() => conCopie('chiusura', () => setConfermaFinale(true))}>Crea pacchetto finale</button>
       </div>`}
     ${rientrata && html`<${Avviso} tipo="info" titolo="Raccolta chiusa">Visita chiusa alle ${oraBreve(pratica.visita.chiusaIl)} del ${dataBreve(pratica.visita.chiusaIl)}. La pratica è in sola lettura.</${Avviso}>
       ${finaleFatto && finaleFatto.ora && html`<button class="secondario" style=${{ alignSelf: 'flex-start' }} onClick=${() => prepara('finale', finaleFatto)}>Ricrea il pacchetto finale</button>
@@ -163,5 +171,6 @@ export function Pacchetto({ pratica, evidenze, registri, sistema, aggiorna, most
     ${confermaFinale && html`<${Foglio} titolo="Pacchetto finale" annulla="Annulla" conferma="Prepara" alChiudi=${() => setConfermaFinale(false)} alConferma=${() => prepara('finale')}>
       <div class="meta">Il pacchetto finale chiude la raccolta: dopo averlo salvato non si potranno più aggiungere evidenze, verifiche o note a questa visita. Prima del salvataggio puoi ancora annullare.</div>
       ${nuove.length < evidenze.length ? html`<div class="meta">Contiene anche i ${evidenze.length - nuove.length} file già consegnati nei checkpoint: il finale è completo da solo.</div>` : null}
-    </${Foglio}>`}`;
+    </${Foglio}>`}    ${foglioCopie && html`<${FoglioCopie} pratica=${pratica} evidenze=${evidenze} momento=${foglioCopie.momento} mostra=${mostra}
+      alChiudi=${() => setFoglioCopie(null)} alProsegui=${() => { const f = foglioCopie; setFoglioCopie(null); f.continua(); }} />`}`;
 }

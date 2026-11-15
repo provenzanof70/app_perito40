@@ -12,7 +12,7 @@ import { randomUUID } from 'node:crypto';
 import { caricaSchemi, caricaCartella, validaCaricata, sha256 } from './lib/disco.mjs';
 import { costruisciAndata } from './lib/andata.mjs';
 
-const VERSIONE = '1.7.0';
+const VERSIONE = '1.8.0';
 const isoLocale = d => {
   const p = n => String(n).padStart(2, '0');
   const o = -d.getTimezoneOffset();

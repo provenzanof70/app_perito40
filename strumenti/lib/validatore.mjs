@@ -400,6 +400,12 @@ function controllaEvidenze(evidenze, beniNoti, esito, dove) {
     if ((e.tipo === 'vocale' || e.tipo === 'video') && e.durataSecondi === undefined) esito.avviso('MEDIA_SENZA_DURATA', p, `${e.tipo} senza durata`);
     if (e.tipo === 'foto' && !(e.annotazioni || []).length && !e.descrizione) esito.avviso('FOTO_SENZA_ANNOTAZIONE', p, 'foto senza annotazione');
     if (e.stato === 'valida' && /\(da descrivere/.test(e.descrizione || '')) esito.avviso('EVIDENZA_DA_DESCRIVERE', p, `nota breve rimandata in campo: «${e.descrizione}»`);
+    const cs = e.copiaSicurezza;
+    if (cs && e.stato === 'valida' && cs.stato === 'da_fare') {
+      const motivi = (cs.rinunce || []).map(r => r.motivo);
+      esito.avviso('COPIA_SICUREZZA_MANCANTE', p, `${e.id}: nessuna copia di sicurezza fuori dall'app${motivi.length ? ` (proseguito senza: ${motivi.join('; ')})` : ''}`);
+    }
+    if (cs && e.origineFile && e.origineFile !== 'app' && cs.stato === 'da_fare') esito.avviso('COPIA_SICUREZZA_INCOERENTE', p, `${e.id}: importata da ${e.origineFile === 'rullino' ? 'Rullino' : 'File'}, quindi già presente sul telefono, ma segnata «da fare»`);
     (e.trascrizioni || []).forEach((t, j) => {
       if (!t.confrontataConOriginale) esito.avviso('TRASCRIZIONE_NON_CONFRONTATA', `${p}/trascrizioni/${j}`, `trascrizione (${t.origine}) non ancora confrontata con l'originale`);
     });
@@ -744,6 +750,14 @@ export function controllaVolumeRientro(vol, andata, esitoFinale, dove, { soloFil
   aggiungiBeniNuovi(r.beniNuovi, beniNoti, esito, dove);
 
   const evidenze = controllaEvidenze(r.evidenze, beniNoti, esito, dove);
+  // Dallo schema 1.8 l'app chiude la visita solo con le copie di sicurezza fatte o con il motivo per cui si è proseguito senza
+  if (r.tipoPacchetto === 'finale' && versioneAlmeno(r.versioneSchema, [1, 8])) {
+    for (const e of evidenze.values()) {
+      if (e.stato === 'valida' && e.copiaSicurezza && e.copiaSicurezza.stato === 'da_fare' && !(e.copiaSicurezza.rinunce || []).length) {
+        esito.errore('COPIA_SICUREZZA_SENZA_MOTIVO', dove, `${e.id}: visita chiusa senza copia di sicurezza e senza motivo registrato`);
+      }
+    }
+  }
   for (const id of evidenze.keys()) if (esistenti.has(id)) esito.errore('EVIDENZA_ID_COLLISIONE', dove, `${id} è già usato nel fascicolo (evidenzeEsistenti dell'andata)`);
   if (andata && andata.doc.idUsati) {
     const u = andata.doc.idUsati;

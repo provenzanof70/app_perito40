@@ -763,6 +763,52 @@
       "atteso": [
         "ID_REGISTRO_COLLISIONE"
       ]
+    },
+    {
+      "nome": "visita chiusa (schema 1.8) senza copia di sicurezza e senza motivo",
+      "modifiche": [
+        {
+          "file": "{vol1}/perizia40-rientro.json",
+          "puntatore": "/evidenze/12/copiaSicurezza/rinunce",
+          "elimina": true
+        },
+        {
+          "file": "{vol2}/perizia40-rientro.json",
+          "puntatore": "/evidenze/12/copiaSicurezza/rinunce",
+          "elimina": true
+        }
+      ],
+      "atteso": [
+        "COPIA_SICUREZZA_SENZA_MOTIVO"
+      ]
+    },
+    {
+      "nome": "copia di sicurezza «fatta» senza data e ora",
+      "modifiche": [
+        {
+          "file": "pratica_40.json",
+          "puntatore": "/evidenze/16/copiaSicurezza",
+          "valore": {
+            "stato": "fatta"
+          }
+        }
+      ],
+      "atteso": [
+        "SCHEMA"
+      ]
+    },
+    {
+      "nome": "proseguito senza copia senza scrivere il motivo",
+      "modifiche": [
+        {
+          "file": "pratica_40.json",
+          "puntatore": "/evidenze/16/copiaSicurezza/rinunce/0/motivo",
+          "valore": ""
+        }
+      ],
+      "atteso": [
+        "SCHEMA"
+      ]
     }
   ]
 }

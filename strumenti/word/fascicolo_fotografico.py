@@ -22,6 +22,8 @@ GRUPPI = {1: 'Bene', 2: 'Targa', 3: 'PLC/CNC', 4: 'HMI', 5: 'Interconnessione', 
           8: 'Monitoraggio', 9: 'Modello digitale', 10: 'Dati in uscita', 11: 'Sicurezza', 'DOC': 'Documenti'}
 # Stesso ordine dell'app: per requisito (ID, RO1…RO5, RU1…RU3, DOC)
 ORDINE = [1, 2, 3, 5, 10, 6, 4, 11, 7, 8, 9, 'DOC']
+ORIGINE_FILE = {'app': "scattata con l'app", 'rullino': 'importata dal Rullino', 'file': 'importata da File'}
+COPIA = {'fatta': 'copia di sicurezza fatta', 'gia_presente': 'già sul telefono', 'da_fare': 'senza copia di sicurezza'}
 ORIGINE = {'metadati': 'dai metadati del file', 'registrazione_app': "registrazione nell'app",
            'fotocamera_app': "fotocamera aperta dall'app", 'assente': 'metadati assenti'}
 LATO_MAX = 1600
@@ -174,6 +176,13 @@ def fascicolo(cartella, codice, pratica, scheda, data, uscita, tmp):
         if video:
             scatto += f" · a video: {video['valore']}{' (orologio del bene errato' + (', ' + video['scartoStimato'] if video.get('scartoStimato') else '') + ')' if video.get('orologioErrato') else ''}"
         riga(p, f"{scatto} · SHA-256 {e['sha256'][:16]}…", colore_=GRIGIO)
+        cs = e.get('copiaSicurezza')
+        if cs or e.get('origineFile'):
+            # fa fede l'originale dell'app con la sua impronta: la copia sul telefono è solo di sicurezza
+            motivi = '; '.join(r['motivo'] for r in (cs or {}).get('rinunce', []))
+            riga(doc.add_paragraph(), ' · '.join(x for x in (ORIGINE_FILE.get(e.get('origineFile')), COPIA.get((cs or {}).get('stato')),
+                                                          f"proseguito senza copia: {motivi}" if motivi else None) if x),
+                 colore_=ROSSO if (cs or {}).get('stato') == 'da_fare' else GRIGIO)
 
     if altri:
         doc.add_heading('Altre evidenze del bene', 1)

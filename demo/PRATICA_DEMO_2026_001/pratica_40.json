@@ -1,6 +1,6 @@
 {
   "formato": "perizia40.pratica",
-  "versioneSchema": "1.7.0",
+  "versioneSchema": "1.8.0",
   "demo": true,
   "codicePratica": "DEMO-2026-001",
   "regime": "CRI_4.0",
@@ -211,7 +211,11 @@
           "testo": "centro di lavoro B01 con cabina chiusa"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B01-ID-002",
@@ -238,6 +242,10 @@
         "motivo": "riflesso sulla targa: matricola illeggibile",
         "data": "2026-10-15T10:09:00+02:00",
         "sostituitaDa": "B01-ID-003"
+      },
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
       }
     },
     {
@@ -279,7 +287,11 @@
           "confrontataIl": "2026-10-15T10:10:00+02:00"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B01-RO1-001",
@@ -318,7 +330,11 @@
           "confrontataIl": "2026-10-15T10:21:00+02:00"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B01-RO1-002",
@@ -379,7 +395,11 @@
           "testo": "ordine ODP-DEMO-0042"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B01-RO2-002",
@@ -418,7 +438,11 @@
           "confrontataIl": "2026-10-15T10:46:00+02:00"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B01-RO2-003",
@@ -461,7 +485,11 @@
           "testo": "storico: primo ordine a B01 il 03/06/2025"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B01-RO2-004",
@@ -485,6 +513,12 @@
       "descrizione": "Prova di invio ordine da MES-DEMO verso B01",
       "nota": "operatore al CN, richiamo del programma P-17",
       "stato": "valida",
+      "origineFile": "app",
+      "copiaSicurezza": {
+        "stato": "fatta",
+        "il": "2026-10-15T10:52:50+02:00",
+        "modo": "condivisione"
+      },
       "trascrizioni": [
         {
           "testo": "Prova di invio: ordine ODP-DEMO-0042 partito dal MES alle 10:41, programma P-17 comparso sull'HMI di B01 alle 10:42.",
@@ -515,6 +549,10 @@
       "durataSecondi": 20,
       "descrizione": "Video: invio dell'ordine dal MES e comparsa del programma sull'HMI di B01 (nella DEMO il file e un segnaposto di testo)",
       "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      },
       "trascrizioni": [
         {
           "testo": "Audio del video: 'ordine inviato... eccolo sul pannello'.",
@@ -543,7 +581,11 @@
       "origineDataScatto": "metadati",
       "dataScatto": "2026-10-15T11:05:00+02:00",
       "descrizione": "Pagina 'Servizio remoto' dell'HMI di B01: modulo di teleassistenza presente, nessuna sessione in corso; nessun dato di accesso inquadrato",
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B01-RU2-001",
@@ -574,7 +616,11 @@
           "testo": "soglia di allarme vibrazioni"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B01.1-ID-001",
@@ -595,7 +641,11 @@
       "origineDataScatto": "metadati",
       "dataScatto": "2026-10-15T11:12:00+02:00",
       "descrizione": "Cambio pallet automatico B01.1 collegato al centro di lavoro B01",
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B01.2-RO5-001",
@@ -625,7 +675,18 @@
           "confrontataIl": "2026-10-15T11:16:00+02:00"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "app",
+      "copiaSicurezza": {
+        "stato": "da_fare",
+        "rinunce": [
+          {
+            "momento": "chiusura",
+            "motivo": "memoria del telefono piena: copia rimandata in studio",
+            "il": "2026-10-15T12:09:00+02:00"
+          }
+        ]
+      }
     },
     {
       "id": "B02-ID-001",
@@ -646,7 +707,11 @@
       "origineDataScatto": "metadati",
       "dataScatto": "2026-10-15T11:25:00+02:00",
       "descrizione": "Vista d'insieme della macchina di misura B02 in sala metrologica, con PC e software di misura",
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B02-ID-002",
@@ -693,7 +758,11 @@
           "confrontataIl": "2026-10-15T11:28:00+02:00"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B02-RO1-001",
@@ -722,7 +791,11 @@
           "confrontataIl": "2026-10-15T11:29:00+02:00"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B02-RO2-001",
@@ -757,7 +830,11 @@
           "testo": "DEMO-PZ-118.pdf - modificato 15/10/2026 11:28"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B02-RO2-002",
@@ -782,7 +859,11 @@
           "fatto": "pezzo DEMO-PZ-118; macchina MM-300 matricola DEMO-0020; 15/10/2026 11:28; esito conforme"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "file",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B02-RO2-003",
@@ -811,7 +892,11 @@
           "confrontataIl": "2026-10-15T11:37:00+02:00"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B01-DOC-002",
@@ -843,7 +928,11 @@
           "testo": "data 14/04/2025"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     },
     {
       "id": "B03-ID-001",
@@ -875,7 +964,11 @@
           "testo": "targa del robot"
         }
       ],
-      "stato": "valida"
+      "stato": "valida",
+      "origineFile": "rullino",
+      "copiaSicurezza": {
+        "stato": "gia_presente"
+      }
     }
   ],
   "timeline": [
@@ -1650,7 +1743,7 @@
       "tipo": "andata",
       "id": "5f0c2a1e-1d2b-4c3a-9e00-00000000a001",
       "file": "andata/perizia40-andata.json",
-      "sha256": "d5420a9f31166d7acb88ae9e7a26887eba0fa3201c8905766d68330c3668f195",
+      "sha256": "a2c8c01fd4f9283d530bd76115bf4b3d5d9ffd34e6fcfc224790316e2cce0ae6",
       "data": "2026-10-10T18:00:00+02:00"
     },
     {
@@ -1658,7 +1751,7 @@
       "id": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
       "volume": 1,
       "file": "rientro/DEMO-2026-001_rientro_FIN_20261015-1730_v1di2.zip",
-      "sha256": "bc5b6b8aff23e7141d759b5b2454f7cf823cb33da6052dbdd2f5f76e28837457",
+      "sha256": "f6e59ce1a634453904d01420a338028a84eceeacde19a883db6d09771e183873",
       "data": "2026-10-15T17:30:00+02:00"
     },
     {
@@ -1666,7 +1759,7 @@
       "id": "7b1e9c40-2f3a-4d5b-8c00-00000000b001",
       "volume": 2,
       "file": "rientro/DEMO-2026-001_rientro_FIN_20261015-1730_v2di2.zip",
-      "sha256": "9523fae12f302102571e743842e515d90ae3fd02bb60a5c6d3d2e05fb2a3f840",
+      "sha256": "198d583183ddb0ebd8635d34f311283762076082802e36264c38313dedd9fe61",
       "data": "2026-10-15T17:30:00+02:00"
     }
   ]

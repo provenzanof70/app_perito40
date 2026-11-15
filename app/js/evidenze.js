@@ -40,7 +40,8 @@ export function estensione(mime, nome = '') {
 
 // Registra una nuova evidenza. Restituisce la riga salvata.
 // opzioni: { codice (bene o componente), gruppo, tipo, blob, nomeOriginale, durataSecondi, dataRegistrazione, descrizione, nota,
-//   aperturaFotocamera e rientroFotocamera (Date) se il file viene dalla fotocamera aperta dall'app }
+//   aperturaFotocamera e rientroFotocamera (Date) se il file viene dalla fotocamera aperta dall'app,
+//   origineFile: 'app' (scattato o registrato con l'app, copia di sicurezza da fare) | 'rullino' | 'file' (già sul telefono) }
 export async function registraEvidenza(pratica, evidenze, registri, o) {
   const ora = new Date();
   const bytes = new Uint8Array(await o.blob.arrayBuffer());
@@ -53,8 +54,9 @@ export async function registraEvidenza(pratica, evidenze, registri, o) {
   const nomeFile = `${pratica.codicePratica}_${giorno}_${id}.${estensione(mime, o.nomeOriginale)}`;
 
   let scatto = {};
-  if (o.tipo === 'vocale') scatto = { origineDataScatto: 'registrazione_app', dataScatto: o.dataRegistrazione };
-  else if (o.tipo === 'foto' || o.tipo === 'video') {
+  if (o.tipo === 'vocale' && o.dataRegistrazione) scatto = { origineDataScatto: 'registrazione_app', dataScatto: o.dataRegistrazione };
+  else if (o.tipo === 'foto' || o.tipo === 'video' || o.tipo === 'vocale') {
+    // per un vocale importato (es. da Memo vocali salvato in File) la data è quella del file m4a
     const d = dataScatto(bytes, mime);
     if (d.origine === 'metadati' && Date.parse(d.data) <= ora.getTime() + 60000) scatto = { origineDataScatto: 'metadati', dataScatto: d.data };
     // Safari su iPhone toglie i metadati alle foto della fotocamera aperta da una pagina web:
@@ -71,6 +73,8 @@ export async function registraEvidenza(pratica, evidenze, registri, o) {
     acquisitaIl: isoLocale(ora), ...scatto,
     durataSecondi: o.durataSecondi, descrizione: o.descrizione || descrizioneProvvisoria(o.gruppo, o.codice), nota: o.nota || undefined,
     annotazioni: [], stato: 'valida', nomeOriginale: o.nomeOriginale,
+    origineFile: o.origineFile || 'app',
+    copiaSicurezza: { stato: (o.origineFile || 'app') === 'app' ? 'da_fare' : 'gia_presente' },
   };
   await transazione(['evidenze', 'media'], 'readwrite', (se, sm) => {
     sm.put({ codicePratica: pratica.codicePratica, nomeFile, blob: o.blob, sha256: impronta });
@@ -97,7 +101,7 @@ export function annullaEvidenza(codicePratica, id, motivo, sostituitaDa) {
 // Evidenza nel formato del pacchetto di rientro (schemi/v1, $defs/evidenza): solo i campi previsti
 const CAMPI_RIENTRO = ['id', 'beni', 'comune', 'gruppo', 'requisiti', 'tipo', 'file', 'mime', 'sha256', 'provenienza', 'idSopralluogo',
   'acquisitaIl', 'dataScatto', 'origineDataScatto', 'aperturaFotocamera', 'dataMostrataAVideo', 'durataSecondi', 'descrizione', 'nota', 'annotazioni',
-  'trascrizioni', 'datiDocumento', 'contenutoLetto', 'storicoIdentificativi', 'stato', 'annullamento'];
+  'trascrizioni', 'datiDocumento', 'contenutoLetto', 'storicoIdentificativi', 'stato', 'annullamento', 'origineFile', 'copiaSicurezza'];
 
 export function evidenzaPerRientro(e) {
   const out = {};

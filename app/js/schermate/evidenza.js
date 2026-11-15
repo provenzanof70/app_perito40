@@ -1,12 +1,13 @@
 // 1e · Annotazione e dettaglio di un'evidenza. Le annotazioni sono segni sovrapposti in coordinate 0–1:
 // il file originale non viene mai modificato. Testi e note descrivono ciò che si vede, non giudizi (§2.7).
 
-import { useState, useRef } from 'preact/hooks';
+import { useState, useRef, useEffect } from 'preact/hooks';
 import { html, Icona, dataBreve, oraBreve } from '../ui.js';
 import { Foglio, Avviso } from '../componenti.js';
 import { vai, rottaPratica } from '../rotte.js';
 import { GRUPPI_UI } from '../stato.js';
-import { aggiornaEvidenza, annullaEvidenza, beneDi, descrizioneProvvisoria, daDescrivere } from '../evidenze.js';
+import { aggiornaEvidenza, annullaEvidenza, beneDi, descrizioneProvvisoria, daDescrivere, leggiFile } from '../evidenze.js';
+import { statoCopia, comeFile, condividi, segnaFatte } from '../copie.js';
 import { useUrlFile } from '../media.js';
 
 const STRUMENTI = [['freccia', 'arrow_up_right', 'Freccia'], ['cerchio', 'circle', 'Cerchio'], ['testo', 'text_t', 'Testo'], ['annulla', 'arrow_counter_clockwise', 'Annulla']];
@@ -73,6 +74,29 @@ function Disegno({ url, annotazioni, strumento, colore, alSegno, alPunto }) {
       ${annotazioni.map((a, i) => html`<${Segno} key=${i} a=${a} L=${dim[0]} H=${dim[1]} />`)}
       ${anteprima && html`<${Segno} a=${anteprima} L=${dim[0]} H=${dim[1]} />`}
     </svg>`}
+  </div>`;
+}
+
+// Copia di sicurezza del file sul telefono: il file si prepara all'apertura, così il tocco apre subito la condivisione
+const ORIGINI = { app: "scattata o registrata con l'app", rullino: 'importata dal Rullino', file: 'importata da File' };
+function CopiaSicurezza({ evidenza: e, mostra }) {
+  const [file, setFile] = useState(null);
+  useEffect(() => { leggiFile(e.codicePratica, e.nomeFile).then(b => b && setFile(comeFile(e, b))); }, [e.nomeFile]);
+  const stato = statoCopia(e);
+  const cs = e.copiaSicurezza || {};
+  const salva = async () => {
+    const esito = await condividi([file]);
+    if (!esito) return;
+    await segnaFatte(e.codicePratica, [e.id], esito);
+    dispatchEvent(new Event('perito40:ricarica'));
+    mostra(`Copia di sicurezza di ${e.id} salvata sul telefono`);
+  };
+  return html`<div class=${`copia-evidenza ${stato}`}>
+    <div><b>Copia di sicurezza</b> · ${stato === 'fatta' ? `fatta il ${dataBreve(cs.il)} alle ${oraBreve(cs.il)}${cs.modo === 'scaricamento' ? ' (scaricata)' : ''}`
+      : stato === 'gia_presente' ? 'già presente sul telefono' : 'da fare: il file esiste solo nell\'app'}${e.origineFile ? ` · ${ORIGINI[e.origineFile]}` : ''}</div>
+    ${(cs.rinunce || []).map(r => html`<div class="meta">Proseguito senza copia (${r.momento.replace('_', ' ')}, ${dataBreve(r.il)} ${oraBreve(r.il)}): ${r.motivo}</div>`)}
+    ${e.stato === 'valida' && html`<button class=${stato === 'da_fare' ? 'primario mini' : 'collegamento chiaro'} disabled=${!file} onClick=${salva}>
+      ${stato === 'da_fare' ? 'Salva copia sul telefono' : 'Salva un\'altra copia'}</button>`}
   </div>`;
 }
 
@@ -170,6 +194,7 @@ export function DettaglioEvidenza({ pratica, evidenza: e, evidenze, registri, mo
           <div class="scelte-beni">${altriBeni.map(c => html`<label class="spunta-riga"><input type="checkbox" disabled=${sola} checked=${comuni.includes(c)}
             onChange=${ev => setComuni(x => ev.target.checked ? [...x, c] : x.filter(y => y !== c))} />${c}</label>`)}</div>
         </details>
+        <${CopiaSicurezza} evidenza=${e} mostra=${mostra} />
         <div class="metadati">
           <div>Acquisita nell'app: ${dataBreve(e.acquisitaIl)} ${oraBreve(e.acquisitaIl)}</div>
           <div>Data di scatto: ${e.origineDataScatto === 'metadati' ? `${dataBreve(e.dataScatto)} ${oraBreve(e.dataScatto)} (dai metadati del file)`

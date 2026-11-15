@@ -6,6 +6,7 @@ import { html, dataBreve, oraBreve, megabyte } from '../ui.js';
 import { Testata, Barra, Foglio, Avviso } from '../componenti.js';
 import { vai, rottaPratica } from '../rotte.js';
 import { eliminaPratica, azzeraRaccolta } from '../archivio.js';
+import { copieMancanti } from '../copie.js';
 import { ElencoBeni, SchedaBene, GalleriaGruppo } from './beni.js';
 import { Rilievo } from './rilievo.js';
 import { DettaglioEvidenza } from './evidenza.js';
@@ -218,7 +219,7 @@ export function SchermataPratica({ pratica, evidenze, registri, scheda, codiceBe
         : scheda === 'pratica' ? html`<${SchedaPraticaDettagli} pratica=${pratica} sistema=${sistema} cp=${cp} alIniziaVisita=${() => setFoglio('scheda')} alRicominciaDemo=${() => setFoglio('demo')} alGestione=${setFoglio} />`
         : html`<${Segnaposto} scheda=${scheda} />`}
     </div>
-    <${Barra} codicePratica=${codice} attiva=${modulo ? 'requisiti' : scheda === 'azione' ? 'azioni' : scheda === 'cronologia' || scheda === 'data' || scheda === 'pacchetto' ? 'pratica' : scheda} distintivi=${{ azioni: azioniAperte(pratica, registri).length, requisiti: requisitiSenzaBasi(pratica, evidenze, registri) }} />
+    <${Barra} codicePratica=${codice} attiva=${modulo ? 'requisiti' : scheda === 'azione' ? 'azioni' : scheda === 'cronologia' || scheda === 'data' || scheda === 'pacchetto' ? 'pratica' : scheda} distintivi=${{ rilievo: copieMancanti(evidenze).length, azioni: azioniAperte(pratica, registri).length, requisiti: requisitiSenzaBasi(pratica, evidenze, registri) }} />
     ${foglio === 'demo' && html`<${Foglio} titolo="Ricomincia la DEMO" annulla="Annulla" conferma="Ricomincia" alChiudi=${() => setFoglio(null)}
         alConferma=${async () => { await eliminaPratica(codice); dispatchEvent(new Event('perito40:ricarica')); vai('/'); mostra('DEMO tolta dal telefono: importala di nuovo con «Prova con la pratica DEMO»'); }}>
       <div class="meta">Si tolgono dal telefono la pratica DEMO, ${evidenze.length === 1 ? 'la sua evidenza' : `le sue ${evidenze.length} evidenze`} con i file e tutti i registri. I pacchetti già salvati in File restano dove sono.</div>

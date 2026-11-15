@@ -182,6 +182,33 @@
           }
         },
         "durataSecondi": { "type": "number", "minimum": 0 },
+        "origineFile": {
+          "enum": ["app", "rullino", "file"],
+          "description": "Dove è nato il file dell'evidenza: app = scattato o registrato con l'app (fotocamera, videocamera o microfono aperti dall'app); rullino = importato dalla libreria Foto; file = importato dall'app File. Per i file importati vale la voce scelta dal perito, perché iOS non indica la provenienza. (v1.8)"
+        },
+        "copiaSicurezza": {
+          "type": "object", "required": ["stato"], "additionalProperties": false,
+          "description": "Copia di sicurezza del file fuori dall'archivio dell'app (Rullino o File), perché i rilievi sono irripetibili. Fa fede l'originale dell'app con il suo SHA-256: la copia è solo di sicurezza, iOS potrebbe ricomprimerla. (v1.8)",
+          "properties": {
+            "stato": { "enum": ["da_fare", "fatta", "gia_presente"], "description": "gia_presente = il file era già sul telefono (importato dal Rullino o da File)" },
+            "il": { "$ref": "#/$defs/dataOra", "description": "Quando la copia è stata fatta" },
+            "modo": { "enum": ["condivisione", "scaricamento"], "description": "condivisione = foglio di condivisione di iOS completato (Salva immagine, Salva in File…): l'app non può verificare quale azione è stata scelta" },
+            "rinunce": {
+              "type": "array",
+              "description": "Ogni volta che il perito ha proseguito senza copia, con il motivo",
+              "items": {
+                "type": "object", "required": ["momento", "motivo", "il"], "additionalProperties": false,
+                "properties": {
+                  "momento": { "enum": ["cambio_bene", "checkpoint", "chiusura"] },
+                  "motivo": { "$ref": "#/$defs/testo" },
+                  "il": { "$ref": "#/$defs/dataOra" }
+                }
+              }
+            }
+          },
+          "if": { "properties": { "stato": { "const": "fatta" } } },
+          "then": { "required": ["il", "modo"] }
+        },
         "descrizione": { "$ref": "#/$defs/testo", "description": "Quale fatto mostra, di quale bene, in quale circostanza (per vocali e video: il titolo)" },
         "nota": { "type": "string", "description": "Nota facoltativa del perito sull'evidenza" },
         "annotazioni": { "type": "array", "items": { "$ref": "#/$defs/annotazione" } },
