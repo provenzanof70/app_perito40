@@ -10,7 +10,7 @@ import { vai, rottaPratica } from '../rotte.js';
 import { GRUPPI_UI } from '../stato.js';
 import { registraEvidenza, gruppiPer, beneDi } from '../evidenze.js';
 import { useUrlFile, durata, avviaRegistrazione } from '../media.js';
-import { comeFile, condividi, segnaFatte, copieMancanti, statoCopia, android } from '../copie.js';
+import { comeFile, condividi, segnaFatte, copieMancanti, statoCopia, android, preparaDati } from '../copie.js';
 import { FoglioCopie } from './copie.js';
 
 const TIPI_COMPONENTE = { M: 'macchina', QM: 'quasi-macchina', ITS: 'insieme', ACC: 'accessorio' };
@@ -91,7 +91,12 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
       const e = await registraEvidenza(pratica, evidenze, registri, { codice, gruppo, tipo, blob, ...extra });
       dispatchEvent(new Event('perito40:ricarica'));
       // il file è già in memoria: la condivisione può partire subito dal tocco su «Salva copia sul telefono»
-      setCopia(e.copiaSicurezza.stato === 'da_fare' ? { id: e.id, file: comeFile(e, blob) } : null);
+      if (e.copiaSicurezza.stato !== 'da_fare') setCopia(null);
+      else {
+        const file = comeFile(e, blob);
+        setCopia({ id: e.id, file, pronto: !android });
+        if (android) preparaDati([file]).then(() => setCopia(c => c && c.id === e.id ? { ...c, pronto: true } : c));
+      }
       // Si resta sulla fotocamera per lo scatto successivo: nota e annotazioni si aggiungono toccando la miniatura, anche dopo
       mostra(`${e.id} salvata${e.origineDataScatto === 'assente' ? ' · data di scatto assente' : e.origineDataScatto === 'metadati' ? ' · data di scatto dai metadati' : ''} · tocca la miniatura per descriverla`);
     } catch (err) {
@@ -173,7 +178,7 @@ export function Rilievo({ pratica, evidenze, registri, beneIniziale, gruppoInizi
     <div class="rilievo-pannello">
       ${copiaAperta && html`<div class="striscia-copia" role="status">
         <span><b>Copia di sicurezza</b> · ${copia.id} esiste solo nell'app</span>
-        <button onClick=${salvaCopia}>${android ? 'Scarica copia nel telefono' : 'Salva copia sul telefono'}</button>
+        <button disabled=${!copia.pronto} onClick=${salvaCopia}>${android ? 'Scarica copia nel telefono' : 'Salva copia sul telefono'}</button>
         <button class="chiudi" aria-label="Più tardi" onClick=${() => setCopia(null)}>×</button>
       </div>`}
       <div class="rilievo-bene">

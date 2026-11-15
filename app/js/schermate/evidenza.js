@@ -7,7 +7,7 @@ import { Foglio, Avviso } from '../componenti.js';
 import { vai, rottaPratica } from '../rotte.js';
 import { GRUPPI_UI } from '../stato.js';
 import { aggiornaEvidenza, annullaEvidenza, beneDi, descrizioneProvvisoria, daDescrivere, leggiFile } from '../evidenze.js';
-import { statoCopia, comeFile, condividi, segnaFatte, android } from '../copie.js';
+import { statoCopia, comeFile, condividi, segnaFatte, android, preparaDati } from '../copie.js';
 import { ApriPerSalvare } from './copie.js';
 import { useUrlFile } from '../media.js';
 
@@ -83,7 +83,14 @@ const ORIGINI = { app: "scattata o registrata con l'app", rullino: 'importata da
 function CopiaSicurezza({ evidenza: e, mostra }) {
   const [file, setFile] = useState(null);
   const [aMano, setAMano] = useState(false);
-  useEffect(() => { leggiFile(e.codicePratica, e.nomeFile).then(b => b && setFile(comeFile(e, b))); }, [e.nomeFile]);
+  useEffect(() => {
+    leggiFile(e.codicePratica, e.nomeFile).then(async b => {
+      if (!b) return;
+      const f = comeFile(e, b);
+      if (android) await preparaDati([f]);
+      setFile(f);
+    });
+  }, [e.nomeFile]);
   const stato = statoCopia(e);
   const cs = e.copiaSicurezza || {};
   const salva = async (modo = 'auto') => {

@@ -4,16 +4,18 @@
 import { useState, useEffect } from 'preact/hooks';
 import { html } from '../ui.js';
 import { Foglio } from '../componenti.js';
-import { copieMancanti, perRullino, preparaFile, condividi, segnaFatte, registraRinuncia, android } from '../copie.js';
+import { copieMancanti, perRullino, preparaFile, condividi, segnaFatte, registraRinuncia, android, aDati } from '../copie.js';
 
 // Su alcuni browser Android (es. tablet Huawei) il file scaricato non compare in Galleria: si mostra il file e il perito lo salva
 // a mano (tieni premuto › Salva immagine; ⋮ del lettore › Scarica), poi conferma con un tocco
 export function ApriPerSalvare({ voci, alChiudi, alFatto }) {
   const [url, setUrl] = useState([]);
   useEffect(() => {
-    const u = voci.map(x => URL.createObjectURL(x.file));
-    setUrl(u);
-    return () => u.forEach(x => URL.revokeObjectURL(x));
+    // dati incorporati (data:): «tieni premuto › Salva immagine» funziona anche nei browser che non salvano gli indirizzi blob:
+    const blob = [];
+    let vivo = true;
+    Promise.all(voci.map(async x => (await aDati(x.file)) || (blob[blob.length] = URL.createObjectURL(x.file)))).then(u => vivo && setUrl(u));
+    return () => { vivo = false; blob.forEach(x => URL.revokeObjectURL(x)); };
   }, []);
   return html`<${Foglio} titolo="Salva a mano" annulla="Chiudi" conferma="Fatto, le ho salvate" alChiudi=${alChiudi} alConferma=${alFatto}>
     <div class="meta">Per ogni file: <b>tieni premuto sull'immagine</b> e scegli «Salva immagine» o «Scarica immagine». Per video e vocali usa il menu del lettore (⋮ › Scarica). Poi tocca «Fatto, le ho salvate».</div>
