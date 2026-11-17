@@ -8,7 +8,7 @@ import { Foglio, Avviso } from '../componenti.js';
 import { vai, rottaPratica } from '../rotte.js';
 import { REQUISITI_UI, GRUPPI_UI, requisitiDelBene, basiRequisito } from '../stato.js';
 import { salvaRegistro, salvaRegistri, cancellaRegistro, prossimoId, dataVisita, fraseRiscontro } from '../registri.js';
-import { registraEvidenza, beneDi } from '../evidenze.js';
+import { registraEvidenza, beneDi, nomeEvidenza } from '../evidenze.js';
 import { useUrlFile } from '../media.js';
 import { GUIDA_REQUISITI, FONTE } from '../guida.js';
 
@@ -95,13 +95,19 @@ export function Requisiti({ pratica, evidenze, registri, codiceBene, mostra, alV
 
 function Miniatura({ evidenza: e, scelta, alTocco }) {
   const url = useUrlFile(e.tipo === 'foto' || (e.tipo === 'screenshot' && e.mime.startsWith('image/')) ? e : null);
-  return html`<button class=${`mini-ev ${scelta ? 'scelta' : ''}`} onClick=${alTocco} style=${url ? { backgroundImage: `url(${url})` } : null}>
-    ${!url && html`<${Icona} nome=${e.tipo === 'vocale' ? 'chat_text' : e.tipo === 'video' ? 'camera' : 'file_text'} dim=${22} />`}
-    <span class="mini-ev-id">${e.id}</span>${scelta && html`<span class="mini-ev-spunta">✓</span>`}</button>`;
+  const nome = nomeEvidenza(e);
+  return html`<div class="scelta-ev-blocco">
+    <button class=${`mini-ev ${scelta ? 'scelta' : ''}`} onClick=${alTocco} style=${url ? { backgroundImage: `url(${url})` } : null} title=${nome}>
+      ${!url && html`<${Icona} nome=${e.tipo === 'vocale' ? 'chat_text' : e.tipo === 'video' ? 'camera' : 'file_text'} dim=${22} />`}
+      <span class="mini-ev-id">${e.id}</span>${scelta && html`<span class="mini-ev-spunta">✓</span>`}</button>
+    ${nome && html`<span class="mini-ev-nome">${nome}</span>`}
+  </div>`;
 }
 
 export function SceltaEvidenze({ pratica, evidenze, registri, bene, requisito, scelte, setScelte, idCampo, mostra, gruppo }) {
   const [lavoro, setLavoro] = useState(false);
+  // Documento (PDF o schermata) caricato da File: prima si dà il nome, poi si sceglie il file
+  const [nuovoDoc, setNuovoDoc] = useState(null);
   const elenco = evidenze.filter(e => e.stato === 'valida' && e.beni.some(b => beneDi(b) === bene))
     .sort((a, b) => (b.requisiti.includes(requisito) - a.requisiti.includes(requisito)) || b.acquisitaIl.localeCompare(a.acquisitaIl));
   const cambia = id => setScelte(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
@@ -121,12 +127,45 @@ export function SceltaEvidenze({ pratica, evidenze, registri, bene, requisito, s
       mostra(`${e.id} salvata e collegata`);
     } catch (err) { mostra(`Evidenza non salvata: ${err.message}`); } finally { setLavoro(false); }
   }
-  return html`<div class="scelta-ev">
-    <label class=${`mini-ev nuova ${lavoro ? 'in-corso' : ''}`} for=${idCampo} onClick=${() => { apertura.current = new Date(); }}>
-      <${Icona} nome="fotocamera" dim=${22} /><span>Foto o video</span></label>
-    <input id=${idCampo} type="file" class="campo-file" accept="image/*,video/*" capture="environment"
-      onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f); }} />
-    ${elenco.map(e => html`<${Miniatura} key=${e.id} evidenza=${e} scelta=${scelte.includes(e.id)} alTocco=${() => cambia(e.id)} />`)}
+  async function suDocumento(f) {
+    if (!f) return;
+    setLavoro(true);
+    try {
+      const g = gruppo != null ? gruppo : REQUISITI_UI[requisito].gruppo;
+      const pdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+      const nome = (nuovoDoc || '').trim();
+      const e = await registraEvidenza(pratica, evidenze, registri, {
+        codice: bene, gruppo: g, tipo: pdf || !f.type.startsWith('image/') ? 'documento' : 'screenshot', blob: f, nomeOriginale: f.name,
+        origineFile: 'file', descrizione: nome || undefined,
+      });
+      setScelte(s => [...s, e.id]);
+      setNuovoDoc(null);
+      dispatchEvent(new Event('perito40:ricarica'));
+      mostra(`${e.id} salvato e collegato`);
+    } catch (err) { mostra(`Documento non salvato: ${err.message}`); } finally { setLavoro(false); }
+  }
+  const idDoc = `${idCampo}-documento`;
+  return html`<div class="scelta-ev-zona">
+    <div class="scelta-ev">
+      <label class=${`mini-ev nuova ${lavoro ? 'in-corso' : ''}`} for=${idCampo} onClick=${() => { apertura.current = new Date(); }}>
+        <${Icona} nome="fotocamera" dim=${22} /><span>Foto o video</span></label>
+      <input id=${idCampo} type="file" class="campo-file" accept="image/*,video/*" capture="environment"
+        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f); }} />
+      <button class=${`mini-ev nuova ${lavoro ? 'in-corso' : ''}`} onClick=${() => setNuovoDoc(d => d == null ? '' : null)}>
+        <${Icona} nome="file_text" dim=${22} /><span>Documento</span></button>
+      <input id=${idDoc} type="file" class="campo-file" accept=".pdf,application/pdf,image/*"
+        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suDocumento(f); }} />
+      ${elenco.map(e => html`<${Miniatura} key=${e.id} evidenza=${e} scelta=${scelte.includes(e.id)} alTocco=${() => cambia(e.id)} />`)}
+    </div>
+    ${nuovoDoc != null && html`<div class="nuovo-documento">
+      <label class="etichetta-campo">Nome del documento (nota breve)
+        <input class="campo-testo" maxLength="80" value=${nuovoDoc} onInput=${e => setNuovoDoc(e.target.value)} placeholder="Es. Verbale FAT" /></label>
+      <div class="azione-tasti">
+        <button class="secondario piccolo" onClick=${() => setNuovoDoc(null)}>Annulla</button>
+        <label class=${`secondario piccolo pieno pulsante-file ${lavoro ? 'in-corso' : ''}`} for=${idDoc}>
+          <${Icona} nome="file_text" dim=${16} />Scegli il file</label>
+      </div>
+    </div>`}
   </div>`;
 }
 

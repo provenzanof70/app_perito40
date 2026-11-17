@@ -23,6 +23,13 @@ export function gruppiPer(pratica, registri, codice) {
 export const descrizioneProvvisoria = (gruppo, codice) => `${GRUPPI_UI[gruppo].nome.replace('­', '')} di ${codice} (da descrivere)`;
 export const daDescrivere = e => /\(da descrivere/.test(e.descrizione || '');
 
+// Nome leggibile da mostrare sotto il codice: la nota breve, oppure il nome del file d'origine finché la nota è provvisoria.
+// Il codice (B01-DOC-006) resta l'identificativo: finisce nel nome file, nel manifesto e nei rimandi.
+export function nomeEvidenza(e) {
+  if (e.descrizione && !daDescrivere(e)) return e.descrizione;
+  return (e.nomeOriginale || '').replace(/\.[^.]+$/, '') || e.descrizione || '';
+}
+
 // Primo progressivo libero per bene e requisito, tra le evidenze del telefono e quelle già nel fascicolo
 export function prossimoId(pratica, evidenze, codice, requisito) {
   const usati = new Set([...pratica.andata.evidenzeEsistenti, ...evidenze.map(e => e.id),
