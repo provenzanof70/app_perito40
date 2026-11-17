@@ -368,8 +368,7 @@ select.campo-testo { appearance: none; -webkit-appearance: none; }
 .scelta-ev-blocco .mini-ev { width: 100%; }
 .mini-ev-nome { font-size: 11px; line-height: 1.25; color: var(--testo2); text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; }
 .nuovo-documento { display: flex; flex-direction: column; gap: 8px; background: var(--sfondo); border-radius: 12px; padding: 10px 12px; }
-.pulsante-file { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
-.pulsante-file.in-corso { opacity: .5; pointer-events: none; }
+.nuovo-documento-file { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--testo2); word-break: break-all; }
 .mini-ev-spunta { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; border-radius: 10px; background: var(--accento); color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; }
 .frase { background: var(--sfondo); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.45; }
 .campo-voce { flex: 1; border: none; background: none; outline: none; text-align: right; font-size: 15px; color: var(--testo); min-width: 0; }

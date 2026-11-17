@@ -27,7 +27,9 @@ export const daDescrivere = e => /\(da descrivere/.test(e.descrizione || '');
 // Il codice (B01-DOC-006) resta l'identificativo: finisce nel nome file, nel manifesto e nei rimandi.
 export function nomeEvidenza(e) {
   if (e.descrizione && !daDescrivere(e)) return e.descrizione;
-  return (e.nomeOriginale || '').replace(/\.[^.]+$/, '') || e.descrizione || '';
+  const base = (e.nomeOriginale || '').replace(/\.[^.]+$/, '');
+  // Safari su iPhone chiama «image» ogni scatto della fotocamera: non dice nulla, meglio niente
+  return /^image$/i.test(base) ? '' : base;
 }
 
 // Primo progressivo libero per bene e requisito, tra le evidenze del telefono e quelle già nel fascicolo

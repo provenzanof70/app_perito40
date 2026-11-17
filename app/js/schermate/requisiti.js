@@ -106,7 +106,7 @@ function Miniatura({ evidenza: e, scelta, alTocco }) {
 
 export function SceltaEvidenze({ pratica, evidenze, registri, bene, requisito, scelte, setScelte, idCampo, mostra, gruppo }) {
   const [lavoro, setLavoro] = useState(false);
-  // Documento (PDF o schermata) caricato da File: prima si dà il nome, poi si sceglie il file
+  // Documento (PDF o schermata) caricato da File: si sceglie il file, poi si conferma il nome (proposto dal nome del file)
   const [nuovoDoc, setNuovoDoc] = useState(null);
   const elenco = evidenze.filter(e => e.stato === 'valida' && e.beni.some(b => beneDi(b) === bene))
     .sort((a, b) => (b.requisiti.includes(requisito) - a.requisiti.includes(requisito)) || b.acquisitaIl.localeCompare(a.acquisitaIl));
@@ -127,13 +127,14 @@ export function SceltaEvidenze({ pratica, evidenze, registri, bene, requisito, s
       mostra(`${e.id} salvata e collegata`);
     } catch (err) { mostra(`Evidenza non salvata: ${err.message}`); } finally { setLavoro(false); }
   }
-  async function suDocumento(f) {
+  async function salvaDocumento() {
+    const f = nuovoDoc && nuovoDoc.file;
     if (!f) return;
     setLavoro(true);
     try {
       const g = gruppo != null ? gruppo : REQUISITI_UI[requisito].gruppo;
       const pdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
-      const nome = (nuovoDoc || '').trim();
+      const nome = nuovoDoc.nome.trim();
       const e = await registraEvidenza(pratica, evidenze, registri, {
         codice: bene, gruppo: g, tipo: pdf || !f.type.startsWith('image/') ? 'documento' : 'screenshot', blob: f, nomeOriginale: f.name,
         origineFile: 'file', descrizione: nome || undefined,
@@ -146,26 +147,27 @@ export function SceltaEvidenze({ pratica, evidenze, registri, bene, requisito, s
   }
   const idDoc = `${idCampo}-documento`;
   return html`<div class="scelta-ev-zona">
+    ${nuovoDoc && html`<div class="nuovo-documento">
+      <div class="nuovo-documento-file"><${Icona} nome="file_text" dim=${16} />${nuovoDoc.file.name}</div>
+      <label class="etichetta-campo">Nome del documento (nota breve)
+        <input class="campo-testo" maxLength="80" value=${nuovoDoc.nome} onInput=${e => { const v = e.target.value; setNuovoDoc(d => ({ ...d, nome: v })); }}
+          placeholder="Es. Verbale FAT" /></label>
+      <div class="azione-tasti">
+        <button class="secondario piccolo" onClick=${() => setNuovoDoc(null)}>Annulla</button>
+        <button class="secondario piccolo pieno" disabled=${lavoro} onClick=${salvaDocumento}><${Icona} nome="spunta" dim=${16} />Salva e collega</button>
+      </div>
+    </div>`}
     <div class="scelta-ev">
       <label class=${`mini-ev nuova ${lavoro ? 'in-corso' : ''}`} for=${idCampo} onClick=${() => { apertura.current = new Date(); }}>
         <${Icona} nome="fotocamera" dim=${22} /><span>Foto o video</span></label>
       <input id=${idCampo} type="file" class="campo-file" accept="image/*,video/*" capture="environment"
         onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suFile(f); }} />
-      <button class=${`mini-ev nuova ${lavoro ? 'in-corso' : ''}`} onClick=${() => setNuovoDoc(d => d == null ? '' : null)}>
-        <${Icona} nome="file_text" dim=${22} /><span>Documento</span></button>
+      <label class=${`mini-ev nuova ${lavoro ? 'in-corso' : ''}`} for=${idDoc}>
+        <${Icona} nome="file_text" dim=${22} /><span>Documento</span></label>
       <input id=${idDoc} type="file" class="campo-file" accept=".pdf,application/pdf,image/*"
-        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; suDocumento(f); }} />
+        onChange=${e => { const f = e.target.files[0]; e.target.value = ''; if (f) setNuovoDoc({ file: f, nome: f.name.replace(/\.[^.]+$/, '').slice(0, 80) }); }} />
       ${elenco.map(e => html`<${Miniatura} key=${e.id} evidenza=${e} scelta=${scelte.includes(e.id)} alTocco=${() => cambia(e.id)} />`)}
     </div>
-    ${nuovoDoc != null && html`<div class="nuovo-documento">
-      <label class="etichetta-campo">Nome del documento (nota breve)
-        <input class="campo-testo" maxLength="80" value=${nuovoDoc} onInput=${e => setNuovoDoc(e.target.value)} placeholder="Es. Verbale FAT" /></label>
-      <div class="azione-tasti">
-        <button class="secondario piccolo" onClick=${() => setNuovoDoc(null)}>Annulla</button>
-        <label class=${`secondario piccolo pieno pulsante-file ${lavoro ? 'in-corso' : ''}`} for=${idDoc}>
-          <${Icona} nome="file_text" dim=${16} />Scegli il file</label>
-      </div>
-    </div>`}
   </div>`;
 }
 
